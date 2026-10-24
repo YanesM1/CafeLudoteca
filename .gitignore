@@ -1,0 +1,17 @@
+
+# Archivos generados por Maven
+target/
+
+# Configuración local de Eclipse
+.classpath
+.factorypath
+.project
+.settings/
+
+# Configuración local de VS Code
+.vscode/
+
+# Archivos con variables y secretos
+.env
+.env.*
+!.env.example
