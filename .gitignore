@@ -1,6 +1,13 @@
 
 # Archivos generados por Maven
+Backend/target/
 target/
+
+# Dependencias y archivos generados por Angular/Node.js
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/coverage/
 
 # Configuración local de Eclipse
 .classpath
