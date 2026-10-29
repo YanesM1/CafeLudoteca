@@ -4,7 +4,7 @@ import co.edu.unbosque.model.dto.JuegoMesaRequestDTO;
 import co.edu.unbosque.model.entity.JuegoMesa;
 
 public class JuegoMesaMapper {
-    public JuegoMesa JuegoMesaRequestDTOToJuegoMesa(JuegoMesaRequestDTO dto){
+    public JuegoMesa juegoMesaRequestDTOToJuegoMesa(JuegoMesaRequestDTO dto){
         JuegoMesa juegoMesa=new JuegoMesa();
         juegoMesa.setNumSerie(dto.getNumSerie());
         juegoMesa.setReglamento(dto.getReglamento());
@@ -16,7 +16,7 @@ public class JuegoMesaMapper {
         return juegoMesa;
     }
 
-    public JuegoMesaRequestDTO JuegoMesaRequestDTO(JuegoMesa juegoMesa){
+    public JuegoMesaRequestDTO juegoMesaRequestDTO(JuegoMesa juegoMesa){
         JuegoMesaRequestDTO dto=new JuegoMesaRequestDTO();
         dto.setNumSerie(juegoMesa.getNumSerie());
         dto.setReglamento(juegoMesa.getReglamento());
