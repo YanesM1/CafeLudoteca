@@ -1,18 +1,15 @@
-package mapper;
-
-import dto.ClienteFrecuenteRequest;
-import dto.ClienteFrecuenteResponse;
-import model.ClienteFrecuente;
-
+package co.edu.unbosque.mapper;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class ClienteFrecuenteMapper {
+import co.edu.unbosque.model.dto.ClienteFrecuenteRequestDTO;
+import co.edu.unbosque.model.dto.ClienteFrecuenteResponseDTO;
+import co.edu.unbosque.model.entity.ClienteFrecuente;
+import lombok.NoArgsConstructor;
 
-    private ClienteFrecuenteMapper() {
-    }
-
-    public static ClienteFrecuente toEntity(ClienteFrecuenteRequest request) {
+@NoArgsConstructor
+public class ClienteFrecuenteMapper {
+     public static ClienteFrecuente toEntity(ClienteFrecuenteRequestDTO request) {
         if (request == null) {
             return null;
         }
@@ -23,19 +20,19 @@ public final class ClienteFrecuenteMapper {
         return entity;
     }
 
-    public static ClienteFrecuenteResponse toResponse(ClienteFrecuente entity) {
+    public static ClienteFrecuenteResponseDTO toResponse(ClienteFrecuente entity) {
         if (entity == null) {
             return null;
         }
-        return new ClienteFrecuenteResponse(
+        return new ClienteFrecuenteResponseDTO(
                 entity.getDocumento(),
                 entity.getPuntosAcumulados(),
                 entity.getNivelFidelidad()
         );
     }
 
-    public static List<ClienteFrecuenteResponse> toResponseList(List<ClienteFrecuente> entities) {
-        List<ClienteFrecuenteResponse> responses = new ArrayList<>();
+    public static List<ClienteFrecuenteResponseDTO> toResponseList(List<ClienteFrecuente> entities) {
+        List<ClienteFrecuenteResponseDTO> responses = new ArrayList<>();
         if (entities == null) {
             return responses;
         }
@@ -44,4 +41,5 @@ public final class ClienteFrecuenteMapper {
         }
         return responses;
     }
+
 }

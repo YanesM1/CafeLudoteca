@@ -1,37 +1,23 @@
+package co.edu.unbosque.model.entity;
+
 import java.time.LocalDate;
 import java.util.Objects;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Socio {
 
     // PK y FK (referencia a Cliente.documento)
     private String documento;
     private LocalDate fechaAfiliacion;
 
-    public Socio() {
-    }
-
-    public Socio(String documento, LocalDate fechaAfiliacion) {
-        this.documento = documento;
-        this.fechaAfiliacion = fechaAfiliacion;
-    }
-
-    public String getDocumento() {
-        return documento;
-    }
-
-    public void setDocumento(String documento) {
-        this.documento = documento;
-    }
-
-    public LocalDate getFechaAfiliacion() {
-        return fechaAfiliacion;
-    }
-
-    public void setFechaAfiliacion(LocalDate fechaAfiliacion) {
-        this.fechaAfiliacion = fechaAfiliacion;
-    }
-
-    // La igualdad se basa en la llave primaria (documento)
+// La igualdad se basa en la llave primaria (documento)
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -52,4 +38,5 @@ public class Socio {
                 ", fechaAfiliacion=" + fechaAfiliacion +
                 '}';
     }
+
 }

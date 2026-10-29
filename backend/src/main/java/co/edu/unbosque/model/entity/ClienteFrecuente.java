@@ -1,46 +1,22 @@
-import java.util.Objects;
+package co.edu.unbosque.model.entity;
 
+import java.util.Objects;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ClienteFrecuente {
 
-    
     private String documento; // PK FK
     private int puntosAcumulados;
     private String nivelFidelidad;
 
-    public ClienteFrecuente() {
-    }
-
-    public ClienteFrecuente(String documento, int puntosAcumulados, String nivelFidelidad) {
-        this.documento = documento;
-        this.puntosAcumulados = puntosAcumulados;
-        this.nivelFidelidad = nivelFidelidad;
-    }
-
-    public String getDocumento() {
-        return documento;
-    }
-
-    public void setDocumento(String documento) {
-        this.documento = documento;
-    }
-
-    public int getPuntosAcumulados() {
-        return puntosAcumulados;
-    }
-
-    public void setPuntosAcumulados(int puntosAcumulados) {
-        this.puntosAcumulados = puntosAcumulados;
-    }
-
-    public String getNivelFidelidad() {
-        return nivelFidelidad;
-    }
-
-    public void setNivelFidelidad(String nivelFidelidad) {
-        this.nivelFidelidad = nivelFidelidad;
-    }
-
-    // La igualdad se basa en la llave primaria (documento)
+// La igualdad se basa en la llave primaria (documento)
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -62,4 +38,5 @@ public class ClienteFrecuente {
                 ", nivelFidelidad='" + nivelFidelidad + '\'' +
                 '}';
     }
+
 }

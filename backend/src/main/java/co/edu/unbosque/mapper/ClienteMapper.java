@@ -1,20 +1,16 @@
-package mapper;
-
-import dto.ClienteRequest;
-import dto.ClienteResponse;
-import model.Cliente;
-
+package co.edu.unbosque.mapper;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class ClienteMapper {
+import co.edu.unbosque.model.dto.ClienteRequestDTO;
+import co.edu.unbosque.model.dto.ClienteResponseDTO;
+import co.edu.unbosque.model.entity.Cliente;
+import lombok.NoArgsConstructor;
 
-    // Clase de utilidad: no se instancia
-    private ClienteMapper() {
-    }
-
+@NoArgsConstructor
+public class ClienteMapper {
     // Request (lo que llega del cliente) -> Entidad (Guarda en DB)
-    public static Cliente toEntity(ClienteRequest request) {
+    public static Cliente toEntity(ClienteRequestDTO request) {
         if (request == null) {
             return null;
         }
@@ -30,11 +26,11 @@ public final class ClienteMapper {
     }
 
     // Entidad (lo que lees de la BD) -> Response (lo que devuelves)
-    public static ClienteResponse toResponse(Cliente cliente) {
+    public static ClienteResponseDTO toResponse(Cliente cliente) {
         if (cliente == null) {
             return null;
         }
-        return new ClienteResponse(
+        return new ClienteResponseDTO(
                 cliente.getDocumento(),
                 cliente.getFechaNacimiento(),
                 cliente.getPrimerNombre(),
@@ -46,8 +42,8 @@ public final class ClienteMapper {
     }
 
     // Lista de entidades -> lista de Response
-    public static List<ClienteResponse> toResponseList(List<Cliente> clientes) {
-        List<ClienteResponse> responses = new ArrayList<>();
+    public static List<ClienteResponseDTO> toResponseList(List<Cliente> clientes) {
+        List<ClienteResponseDTO> responses = new ArrayList<>();
         if (clientes == null) {
             return responses;
         }
@@ -56,4 +52,5 @@ public final class ClienteMapper {
         }
         return responses;
     }
+
 }

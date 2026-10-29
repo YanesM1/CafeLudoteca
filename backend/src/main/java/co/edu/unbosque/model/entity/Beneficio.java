@@ -1,46 +1,21 @@
+package co.edu.unbosque.model.entity;
+
 import java.util.Objects;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Beneficio {
-
-  
-    private String idMembresia; // PK FK
-    private String idBeneficio; // PK
+    private Integer idBeneficio;
     private String beneficio;
-
-    public Beneficio() {
-    }
-
-    public Beneficio(String idMembresia, String idBeneficio, String beneficio) {
-        this.idMembresia = idMembresia;
-        this.idBeneficio = idBeneficio;
-        this.beneficio = beneficio;
-    }
-
-    public String getIdMembresia() {
-        return idMembresia;
-    }
-
-    public void setIdMembresia(String idMembresia) {
-        this.idMembresia = idMembresia;
-    }
-
-    public String getIdBeneficio() {
-        return idBeneficio;
-    }
-
-    public void setIdBeneficio(String idBeneficio) {
-        this.idBeneficio = idBeneficio;
-    }
-
-    public String getBeneficio() {
-        return beneficio;
-    }
-
-    public void setBeneficio(String beneficio) {
-        this.beneficio = beneficio;
-    }
-
-    // La igualdad se basa en la llave primaria compuesta (idMembresia + idBeneficio)
+    private Integer idMembresia;
+  
+// La igualdad se basa en la llave primaria compuesta (idMembresia + idBeneficio)
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -56,11 +31,12 @@ public class Beneficio {
     }
 
     @Override
-    public String toString() {
-        return "Beneficio{" +
-                "idMembresia='" + idMembresia + '\'' +
-                ", idBeneficio='" + idBeneficio + '\'' +
-                ", beneficio='" + beneficio + '\'' +
-                '}';
-    }
+public String toString() {
+    return "Beneficio{" +
+            "idBeneficio=" + idBeneficio +
+            ", beneficio='" + beneficio + '\'' +
+            ", idMembresia=" + idMembresia +
+            '}';
+}
+
 }

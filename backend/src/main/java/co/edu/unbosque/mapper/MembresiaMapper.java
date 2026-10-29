@@ -1,18 +1,15 @@
-package mapper;
-
-import dto.MembresiaRequest;
-import dto.MembresiaResponse;
-import model.Membresia;
-
+package co.edu.unbosque.mapper;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class MembresiaMapper {
+import co.edu.unbosque.model.dto.MembresiaRequestDTO;
+import co.edu.unbosque.model.dto.MembresiaResponseDTO;
+import co.edu.unbosque.model.entity.Membresia;
+import lombok.NoArgsConstructor;
 
-    private MembresiaMapper() {
-    }
-
-    public static Membresia toEntity(MembresiaRequest request) {
+@NoArgsConstructor
+public class MembresiaMapper {
+    public static Membresia toEntity(MembresiaRequestDTO request) {
         if (request == null) {
             return null;
         }
@@ -27,11 +24,11 @@ public final class MembresiaMapper {
         return entity;
     }
 
-    public static MembresiaResponse toResponse(Membresia entity) {
+    public static MembresiaResponseDTO toResponse(Membresia entity) {
         if (entity == null) {
             return null;
         }
-        return new MembresiaResponse(
+        return new MembresiaResponseDTO(
                 entity.getIdMembresia(),
                 entity.getPlan(),
                 entity.getEstado(),
@@ -42,8 +39,8 @@ public final class MembresiaMapper {
         );
     }
 
-    public static List<MembresiaResponse> toResponseList(List<Membresia> entities) {
-        List<MembresiaResponse> responses = new ArrayList<>();
+    public static List<MembresiaResponseDTO> toResponseList(List<Membresia> entities) {
+        List<MembresiaResponseDTO> responses = new ArrayList<>();
         if (entities == null) {
             return responses;
         }
@@ -52,4 +49,5 @@ public final class MembresiaMapper {
         }
         return responses;
     }
+
 }

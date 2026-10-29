@@ -1,18 +1,15 @@
-package mapper;
-
-import dto.SocioRequest;
-import dto.SocioResponse;
-import model.Socio;
-
+package co.edu.unbosque.mapper;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class SocioMapper {
+import co.edu.unbosque.model.dto.SocioRequestDTO;
+import co.edu.unbosque.model.dto.SocioResponseDTO;
+import co.edu.unbosque.model.entity.Socio;
+import lombok.NoArgsConstructor;
 
-    private SocioMapper() {
-    }
-
-    public static Socio toEntity(SocioRequest request) {
+@NoArgsConstructor
+public class SocioMapper {
+    public static Socio toEntity(SocioRequestDTO request) {
         if (request == null) {
             return null;
         }
@@ -22,18 +19,18 @@ public final class SocioMapper {
         return entity;
     }
 
-    public static SocioResponse toResponse(Socio entity) {
+    public static SocioResponseDTO toResponse(Socio entity) {
         if (entity == null) {
             return null;
         }
-        return new SocioResponse(
+        return new SocioResponseDTO(
                 entity.getDocumento(),
                 entity.getFechaAfiliacion()
         );
     }
 
-    public static List<SocioResponse> toResponseList(List<Socio> entities) {
-        List<SocioResponse> responses = new ArrayList<>();
+    public static List<SocioResponseDTO> toResponseList(List<Socio> entities) {
+        List<SocioResponseDTO> responses = new ArrayList<>();
         if (entities == null) {
             return responses;
         }
@@ -42,4 +39,5 @@ public final class SocioMapper {
         }
         return responses;
     }
+
 }

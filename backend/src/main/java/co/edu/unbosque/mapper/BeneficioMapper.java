@@ -1,47 +1,55 @@
-package mapper;
-
-import dto.BeneficioRequest;
-import dto.BeneficioResponse;
-import model.Beneficio;
+package co.edu.unbosque.mapper;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public final class BeneficioMapper {
+import co.edu.unbosque.model.dto.BeneficioRequestDTO;
+import co.edu.unbosque.model.dto.BeneficioResponseDTO;
+import co.edu.unbosque.model.entity.Beneficio;
 
-    private BeneficioMapper() {
-    }
+import lombok.NoArgsConstructor;
 
-    public static Beneficio toEntity(BeneficioRequest request) {
+@NoArgsConstructor
+public class BeneficioMapper {
+
+    public static Beneficio toEntity(BeneficioRequestDTO request) {
         if (request == null) {
             return null;
         }
+
         Beneficio entity = new Beneficio();
-        entity.setIdMembresia(request.getIdMembresia());
         entity.setIdBeneficio(request.getIdBeneficio());
         entity.setBeneficio(request.getBeneficio());
+        entity.setIdMembresia(request.getIdMembresia());
+
         return entity;
     }
 
-    public static BeneficioResponse toResponse(Beneficio entity) {
+    public static BeneficioResponseDTO toResponse(Beneficio entity) {
         if (entity == null) {
             return null;
         }
-        return new BeneficioResponse(
-                entity.getIdMembresia(),
+
+        return new BeneficioResponseDTO(
                 entity.getIdBeneficio(),
-                entity.getBeneficio()
+                entity.getBeneficio(),
+                entity.getIdMembresia()
         );
     }
 
-    public static List<BeneficioResponse> toResponseList(List<Beneficio> entities) {
-        List<BeneficioResponse> responses = new ArrayList<>();
+    public static List<BeneficioResponseDTO> toResponseList(List<Beneficio> entities) {
+        List<BeneficioResponseDTO> responses = new ArrayList<>();
+
         if (entities == null) {
             return responses;
         }
+
         for (Beneficio entity : entities) {
-            responses.add(toResponse(entity));
+            if (entity != null) {
+                responses.add(toResponse(entity));
+            }
         }
+
         return responses;
     }
 }

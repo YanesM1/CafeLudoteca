@@ -1,36 +1,18 @@
-package model;
-
+package co.edu.unbosque.model.entity;
 import java.util.Objects;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Telefono {
 
-    
     private String documento; // PK FK
     private String telefono; // PK
-
-    public Telefono() {
-    }
-
-    public Telefono(String documento, String telefono) {
-        this.documento = documento;
-        this.telefono = telefono;
-    }
-
-    public String getDocumento() {
-        return documento;
-    }
-
-    public void setDocumento(String documento) {
-        this.documento = documento;
-    }
-
-    public String getTelefono() {
-        return telefono;
-    }
-
-    public void setTelefono(String telefono) {
-        this.telefono = telefono;
-    }
 
     // La igualdad se basa en la llave primaria compuesta (documento + telefono)
     @Override
@@ -54,4 +36,5 @@ public class Telefono {
                 ", telefono='" + telefono + '\'' +
                 '}';
     }
+
 }
