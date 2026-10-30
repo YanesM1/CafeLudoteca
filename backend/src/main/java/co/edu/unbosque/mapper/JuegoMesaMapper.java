@@ -17,7 +17,7 @@ public class JuegoMesaMapper {
         return juegoMesa;
     }
 
-    public JuegoMesaResponseDTO juegoMesaResponseDTO(JuegoMesa juegoMesa){
+    public JuegoMesaResponseDTO juegoMesaToResponseDTO(JuegoMesa juegoMesa){
         JuegoMesaResponseDTO dto=new JuegoMesaResponseDTO();
         dto.setNumSerie(juegoMesa.getNumSerie());
         dto.setReglamento(juegoMesa.getReglamento());
