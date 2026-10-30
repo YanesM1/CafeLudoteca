@@ -1,6 +1,7 @@
 package co.edu.unbosque.mapper;
 
 import co.edu.unbosque.model.dto.ElementoJuegoRequestDTO;
+import co.edu.unbosque.model.dto.ElementoJuegoResponseDTO;
 import co.edu.unbosque.model.entity.ElementoJuego;
 
 public class ElementoJuegoMapper {
@@ -12,8 +13,8 @@ public class ElementoJuegoMapper {
 
     }
 
-    public ElementoJuegoRequestDTO elementoJuegoToDTO(ElementoJuego elementoJuego){
-        ElementoJuegoRequestDTO dto=new ElementoJuegoRequestDTO();
+    public ElementoJuegoResponseDTO elementoJuegoToDTO(ElementoJuego elementoJuego){
+        ElementoJuegoResponseDTO dto=new ElementoJuegoResponseDTO();
         dto.setIdElementoJuego(elementoJuego.getIdElementoJuego());
         dto.setElementoJuego(elementoJuego.getElementoJuego());
         return dto;

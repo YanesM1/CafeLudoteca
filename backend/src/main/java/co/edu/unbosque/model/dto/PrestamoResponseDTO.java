@@ -1,4 +1,5 @@
 package co.edu.unbosque.model.dto;
+
 import java.time.LocalDate;
 
 import lombok.AllArgsConstructor;
@@ -10,7 +11,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PretamoResponseDTO {
+public class PrestamoResponseDTO {
     private int idPrestamo;
     private LocalDate fechaSalida;
     private String estadoComponentes;

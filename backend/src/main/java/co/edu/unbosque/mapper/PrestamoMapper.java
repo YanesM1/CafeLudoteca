@@ -1,6 +1,6 @@
 package co.edu.unbosque.mapper;
-
 import co.edu.unbosque.model.dto.PrestamoRequestDTO;
+import co.edu.unbosque.model.dto.PrestamoResponseDTO;
 import co.edu.unbosque.model.entity.Prestamo;
 
 public class PrestamoMapper {
@@ -14,8 +14,8 @@ public class PrestamoMapper {
         return prestamo;
     }
 
-    public PrestamoRequestDTO PrestamoToDTO(Prestamo prestamo){
-        PrestamoRequestDTO dto=new PrestamoRequestDTO();
+    public PrestamoResponseDTO PrestamoToPrestamoResponseDTO(Prestamo prestamo){
+        PrestamoResponseDTO dto=new PrestamoResponseDTO();
         dto.setIdPrestamo(prestamo.getIdPrestamo());
         dto.setFechaSalida(prestamo.getFechaSalida());
         dto.setEstadoComponentes(prestamo.getEstadoComponentes());

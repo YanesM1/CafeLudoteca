@@ -1,6 +1,7 @@
 package co.edu.unbosque.mapper;
 
 import co.edu.unbosque.model.dto.JuegoMesaRequestDTO;
+import co.edu.unbosque.model.dto.JuegoMesaResponseDTO;
 import co.edu.unbosque.model.entity.JuegoMesa;
 
 public class JuegoMesaMapper {
@@ -16,8 +17,8 @@ public class JuegoMesaMapper {
         return juegoMesa;
     }
 
-    public JuegoMesaRequestDTO juegoMesaRequestDTO(JuegoMesa juegoMesa){
-        JuegoMesaRequestDTO dto=new JuegoMesaRequestDTO();
+    public JuegoMesaResponseDTO juegoMesaResponseDTO(JuegoMesa juegoMesa){
+        JuegoMesaResponseDTO dto=new JuegoMesaResponseDTO();
         dto.setNumSerie(juegoMesa.getNumSerie());
         dto.setReglamento(juegoMesa.getReglamento());
         dto.setCantidadMinimaJugador(juegoMesa.getCantidadMinimaJugador());

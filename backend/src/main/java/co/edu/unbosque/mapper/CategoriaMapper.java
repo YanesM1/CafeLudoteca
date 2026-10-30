@@ -1,6 +1,7 @@
 package co.edu.unbosque.mapper;
 
 import co.edu.unbosque.model.dto.CategoriaRequestDTO;
+import co.edu.unbosque.model.dto.CategoriaResponseDTO;
 import co.edu.unbosque.model.entity.Categoria;
 
 public class CategoriaMapper {
@@ -11,8 +12,8 @@ public class CategoriaMapper {
         return categoria;
     }
 
-    public CategoriaRequestDTO categoriaToCategoriaRequestDTO(Categoria categoria){
-        CategoriaRequestDTO dto=new CategoriaRequestDTO();
+    public CategoriaResponseDTO categoriaToCategoriaResponseDTO(Categoria categoria){
+        CategoriaResponseDTO dto=new CategoriaResponseDTO();
         dto.setNumCategoria(categoria.getNumCategoria());
         dto.setCategoria(categoria.getCategoria());
         return dto;

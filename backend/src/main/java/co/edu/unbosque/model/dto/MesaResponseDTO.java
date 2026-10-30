@@ -1,4 +1,3 @@
-
 package co.edu.unbosque.model.dto;
 
 import lombok.AllArgsConstructor;

@@ -1,6 +1,7 @@
 package co.edu.unbosque.mapper;
 
 import co.edu.unbosque.model.dto.ExpansionRequestDTO;
+import co.edu.unbosque.model.dto.ExpansionResponseDTO;
 import co.edu.unbosque.model.entity.Expansion;
 
 public class ExpansionMapper{
@@ -15,8 +16,8 @@ public class ExpansionMapper{
         
     }
 
-    public ExpansionRequestDTO expansionTodto(Expansion expansion){
-        ExpansionRequestDTO dto=new ExpansionRequestDTO();
+    public ExpansionResponseDTO expansionTodto(Expansion expansion){
+        ExpansionResponseDTO dto=new ExpansionResponseDTO();
         dto.setIdExpansion(expansion.getIdExpansion());
         dto.setNombre(expansion.getNombre());
         dto.setDescripcion(expansion.getDescripcion());
