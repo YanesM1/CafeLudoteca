@@ -8,7 +8,7 @@ import co.edu.unbosque.model.dto.ReservaResponseDTO;
 
 public interface IReservaService {
 
-    ReservaResponseDTO AddReserva(ReservaRequestDTO request);
+    ReservaResponseDTO addReserva(ReservaRequestDTO request);
 
     List<ReservaResponseDTO> getReserva(String documento);
 

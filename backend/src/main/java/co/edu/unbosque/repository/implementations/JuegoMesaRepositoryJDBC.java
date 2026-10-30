@@ -17,7 +17,7 @@ public class JuegoMesaRepositoryJDBC implements IJuegoMesaRepository {
     @Override
     public boolean saveJuegoMesa(JuegoMesa juegoMesa) {
         String sql = """
-                INSERT INTO juego_mesa (num_serie, nombre)
+                INSERT INTO JUEGO_MESA (num_serie, nombre)
                 VALUES(?,?)""";
 
         try (Connection conection = ConnectionBD.obtenerConexion();
@@ -40,7 +40,7 @@ public class JuegoMesaRepositoryJDBC implements IJuegoMesaRepository {
         String sql = """
                 SELECT *
                 FROM JUEGO_MESA
-                WHERE NOMBRE=?
+                WHERE nombre=?
                 """;
 
         try (Connection conexion = ConnectionBD.obtenerConexion();
@@ -73,7 +73,7 @@ public class JuegoMesaRepositoryJDBC implements IJuegoMesaRepository {
     public Optional<JuegoMesa> findByNumSerie(String numSerie) {
         String sql = """
                 SELECT*
-                FROM juego_mesa
+                FROM JUEGO_MESA
                 WHERE num_serie=?
                 """;
         try (Connection conexion = ConnectionBD.obtenerConexion();
@@ -104,14 +104,51 @@ public class JuegoMesaRepositoryJDBC implements IJuegoMesaRepository {
 
     @Override
     public boolean updateJuegoMesa(String numSerie, JuegoMesa juegoMesa) {
-      
-        return false;
+      String sql="""
+            UPDATE JUEGO_MESA
+              SET reglamento=?,
+              cantidad_minima_jugador=?,
+              cantidad_maxima_jugador=?,
+              edad_minima=?,
+              nombre=?,
+              duracion_partida=?
+            WHERE num_serie=?
+              """;
+
+              try(Connection conexion=ConnectionBD.obtenerConexion();
+            PreparedStatement ps=conexion.prepareStatement(sql)) {
+                ps.setString(1, juegoMesa.getReglamento());
+                ps.setInt(2, juegoMesa.getCantidadMinimaJugador());
+                ps.setInt(3, juegoMesa.getCantidadMaximaJugador());
+                ps.setInt(4, juegoMesa.getEdadMinima());
+                ps.setString(5, juegoMesa.getNombre());
+                ps.setInt(6, juegoMesa.getDuracionPartida());
+                ps.setString(7, numSerie);
+
+                return ps.executeUpdate()>0;
+                
+              } catch (SQLException e) {
+                throw new PersistenceException("Error no se encuentra en la base de datos", e);
+              
+            }
     }
 
     @Override
     public boolean deleteJuegoMesa(String numSerie) {
-        // TODO Auto-generated method stub
-        return false;
+        String sql="""
+                DELETE FROM JUEGO_MESA
+                WHERE num_serie=?
+                """;
+
+                try (Connection conexion=ConnectionBD.obtenerConexion();
+            PreparedStatement ps=conexion.prepareStatement(sql)){
+
+                ps.setString(1, numSerie);
+                return ps.executeUpdate()>0;
+                    
+                } catch (SQLException e) {
+                    throw new PersistenceException("Error no se encontro en la base de datos", e);
+                }
     }
 
 }

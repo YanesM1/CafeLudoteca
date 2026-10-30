@@ -1,4 +1,5 @@
 package co.edu.unbosque.model.entity;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,5 +17,23 @@ public class JuegoMesa {
     private int edadMinima;
     private String nombre;
     private int duracionPartida;
+
+
+    
+
+@Override
+public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    JuegoMesa juegoMesa = (JuegoMesa) o;
+
+    return Objects.equals(numSerie, juegoMesa.numSerie);
+}
+
+@Override
+public int hashCode() {
+    return Objects.hash(numSerie);
+}
     
 }

@@ -8,16 +8,11 @@ import co.edu.unbosque.services.interfaces.IJuegoMesaService;
 
 public class JuegoMesaService implements IJuegoMesaService{
     @Override
-    public JuegoMesaResponseDTO AddJuegoMesa(JuegoMesaRequestDTO request) {
-        // TODO Auto-generated method stub
+    public List<JuegoMesaResponseDTO> getJuegoMesa(String nombre) {
+        
         return null;
     }
 
-    @Override
-    public List<JuegoMesaResponseDTO> getJuegoMesa(String nombre) {
-        // TODO Auto-generated method stub
-        return null;
-    }
     @Override
     public JuegoMesaResponseDTO updateJuegoMesa(String numSerie, JuegoMesaRequestDTO request) {
         // TODO Auto-generated method stub
@@ -25,7 +20,7 @@ public class JuegoMesaService implements IJuegoMesaService{
     }
 
     @Override
-    public JuegoMesaResponseDTO deleteJuegoMesa(String numSerie) {
+    public JuegoMesaResponseDTO addJuegoMesa(JuegoMesaRequestDTO request) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -35,5 +30,12 @@ public class JuegoMesaService implements IJuegoMesaService{
         // TODO Auto-generated method stub
         return null;
     }
+    @Override
+    public JuegoMesaResponseDTO deleteJuegoMesa(String numSerie) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+  
+
 
 }

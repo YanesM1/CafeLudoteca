@@ -37,7 +37,7 @@ public class ReservaController implements IReservaController {
                     .build();
         }
 
-        ReservaResponseDTO reserva = reservaService.AddReserva(request);
+        ReservaResponseDTO reserva = reservaService.addReserva(request);
 
         if (reserva == null) {
             return Response.status(

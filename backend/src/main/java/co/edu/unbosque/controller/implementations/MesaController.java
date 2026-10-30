@@ -37,7 +37,7 @@ public class MesaController implements IMesaController {
                     .build();
         }
 
-        MesaResponseDTO mesa = mesaService.AddMesa(request);
+        MesaResponseDTO mesa = mesaService.addMesa(request);
 
         if (mesa == null) {
             return Response.status(

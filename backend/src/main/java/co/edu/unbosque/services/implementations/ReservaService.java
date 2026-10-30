@@ -18,7 +18,7 @@ public class ReservaService implements IReservaService {
             new ReservaRepositoryJDBC();
 
     @Override
-    public ReservaResponseDTO AddReserva(ReservaRequestDTO request) {
+    public ReservaResponseDTO addReserva(ReservaRequestDTO request) {
         if (request == null) {
             return null;
         }

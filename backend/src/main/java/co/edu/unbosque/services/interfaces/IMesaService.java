@@ -8,7 +8,7 @@ import co.edu.unbosque.model.dto.MesaResponseDTO;
 
 public interface IMesaService {
 
-    MesaResponseDTO AddMesa(MesaRequestDTO request);
+    MesaResponseDTO addMesa(MesaRequestDTO request);
 
     List<MesaResponseDTO> getMesa(String tematica);
 

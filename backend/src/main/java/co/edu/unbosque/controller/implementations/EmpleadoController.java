@@ -39,7 +39,7 @@ public class EmpleadoController implements IEmpleadoController {
         }
 
         EmpleadoResponseDTO empleado =
-                empleadoService.AddEmpleado(request);
+                empleadoService.addEmpleado(request);
 
         if (empleado == null) {
             return Response.status(

@@ -8,7 +8,7 @@ import co.edu.unbosque.model.dto.EmpleadoResponseDTO;
 
 public interface IEmpleadoService {
 
-    EmpleadoResponseDTO AddEmpleado(EmpleadoRequestDTO request);
+    EmpleadoResponseDTO addEmpleado(EmpleadoRequestDTO request);
 
     List<EmpleadoResponseDTO> getEmpleado(String nombre);
 

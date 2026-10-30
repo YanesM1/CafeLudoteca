@@ -18,7 +18,7 @@ public class EmpleadoService implements IEmpleadoService {
             new EmpleadoRepositoryJDBC();
 
     @Override
-    public EmpleadoResponseDTO AddEmpleado(EmpleadoRequestDTO request) {
+    public EmpleadoResponseDTO addEmpleado(EmpleadoRequestDTO request) {
         if (request == null) {
             return null;
         }

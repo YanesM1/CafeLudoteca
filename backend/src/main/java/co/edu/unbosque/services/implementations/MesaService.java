@@ -18,7 +18,7 @@ public class MesaService implements IMesaService {
             new MesaRepositoryJDBC();
 
     @Override
-    public MesaResponseDTO AddMesa(MesaRequestDTO request) {
+    public MesaResponseDTO addMesa(MesaRequestDTO request) {
         if (request == null) {
             return null;
         }
