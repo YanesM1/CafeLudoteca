@@ -16,10 +16,44 @@ public class JuegoMesaService implements IJuegoMesaService {
     private final IJuegoMesaRepository juegoMesaRepository = new JuegoMesaRepositoryJDBC();
     private final JuegoMesaMapper juegoMesaMapper = new JuegoMesaMapper();
 
+    private boolean validarJuegoMesa(JuegoMesaRequestDTO request){
+
+        if(request==null){
+            return false;
+        }
+
+        if(request.getNumSerie()==null|| request.getNumSerie().isBlank()){
+            return false;
+        }
+        if(request.getReglamento()==null|| request.getReglamento().isBlank()){
+            return false;
+        }
+        if(request.getCantidadMinimaJugador()<=0){
+            return false;
+        }
+        if(request.getCantidadMaximaJugador()<request.getCantidadMinimaJugador()){
+            return false;
+        }
+        if(request.getEdadMinima()<=0){
+            return false;
+        }
+        if(request.getNombre()==null||request.getNombre().isBlank()){
+            return false;
+        }
+        if(request.getDuracionPartida()<=0){
+            return false;
+        }
+
+        return true;
+    }
+
+
+
+
     @Override
     public JuegoMesaResponseDTO addJuegoMesa(JuegoMesaRequestDTO request) {
 
-        if (request == null) {
+        if (!validarJuegoMesa(request)) {
             return null;
         }
 
@@ -38,6 +72,10 @@ public class JuegoMesaService implements IJuegoMesaService {
 
         List<JuegoMesa> juegos = juegoMesaRepository.findByNombre(nombre);
         List<JuegoMesaResponseDTO> response = new ArrayList<>();
+
+        if(juegos==null){
+            return response;
+        }
 
         for (JuegoMesa juegoM : juegos) {
             response.add(
@@ -66,7 +104,7 @@ public class JuegoMesaService implements IJuegoMesaService {
             String numSerie,
             JuegoMesaRequestDTO request) {
 
-        if (request == null) {
+        if (!validarJuegoMesa(request)) {
             return null;
         }
 
