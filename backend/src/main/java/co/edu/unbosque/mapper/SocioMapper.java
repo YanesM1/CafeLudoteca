@@ -1,43 +1,24 @@
 package co.edu.unbosque.mapper;
-import java.util.ArrayList;
-import java.util.List;
 
 import co.edu.unbosque.model.dto.SocioRequestDTO;
 import co.edu.unbosque.model.dto.SocioResponseDTO;
 import co.edu.unbosque.model.entity.Socio;
-import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
 public class SocioMapper {
-    public static Socio toEntity(SocioRequestDTO request) {
-        if (request == null) {
-            return null;
-        }
-        Socio entity = new Socio();
-        entity.setDocumento(request.getDocumento());
-        entity.setFechaAfiliacion(request.getFechaAfiliacion());
-        return entity;
+
+    public Socio socioRequestDTOToSocio(SocioRequestDTO dto) {
+        Socio socio = new Socio();
+        socio.setDocumento(dto.getDocumento());
+        socio.setFechaAfiliacion(dto.getFechaAfiliacion());
+
+        return socio;
     }
 
-    public static SocioResponseDTO toResponse(Socio entity) {
-        if (entity == null) {
-            return null;
-        }
-        return new SocioResponseDTO(
-                entity.getDocumento(),
-                entity.getFechaAfiliacion()
-        );
-    }
+    public SocioResponseDTO socioToResponseDTO(Socio socio) {
+        SocioResponseDTO dto = new SocioResponseDTO();
+        dto.setDocumento(socio.getDocumento());
+        dto.setFechaAfiliacion(socio.getFechaAfiliacion());
 
-    public static List<SocioResponseDTO> toResponseList(List<Socio> entities) {
-        List<SocioResponseDTO> responses = new ArrayList<>();
-        if (entities == null) {
-            return responses;
-        }
-        for (Socio entity : entities) {
-            responses.add(toResponse(entity));
-        }
-        return responses;
+        return dto;
     }
-
 }
