@@ -1,0 +1,33 @@
+<section class="loans-page">
+
+    <div class="loans-page__notification">
+
+        <app-notification-toast
+            [visible]="notificationVisible"
+            [type]="notificationType"
+            [title]="notificationTitle"
+            [message]="notificationMessage"
+            (dismiss)="closeNotification()"
+        />
+
+    </div>
+
+    <app-loan-form
+        [clienteOptions]="clienteOptions"
+        [membershipOptions]="membershipOptions"
+        [unitOptions]="unitOptions"
+        [employeeOptions]="employeeOptions"
+        [componentStatusOptions]="componentStatusOptions"
+        [activeLoanOptions]="activeLoanOptions"
+        [activeLoanId]="activeLoanId"
+        [submitting]="submitting"
+        [loading]="loading"
+        [errorMessage]="errorMessage"
+        (registerLoan)="onRegisterLoan($event)"
+        (activeLoanChange)="onActiveLoanChange($event)"
+        (updateAudit)="onUpdateAudit($event)"
+        (cancel)="onCancel()"
+        (retry)="onRetry()"
+    />
+
+</section>

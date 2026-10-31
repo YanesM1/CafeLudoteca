@@ -1,0 +1,14 @@
+<input
+    class="form-control"
+    [id]="inputId || null"
+    [type]="type"
+    [name]="name"
+    [placeholder]="placeholder"
+    [value]="value"
+    [disabled]="disabled"
+    [required]="required"
+    [attr.aria-label]="ariaLabel || placeholder || null"
+    [attr.min]="min || null"
+    [attr.max]="max || null"
+    (input)="onInput($event)"
+/>

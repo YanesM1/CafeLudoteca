@@ -1,0 +1,41 @@
+@if (visible) {
+
+    <div
+        class="notification-toast"
+        [class.notification-toast--success]="type === 'success'"
+        [class.notification-toast--error]="type === 'error'"
+        [class.notification-toast--warning]="type === 'warning'"
+        [class.notification-toast--info]="type === 'info'"
+        [attr.role]="type === 'error' ? 'alert' : 'status'"
+        aria-live="polite"
+    >
+
+        <div class="notification-toast__indicator">
+            @switch (type) {
+                @case ('success') { ✓ }
+                @case ('error') { ! }
+                @case ('warning') { ! }
+                @case ('info') { i }
+            }
+        </div>
+
+        <div class="notification-toast__content">
+
+            <strong>{{ title }}</strong>
+
+            <p>{{ message }}</p>
+
+        </div>
+
+        <button
+            type="button"
+            class="notification-toast__close"
+            aria-label="Cerrar notificación"
+            (click)="close()"
+        >
+            ×
+        </button>
+
+    </div>
+
+}

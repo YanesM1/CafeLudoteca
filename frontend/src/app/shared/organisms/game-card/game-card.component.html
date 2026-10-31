@@ -1,0 +1,99 @@
+<article
+    class="game-card"
+    [class.game-card--selected]="selected"
+>
+
+    <div class="game-card__media">
+
+        @if (imageUrl) {
+            <img
+                [src]="imageUrl"
+                [alt]="'Portada de ' + nombre"
+                loading="lazy"
+            />
+        } @else {
+            <div class="game-card__placeholder">
+                <app-icon name="dice" [size]="52" />
+                <span>Imagen no disponible</span>
+            </div>
+        }
+
+        <div class="game-card__status">
+            <app-badge
+                [variant]="unidadesDisponibles > 0 ? 'success' : 'danger'"
+            >
+                {{ unidadesDisponibles > 0 ? 'Disponible' : 'No disponible' }}
+            </app-badge>
+        </div>
+
+    </div>
+
+    <div class="game-card__content">
+
+        <div class="game-card__heading">
+
+            <span class="game-card__serial">
+                Juego #{{ numSerie }}
+            </span>
+
+            <h3 class="game-card__title">
+                {{ nombre }}
+            </h3>
+
+            @if (categoria) {
+                <span class="game-card__category">
+                    {{ categoria }}
+                </span>
+            }
+
+        </div>
+
+        <div class="game-card__details">
+
+            <div class="game-card__detail">
+                <app-icon name="user" [size]="17" />
+                <span>
+                    {{ cantidadMinimaJugador }}–{{ cantidadMaximaJugador }}
+                    jugadores
+                </span>
+            </div>
+
+            <div class="game-card__detail">
+                <app-icon name="clock" [size]="17" />
+                <span>{{ duracionPartida }} minutos</span>
+            </div>
+
+            <div class="game-card__detail">
+                <app-icon name="user" [size]="17" />
+                <span>Edad mínima: {{ edadMinima }}+</span>
+            </div>
+
+        </div>
+
+        <div class="game-card__availability">
+            <span>Unidades disponibles</span>
+            <strong>{{ unidadesDisponibles }}</strong>
+        </div>
+
+        <div class="game-card__actions">
+
+            <app-button
+                variant="ghost"
+                (click)="verDetalles()"
+            >
+                Ver detalles
+            </app-button>
+
+            <app-button
+                [variant]="selected ? 'danger' : 'gold'"
+                [disabled]="unidadesDisponibles <= 0 && !selected"
+                (click)="cambiarSeleccion()"
+            >
+                {{ selected ? 'Quitar' : 'Preseleccionar' }}
+            </app-button>
+
+        </div>
+
+    </div>
+
+</article>

@@ -1,0 +1,10 @@
+<label
+    class="form-label"
+    [attr.for]="forId || null"
+>
+    {{ text }}
+
+    @if (required) {
+        <span class="required-mark" aria-hidden="true">*</span>
+    }
+</label>

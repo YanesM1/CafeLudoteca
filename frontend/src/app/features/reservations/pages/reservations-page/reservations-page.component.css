@@ -1,0 +1,11 @@
+:host {
+    display: block;
+    width: 100%;
+}
+
+.reservations-page {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    width: 100%;
+}

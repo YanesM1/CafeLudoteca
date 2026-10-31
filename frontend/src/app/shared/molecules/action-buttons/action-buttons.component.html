@@ -1,0 +1,28 @@
+<div
+    class="action-buttons"
+    [class.action-buttons--start]="alignment === 'start'"
+    [class.action-buttons--center]="alignment === 'center'"
+    [class.action-buttons--end]="alignment === 'end'"
+    [class.action-buttons--between]="alignment === 'between'"
+    [class.action-buttons--full]="fullWidth"
+>
+    @for (action of actions; track action.id) {
+
+        <app-button
+            [variant]="action.variant || 'secondary'"
+            [type]="action.type || 'button'"
+            [disabled]="action.disabled || false"
+            (click)="onAction(action)"
+        >
+            @if (action.icon) {
+                <app-icon
+                    [name]="action.icon"
+                    [size]="18"
+                />
+            }
+
+            {{ action.label }}
+        </app-button>
+
+    }
+</div>

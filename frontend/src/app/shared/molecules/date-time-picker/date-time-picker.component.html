@@ -1,0 +1,45 @@
+<div class="date-time-picker">
+
+    <div class="date-time-picker__field">
+        <app-label
+            [text]="dateLabel"
+            [forId]="dateInputId"
+            [required]="required"
+        />
+
+        <app-input
+            [inputId]="dateInputId"
+            name="reservationDate"
+            type="date"
+            [value]="date"
+            [min]="minDate"
+            [max]="maxDate"
+            [required]="required"
+            [disabled]="disabled"
+            [ariaLabel]="dateLabel"
+            (valueChange)="onDateChange($event)"
+        />
+    </div>
+
+    <div class="date-time-picker__field">
+        <app-label
+            [text]="timeLabel"
+            [forId]="timeInputId"
+            [required]="required"
+        />
+
+        <app-input
+            [inputId]="timeInputId"
+            name="reservationTime"
+            type="time"
+            [value]="time"
+            [min]="minTime"
+            [max]="maxTime"
+            [required]="required"
+            [disabled]="disabled"
+            [ariaLabel]="timeLabel"
+            (valueChange)="onTimeChange($event)"
+        />
+    </div>
+
+</div>

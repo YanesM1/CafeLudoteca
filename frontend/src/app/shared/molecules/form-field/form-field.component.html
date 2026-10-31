@@ -1,0 +1,26 @@
+<div class="form-group">
+
+    <app-label
+        [text]="label"
+        [forId]="inputId"
+        [required]="required"
+    />
+
+    <app-input
+        [inputId]="inputId"
+        [name]="name"
+        [type]="type"
+        [placeholder]="placeholder"
+        [value]="value"
+        [required]="required"
+        [disabled]="disabled"
+        (valueChange)="onValueChange($event)"
+    />
+
+    @if (errorMessage) {
+        <span class="form-error" role="alert">
+            {{ errorMessage }}
+        </span>
+    }
+
+</div>

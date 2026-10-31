@@ -1,0 +1,20 @@
+<div class="employee-layout">
+
+    <app-navbar
+        [brand]="brand"
+        [homeRoute]="'/empleado/prestamos'"
+        [links]="navigationLinks"
+        [showCartButton]="false"
+        [showUserButton]="true"
+        [userLabel]="userLabel"
+    />
+
+    <main class="employee-layout__main">
+
+        <div class="employee-layout__content">
+            <router-outlet />
+        </div>
+
+    </main>
+
+</div>

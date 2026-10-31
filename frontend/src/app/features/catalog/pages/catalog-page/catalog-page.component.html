@@ -1,0 +1,7 @@
+<app-game-catalog
+    [games]="games"
+    [loading]="loading"
+    (gameDetails)="onGameDetails($event)"
+    (preselectionChange)="onPreselectionChange($event)"
+    (continueReservation)="onContinueReservation($event)"
+/>
