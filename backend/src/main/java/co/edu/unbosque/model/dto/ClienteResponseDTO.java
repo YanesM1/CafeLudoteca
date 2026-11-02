@@ -11,7 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ClienteResponseDTO {
-     private String documento; // PK
+     private String documentoCliente; // PK
      private String primerApellido;
      private String segundoApellido;
      private String primerNombre;

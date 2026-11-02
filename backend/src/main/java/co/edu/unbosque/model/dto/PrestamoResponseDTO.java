@@ -17,8 +17,8 @@ public class PrestamoResponseDTO {
     private String estadoComponentes;
     private String tipoPrestamo;
     private LocalDate fechaDevolucion;
-    private String clienteDocumento;
-    private String empleadoDocumento;
+    private String documentoCliente;
+    private String documentoEmp;
     
     
 

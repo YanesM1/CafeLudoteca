@@ -7,7 +7,7 @@ public class ClienteMapper {
 
     public Cliente clienteRequestDTOToCliente(ClienteRequestDTO dto) {
         Cliente cliente = new Cliente();
-        cliente.setDocumento(dto.getDocumento());
+        cliente.setDocumentoCliente(dto.getDocumentoCliente());
         cliente.setPrimerApellido(dto.getPrimerApellido());
         cliente.setSegundoApellido(dto.getSegundoApellido());
         cliente.setPrimerNombre(dto.getPrimerNombre());
@@ -20,7 +20,7 @@ public class ClienteMapper {
 
     public ClienteResponseDTO clienteToResponseDTO(Cliente cliente) {
         ClienteResponseDTO dto = new ClienteResponseDTO();
-        dto.setDocumento(cliente.getDocumento());
+        dto.setDocumentoCliente(cliente.getDocumentoCliente());
         dto.setPrimerApellido(cliente.getPrimerApellido());
         dto.setSegundoApellido(cliente.getSegundoApellido());
         dto.setPrimerNombre(cliente.getPrimerNombre());

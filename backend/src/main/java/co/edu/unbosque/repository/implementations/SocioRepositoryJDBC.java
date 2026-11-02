@@ -30,7 +30,7 @@ public class SocioRepositoryJDBC implements ISocioRepository {
         try (Connection conexion = ConnectionBD.obtenerConexion();
              PreparedStatement statement = conexion.prepareStatement(sql)) {
 
-            statement.setString(1, socio.getDocumento());
+            statement.setString(1, socio.getDocumentoCliente());
             statement.setDate(2, convertirFecha(socio.getFechaAfiliacion()));
 
             return statement.executeUpdate() == 1;
@@ -145,7 +145,7 @@ public class SocioRepositoryJDBC implements ISocioRepository {
 
         Socio socio = new Socio();
 
-        socio.setDocumento(resultado.getString("documento"));
+        socio.setDocumentoCliente(resultado.getString("documento"));
 
         Date fecha = resultado.getDate("fecha_afiliacion");
         if (fecha != null) {

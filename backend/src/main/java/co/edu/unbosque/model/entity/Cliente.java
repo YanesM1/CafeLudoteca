@@ -11,7 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Cliente {
-     private String documento; // PK
+     private String documentoCliente; // PK
      private String primerApellido;
      private String segundoApellido;
      private String primerNombre;
@@ -25,18 +25,18 @@ public class Cliente {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Cliente cliente = (Cliente) o;
-        return Objects.equals(documento, cliente.documento);
+        return Objects.equals(documentoCliente, cliente.documentoCliente);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(documento);
+        return Objects.hash(documentoCliente);
     }
 
     @Override
     public String toString() {
         return "Cliente{" +
-                "documento='" + documento + '\'' +
+                "documento='" + documentoCliente + '\'' +
                 ", fechaNacimiento=" + fechaNacimiento +
                 ", primerNombre='" + primerNombre + '\'' +
                 ", segundoNombre='" + segundoNombre + '\'' +

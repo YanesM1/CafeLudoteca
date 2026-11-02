@@ -22,7 +22,7 @@ public class PrestamoRepositoryJDBC implements IPrestamoRepository {
         // id_prestamo ya NO va: es autoincremental
         String sql = """
                 INSERT INTO PRESTAMO (fecha_salida, estado_componentes,
-                tipo_prestamo, fecha_devolucion, cliente_documento, empleado_documento )
+                tipo_prestamo, fecha_devolucion, documento_cliente, documento_emp )
                 VALUES(?, ?, ?, ?, ?, ?)""";
 
         try (Connection conexion = ConnectionBD.obtenerConexion();
@@ -32,10 +32,8 @@ public class PrestamoRepositoryJDBC implements IPrestamoRepository {
             ps.setString(2, prestamo.getEstadoComponentes());
             ps.setString(3, prestamo.getTipoPrestamo());
             ps.setObject(4, prestamo.getFechaDevolucion());
-            ps.setString(6, prestamo.getClienteDocumento());
-            ps.setString(5, prestamo.getEmpleadoDocumento());
-          
-
+            ps.setString(5, prestamo.getDocumentoCliente());
+            ps.setString(6, prestamo.getDocumentoEmp());
 
             int filas = ps.executeUpdate();
 
@@ -115,8 +113,8 @@ public class PrestamoRepositoryJDBC implements IPrestamoRepository {
                 estado_componentes=?,
                 tipo_prestamo=?,
                 fecha_devolucion=?,
-                cliente_documento=?
-                empleado_documento=?
+                documento_cliente=?,
+                documento_emp=?
                 WHERE id_prestamo=?
                 """;
 
@@ -127,9 +125,9 @@ public class PrestamoRepositoryJDBC implements IPrestamoRepository {
             ps.setString(2, prestamo.getEstadoComponentes());
             ps.setString(3, prestamo.getTipoPrestamo());
             ps.setObject(4, prestamo.getFechaDevolucion());
-            ps.setString(6, prestamo.getClienteDocumento());
-            ps.setString(5, prestamo.getEmpleadoDocumento());
-            
+            ps.setString(5, prestamo.getDocumentoCliente());
+            ps.setString(6, prestamo.getDocumentoEmp());
+
             ps.setInt(7, idPrestamo);
 
             return ps.executeUpdate() > 0;
@@ -158,7 +156,7 @@ public class PrestamoRepositoryJDBC implements IPrestamoRepository {
         }
     }
 
-   
+
     private Prestamo mapearPrestamo(ResultSet rs) throws SQLException {
         Prestamo prestamo = new Prestamo();
         prestamo.setIdPrestamo(rs.getInt("id_prestamo"));
@@ -166,9 +164,9 @@ public class PrestamoRepositoryJDBC implements IPrestamoRepository {
         prestamo.setEstadoComponentes(rs.getString("estado_componentes"));
         prestamo.setTipoPrestamo(rs.getString("tipo_prestamo"));
         prestamo.setFechaDevolucion(rs.getObject("fecha_devolucion", LocalDate.class));
-        prestamo.setClienteDocumento(rs.getString("cliente_documento"));
-        prestamo.setEmpleadoDocumento(rs.getString("empleado_documento"));
-    
+        prestamo.setDocumentoCliente(rs.getString("documento_cliente"));
+        prestamo.setDocumentoEmp(rs.getString("documento_emp"));
+
         return prestamo;
     }
 }

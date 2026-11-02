@@ -46,13 +46,13 @@ public class PrestamoServicio implements IPrestamoServicio {
             return false;
         }
 
-        if (request.getEmpleadoDocumento() == null
-                || request.getEmpleadoDocumento().isBlank()) {
+        if (request.getDocumentoEmp() == null
+                || request.getDocumentoEmp().isBlank()) {
             return false;
         }
 
-        if (request.getClienteDocumento() == null
-                || request.getClienteDocumento().isBlank()) {
+        if (request.getDocumentoCliente() == null
+                || request.getDocumentoCliente().isBlank()) {
             return false;
         }
 

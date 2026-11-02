@@ -24,14 +24,14 @@ public class ClienteRepositoryJDBC implements IClienteRepository {
         }
 
         String sql = "INSERT INTO CLIENTE "
-                + "(documento, primer_apellido, segundo_apellido, "
+                + "(documento_cliente, primer_apellido, segundo_apellido, "
                 + "primer_nombre, segundo_nombre, direccion, fecha_nacimiento) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conexion = ConnectionBD.obtenerConexion();
              PreparedStatement statement = conexion.prepareStatement(sql)) {
 
-            statement.setString(1, cliente.getDocumento());
+            statement.setString(1, cliente.getDocumentoCliente());
             statement.setString(2, cliente.getPrimerApellido());
             statement.setString(3, cliente.getSegundoApellido());
             statement.setString(4, cliente.getPrimerNombre());
@@ -52,7 +52,7 @@ public class ClienteRepositoryJDBC implements IClienteRepository {
 
         List<Cliente> clientes = new ArrayList<>();
 
-        String sql = "SELECT documento, primer_apellido, segundo_apellido, "
+        String sql = "SELECT documento_cliente, primer_apellido, segundo_apellido, "
                 + "primer_nombre, segundo_nombre, direccion, fecha_nacimiento "
                 + "FROM CLIENTE WHERE primer_nombre LIKE ?";
 
@@ -82,7 +82,7 @@ public class ClienteRepositoryJDBC implements IClienteRepository {
     @Override
     public Optional<Cliente> findByDocumento(String documento) {
 
-        String sql = "SELECT documento, primer_apellido, segundo_apellido, "
+        String sql = "SELECT documento_cliente, primer_apellido, segundo_apellido, "
                 + "primer_nombre, segundo_nombre, direccion, fecha_nacimiento "
                 + "FROM CLIENTE WHERE documento = ?";
 
@@ -110,9 +110,9 @@ public class ClienteRepositoryJDBC implements IClienteRepository {
     }
 
     @Override
-    public boolean updateCliente(String documento, Cliente cliente) {
+    public boolean updateCliente(String documentoCliente, Cliente cliente) {
 
-        if (documento == null || cliente == null) {
+        if (documentoCliente == null || cliente == null) {
             return false;
         }
 
@@ -134,7 +134,7 @@ public class ClienteRepositoryJDBC implements IClienteRepository {
             statement.setString(4, cliente.getSegundoNombre());
             statement.setString(5, cliente.getDireccion());
             statement.setDate(6, convertirFecha(cliente.getFechaNacimiento()));
-            statement.setString(7, documento);
+            statement.setString(7, documentoCliente);
 
             return statement.executeUpdate() == 1;
 
@@ -145,18 +145,18 @@ public class ClienteRepositoryJDBC implements IClienteRepository {
     }
 
     @Override
-    public boolean deleteCliente(String documento) {
+    public boolean deleteCliente(String documentoCliente) {
 
         String sql = "DELETE FROM CLIENTE WHERE documento = ?";
 
-        if (documento == null || documento.isBlank()) {
+        if (documentoCliente == null || documentoCliente.isBlank()) {
             return false;
         }
 
         try (Connection conexion = ConnectionBD.obtenerConexion();
              PreparedStatement statement = conexion.prepareStatement(sql)) {
 
-            statement.setString(1, documento);
+            statement.setString(1, documentoCliente);
 
             return statement.executeUpdate() == 1;
 
@@ -171,7 +171,7 @@ public class ClienteRepositoryJDBC implements IClienteRepository {
 
         Cliente cliente = new Cliente();
 
-        cliente.setDocumento(resultado.getString("documento"));
+        cliente.setDocumentoCliente(resultado.getString("documento"));
 
         Date fecha = resultado.getDate("fecha_nacimiento");
 
