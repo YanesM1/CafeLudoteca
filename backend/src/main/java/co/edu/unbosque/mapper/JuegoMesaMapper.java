@@ -9,9 +9,10 @@ public class JuegoMesaMapper {
         JuegoMesa juegoMesa=new JuegoMesa();
         juegoMesa.setNumSerie(dto.getNumSerie());
         juegoMesa.setReglamento(dto.getReglamento());
-        juegoMesa.setCantidadMinimaJugador(dto.getCantidadMinimaJugador());
-        juegoMesa.setCantidadMaximaJugador(dto.getCantidadMaximaJugador());
+        juegoMesa.setCantidadMinimaJugadores(dto.getCantidadMinimaJugadores());
+        juegoMesa.setCantidadMaximaJugadores(dto.getCantidadMaximaJugadores());
         juegoMesa.setEdadMinima(dto.getEdadMinima());
+        juegoMesa.setNombre(dto.getNombre());
         juegoMesa.setDuracionPartida(dto.getDuracionPartida());
 
         return juegoMesa;
@@ -21,8 +22,8 @@ public class JuegoMesaMapper {
         JuegoMesaResponseDTO dto=new JuegoMesaResponseDTO();
         dto.setNumSerie(juegoMesa.getNumSerie());
         dto.setReglamento(juegoMesa.getReglamento());
-        dto.setCantidadMinimaJugador(juegoMesa.getCantidadMinimaJugador());
-        dto.setCantidadMaximaJugador(juegoMesa.getCantidadMaximaJugador());
+        dto.setCantidadMinimaJugadores(juegoMesa.getCantidadMinimaJugadores());
+        dto.setCantidadMaximaJugadores(juegoMesa.getCantidadMaximaJugadores());
         dto.setEdadMinima(juegoMesa.getEdadMinima());
         dto.setNombre(juegoMesa.getNombre());
         dto.setDuracionPartida(juegoMesa.getDuracionPartida());

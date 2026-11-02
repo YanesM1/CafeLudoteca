@@ -19,16 +19,16 @@ public class JuegoMesaRepositoryJDBC implements IJuegoMesaRepository {
     @Override
     public boolean saveJuegoMesa(JuegoMesa juegoMesa) {
         String sql = """
-                INSERT INTO JUEGO_MESA (num_serie, reglamento, cantidad_minima_jugador,
-                cantidad_maxima_jugador, edad_minima, nombre, duracion_partida)
+                INSERT INTO JUEGO_MESA (num_serie, reglamento, cantidad_minima_jugadores,
+                cantidad_maxima_jugadores, edad_minima, nombre, duracion_partida)
                 VALUES(?, ?, ?, ?, ?, ?, ?)""";
 
         try (Connection conection = ConnectionBD.obtenerConexion();
                 PreparedStatement ps = conection.prepareStatement(sql)) {
             ps.setString(1, juegoMesa.getNumSerie());
             ps.setString(2, juegoMesa.getReglamento());
-            ps.setInt(3, juegoMesa.getCantidadMinimaJugador());
-            ps.setInt(4, juegoMesa.getCantidadMaximaJugador());
+            ps.setInt(3, juegoMesa.getCantidadMinimaJugadores());
+            ps.setInt(4, juegoMesa.getCantidadMaximaJugadores());
             ps.setInt(5, juegoMesa.getEdadMinima());
             ps.setString(6, juegoMesa.getNombre());
             ps.setInt(7, juegoMesa.getDuracionPartida());
@@ -62,8 +62,8 @@ public class JuegoMesaRepositoryJDBC implements IJuegoMesaRepository {
 
                     juegoMesa.setNumSerie(rs.getString("num_serie"));
                     juegoMesa.setReglamento(rs.getString("reglamento"));
-                    juegoMesa.setCantidadMinimaJugador(rs.getInt("cantidad_minima_jugador"));
-                    juegoMesa.setCantidadMaximaJugador(rs.getInt("cantidad_maxima_jugador"));
+                    juegoMesa.setCantidadMinimaJugadores(rs.getInt("cantidad_minima_jugadores"));
+                    juegoMesa.setCantidadMaximaJugadores(rs.getInt("cantidad_maxima_jugadores"));
                     juegoMesa.setEdadMinima(rs.getInt("edad_minima"));
                     juegoMesa.setNombre(rs.getString("nombre"));
                     juegoMesa.setDuracionPartida(rs.getInt("duracion_partida"));
@@ -99,8 +99,8 @@ public class JuegoMesaRepositoryJDBC implements IJuegoMesaRepository {
 
                     juegoMesa.setNumSerie(rs.getString("num_serie"));
                     juegoMesa.setReglamento(rs.getString("reglamento"));
-                    juegoMesa.setCantidadMinimaJugador(rs.getInt("cantidad_minima_jugador"));
-                    juegoMesa.setCantidadMaximaJugador(rs.getInt("cantidad_maxima_jugador"));
+                    juegoMesa.setCantidadMinimaJugadores(rs.getInt("cantidad_minima_jugadores"));
+                    juegoMesa.setCantidadMaximaJugadores(rs.getInt("cantidad_maxima_jugadores"));
                     juegoMesa.setEdadMinima(rs.getInt("edad_minima"));
                     juegoMesa.setNombre(rs.getString("nombre"));
                     juegoMesa.setDuracionPartida(rs.getInt("duracion_partida"));
@@ -121,8 +121,8 @@ public class JuegoMesaRepositoryJDBC implements IJuegoMesaRepository {
         String sql = """
                 UPDATE JUEGO_MESA
                 SET reglamento=?,
-                cantidad_minima_jugador=?,
-                cantidad_maxima_jugador=?,
+                cantidad_minima_jugadores=?,
+                cantidad_maxima_jugadores=?,
                 edad_minima=?,
                 nombre=?,
                 duracion_partida=?
@@ -133,8 +133,8 @@ public class JuegoMesaRepositoryJDBC implements IJuegoMesaRepository {
                 PreparedStatement ps = conexion.prepareStatement(sql)) {
 
             ps.setString(1, juegoMesa.getReglamento());
-            ps.setInt(2, juegoMesa.getCantidadMinimaJugador());
-            ps.setInt(3, juegoMesa.getCantidadMaximaJugador());
+            ps.setInt(2, juegoMesa.getCantidadMinimaJugadores());
+            ps.setInt(3, juegoMesa.getCantidadMaximaJugadores());
             ps.setInt(4, juegoMesa.getEdadMinima());
             ps.setString(5, juegoMesa.getNombre());
             ps.setInt(6, juegoMesa.getDuracionPartida());

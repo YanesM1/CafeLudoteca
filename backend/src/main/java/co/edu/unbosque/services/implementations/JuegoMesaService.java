@@ -28,10 +28,10 @@ public class JuegoMesaService implements IJuegoMesaService {
         if(request.getReglamento()==null|| request.getReglamento().isBlank()){
             return false;
         }
-        if(request.getCantidadMinimaJugador()<=0){
+        if(request.getCantidadMinimaJugadores()<=0){
             return false;
         }
-        if(request.getCantidadMaximaJugador()<request.getCantidadMinimaJugador()){
+        if(request.getCantidadMaximaJugadores()<request.getCantidadMinimaJugadores()){
             return false;
         }
         if(request.getEdadMinima()<=0){

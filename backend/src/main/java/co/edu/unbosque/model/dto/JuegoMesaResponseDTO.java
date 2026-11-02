@@ -11,10 +11,10 @@ import lombok.Setter;
 public class JuegoMesaResponseDTO {
     private String numSerie;
     private String reglamento;
-    private int cantidadMinimaJugador;
-    private int cantidadMaximaJugador;
-    private int edadMinima;
+    private Integer cantidadMinimaJugadores;
+    private Integer cantidadMaximaJugadores;
+    private Integer edadMinima;
     private String nombre;
-    private int duracionPartida;
+    private Integer duracionPartida;
 
 }
