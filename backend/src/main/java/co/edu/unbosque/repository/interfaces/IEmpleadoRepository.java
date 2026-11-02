@@ -11,9 +11,9 @@ public interface IEmpleadoRepository {
 
     List<Empleado> findByNombre(String nombre);
 
-    Optional<Empleado> findByDocumento(String documento);
+    Optional<Empleado> findByDocumento(String documentoEmp);
 
-    boolean updateEmpleado(String documento, Empleado empleado);
+    boolean updateEmpleado(String documentoEmp, Empleado empleado);
 
-    boolean deleteEmpleado(String documento);
+    boolean deleteEmpleado(String documentoEmp);
 }

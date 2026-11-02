@@ -12,10 +12,11 @@ import lombok.Setter;
 @AllArgsConstructor
 public class EmpleadoResponseDTO {
 
-    private String documento;
+    private String documentoEmp;
+    private String cargo;
     private String nombre;
     private String apellido;
     private String correo;
-    private String cargo;
+    
 
 }

@@ -1,5 +1,4 @@
-
-package co.edu.unbosque.controller.implementations;
+ package co.edu.unbosque.controller.implementations;
 
 import java.util.List;
 import java.util.Map;
@@ -25,7 +24,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@Path("/empleados")
+@Path("/empleado")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class EmpleadoController implements IEmpleadoController {
@@ -42,7 +41,7 @@ public class EmpleadoController implements IEmpleadoController {
         }
 
         if (validarDocumento &&
-                (request.getDocumento() == null || request.getDocumento().isBlank())) {
+                (request.getDocumentoEmp() == null || request.getDocumentoEmp().isBlank())) {
             return false;
         }
 
@@ -133,10 +132,10 @@ public class EmpleadoController implements IEmpleadoController {
  
     @Override
     @GET
-    @Path("/{documento}")
-    public Response buscarByDocumento(@PathParam("documento") String documento) {
+    @Path("/{documento_emp}")
+    public Response buscarByDocumento(@PathParam("documento_emp") String documentoEmp) {
 
-        if (documento == null || documento.isBlank()) {
+        if (documentoEmp == null || documentoEmp.isBlank()) {
             return respuestaError(
                     Response.Status.BAD_REQUEST,
                     "Debes proporcionar el documento.");
@@ -144,7 +143,7 @@ public class EmpleadoController implements IEmpleadoController {
 
         try {
             EmpleadoResponseDTO empleado =
-                    empleadoService.getEmpleadoPorDocumento(documento);
+                    empleadoService.getEmpleadoPorDocumento(documentoEmp);
 
             if (empleado == null) {
                 return respuestaError(
@@ -161,12 +160,12 @@ public class EmpleadoController implements IEmpleadoController {
 
     @Override
     @PUT
-    @Path("/{documento}")
+    @Path("/{documento_emp}")
     public Response actualizarEmpleado(
-            @PathParam("documento") String documento,
+            @PathParam("documento_emp") String documentoEmp,
             EmpleadoRequestDTO request) {
 
-        if (documento == null || documento.isBlank()
+        if (documentoEmp == null || documentoEmp.isBlank()
                 || !validarEmpleado(request, false)) {
 
             return respuestaError(
@@ -174,9 +173,9 @@ public class EmpleadoController implements IEmpleadoController {
                     "Los datos para actualizar son inválidos.");
         }
 
-        if (request.getDocumento() != null
-                && !request.getDocumento().isBlank()
-                && !documento.equals(request.getDocumento())) {
+        if (request.getDocumentoEmp() != null
+                && !request.getDocumentoEmp().isBlank()
+                && !documentoEmp.equals(request.getDocumentoEmp())) {
 
             return respuestaError(
                     Response.Status.BAD_REQUEST,
@@ -185,7 +184,7 @@ public class EmpleadoController implements IEmpleadoController {
 
         try {
             EmpleadoResponseDTO empleado =
-                    empleadoService.updateEmpleado(documento, request);
+                    empleadoService.updateEmpleado(documentoEmp, request);
 
             if (empleado == null) {
                 return respuestaError(
@@ -203,11 +202,11 @@ public class EmpleadoController implements IEmpleadoController {
    
     @Override
     @DELETE
-    @Path("/{documento}")
+    @Path("/{documento_emp}")
     public Response eliminarEmpleado(
-            @PathParam("documento") String documento) {
+            @PathParam("documento_emp") String documentoEmp) {
 
-        if (documento == null || documento.isBlank()) {
+        if (documentoEmp == null || documentoEmp.isBlank()) {
             return respuestaError(
                     Response.Status.BAD_REQUEST,
                     "Debes proporcionar el documento.");
@@ -215,7 +214,7 @@ public class EmpleadoController implements IEmpleadoController {
 
         try {
             EmpleadoResponseDTO empleado =
-                    empleadoService.deleteEmpleado(documento);
+                    empleadoService.deleteEmpleado(documentoEmp);
 
             if (empleado == null) {
                 return respuestaError(

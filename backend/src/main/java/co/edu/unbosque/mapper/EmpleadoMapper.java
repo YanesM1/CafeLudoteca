@@ -19,11 +19,12 @@ public class EmpleadoMapper {
         }
 
         Empleado empleado = new Empleado();
-        empleado.setDocumento(request.getDocumento());
+        empleado.setDocumentoEmp(request.getDocumentoEmp());
+        empleado.setCargo(request.getCargo());
         empleado.setNombre(request.getNombre());
         empleado.setApellido(request.getApellido());
         empleado.setCorreo(request.getCorreo());
-        empleado.setCargo(request.getCargo());
+
 
         return empleado;
     }
@@ -35,11 +36,12 @@ public class EmpleadoMapper {
         }
 
         return new EmpleadoResponseDTO(
-                empleado.getDocumento(),
+                empleado.getDocumentoEmp(),
+                empleado.getCargo(),
                 empleado.getNombre(),
                 empleado.getApellido(),
-                empleado.getCorreo(),
-                empleado.getCargo()
+                empleado.getCorreo()
+                
         );
     }
 
