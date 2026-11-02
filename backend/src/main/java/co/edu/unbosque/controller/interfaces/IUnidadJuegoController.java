@@ -8,4 +8,6 @@ public interface IUnidadJuegoController {
     Response actualizarUnidadJuego(String codigo, String numSerie, UnidadJuegoRequestDTO request);
     Response borrarUnidadJuego(String codigo, String numSerie);
 
+
+    Response consultarDisponibilidad();
 }

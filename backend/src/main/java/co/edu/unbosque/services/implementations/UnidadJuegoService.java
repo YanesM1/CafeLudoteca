@@ -1,5 +1,7 @@
 package co.edu.unbosque.services.implementations;
 
+import co.edu.unbosque.model.dto.DisponibilidadUnidadJuegoDTO;
+import java.util.List;
 import java.util.Optional;
 
 import co.edu.unbosque.mapper.UnidadJuegoMapper;
@@ -101,6 +103,13 @@ public class UnidadJuegoService implements IUnidadJuegoService {
         }
 
         return unidadJuegoMapper.unidadJuegoToUnidadJuegoResponseDTO(unidad.get());
+    }
+
+
+
+    @Override
+    public List<DisponibilidadUnidadJuegoDTO> consultarDisponibilidad() {
+        return unidadJuegoRepository.consultarDisponibilidad();
     }
 
 }

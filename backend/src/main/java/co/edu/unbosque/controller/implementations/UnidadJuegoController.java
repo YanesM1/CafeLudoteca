@@ -86,4 +86,15 @@ public class UnidadJuegoController implements IUnidadJuegoController{
     }
   
 
+
+
+    @Override
+    @GET
+    @Path("/disponibilidad")
+    public Response consultarDisponibilidad() {
+        return Response.ok(
+            unidadJuegoService.consultarDisponibilidad()
+        ).build();
+    }
+
 }

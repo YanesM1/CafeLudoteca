@@ -7,6 +7,7 @@ import {
 } from '../../../../shared/organisms/game-catalog/game-catalog.component';
 
 import { JuegoMesaService } from '../../../../core/services/juego-mesa.service';
+import { UnidadJuegoService } from '../../../../core/services/unidad-juego.service';
 import { JuegoMesaResponse } from '../../../../core/models/juego-mesa.model';
 
 @Component({
@@ -28,7 +29,8 @@ export class CatalogPageComponent implements OnInit {
 
     constructor(
         private readonly router: Router,
-        private readonly juegoMesaService: JuegoMesaService
+        private readonly juegoMesaService: JuegoMesaService,
+        private readonly unidadJuegoService: UnidadJuegoService
     ) {}
 
     ngOnInit(): void {
@@ -55,6 +57,31 @@ export class CatalogPageComponent implements OnInit {
                     duracionPartida: game.duracionPartida,
                     unidadesDisponibles: null
                 }));
+
+                this.unidadJuegoService.consultarDisponibilidad().subscribe({
+                    next: disponibilidad => {
+                        const conteos = new Map<string, number>();
+
+                        disponibilidad.forEach(item => {
+                            conteos.set(
+                                item.numSerie,
+                                item.unidadesDisponibles
+                            );
+                        });
+
+                        this.games = this.games.map(game => ({
+                            ...game,
+                            unidadesDisponibles:
+                                conteos.get(game.numSerie) ?? 0
+                        }));
+                    },
+                    error: error => {
+                        console.error(
+                            'Error consultando disponibilidad:',
+                            error
+                        );
+                    }
+                });
 
                 this.loading = false;
             },

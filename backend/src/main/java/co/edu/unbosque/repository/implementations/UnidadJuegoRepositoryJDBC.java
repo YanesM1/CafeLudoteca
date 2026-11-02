@@ -1,5 +1,8 @@
 package co.edu.unbosque.repository.implementations;
 
+import co.edu.unbosque.model.dto.DisponibilidadUnidadJuegoDTO;
+import java.util.List;
+import java.util.ArrayList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -116,4 +119,46 @@ public class UnidadJuegoRepositoryJDBC implements IUnidadJuegoRepository {
                 }
     
     }
+
+
+    @Override
+    public List<DisponibilidadUnidadJuegoDTO> consultarDisponibilidad() {
+
+        String sql = """
+            SELECT j.num_serie,
+                   COUNT(
+                       CASE
+                           WHEN UPPER(TRIM(u.estado)) = 'DISPONIBLE'
+                           THEN 1
+                       END
+                   ) AS unidades_disponibles
+            FROM JUEGO_MESA j
+            LEFT JOIN UNIDAD_JUEGO u
+                ON u.num_serie = j.num_serie
+            GROUP BY j.num_serie
+            ORDER BY j.num_serie
+            """;
+
+        List<DisponibilidadUnidadJuegoDTO> resultado = new ArrayList<>();
+
+        try (Connection conexion = ConnectionBD.obtenerConexion();
+             PreparedStatement ps = conexion.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                resultado.add(new DisponibilidadUnidadJuegoDTO(
+                    rs.getString("num_serie"),
+                    rs.getInt("unidades_disponibles")
+                ));
+            }
+
+        } catch (SQLException e) {
+            throw new PersistenceException(
+                "Error al consultar disponibilidad de juegos", e
+            );
+        }
+
+        return resultado;
+    }
+
 }
