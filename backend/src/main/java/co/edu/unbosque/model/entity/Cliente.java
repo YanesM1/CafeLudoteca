@@ -16,8 +16,8 @@ public class Cliente {
      private String segundoApellido;
      private String primerNombre;
      private String segundoNombre;
-     private LocalDate fechaNacimiento;
      private String direccion;
+     private LocalDate fechaNacimiento;
 
 // La igualdad se basa en la llave primaria (documento)
     @Override

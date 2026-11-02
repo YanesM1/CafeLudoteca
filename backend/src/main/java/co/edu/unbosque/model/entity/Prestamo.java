@@ -18,8 +18,9 @@ public class Prestamo {
     private String estadoComponentes;
     private String tipoPrestamo;
     private LocalDate fechaDevolucion;
-    private String documentoEmpleado;
-    private String documentoCliente;
+    private String clienteDocumento;
+    private String empleadoDocumento;
+   
 
      @Override
     public boolean equals(Object o) {
@@ -31,13 +32,13 @@ public class Prestamo {
         Prestamo prestamo = (Prestamo) o;
 
         return idPrestamo == prestamo.idPrestamo
-                && Objects.equals(documentoEmpleado, prestamo.documentoEmpleado)
-                && Objects.equals(documentoCliente, prestamo.documentoCliente);
+                && Objects.equals(empleadoDocumento, prestamo.empleadoDocumento)
+                && Objects.equals(clienteDocumento, prestamo.clienteDocumento);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(idPrestamo, documentoEmpleado, documentoCliente);
+        return Objects.hash(idPrestamo, empleadoDocumento, clienteDocumento);
     }
 
 

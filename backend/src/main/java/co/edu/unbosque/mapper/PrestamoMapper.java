@@ -6,13 +6,13 @@ import co.edu.unbosque.model.entity.Prestamo;
 public class PrestamoMapper {
     public Prestamo prestamoRequestDTOToPrestamo(PrestamoRequestDTO dto){
         Prestamo prestamo=new Prestamo();
-        prestamo.setIdPrestamo(dto.getIdPrestamo());
         prestamo.setFechaSalida(dto.getFechaSalida());
         prestamo.setEstadoComponentes(dto.getEstadoComponentes());
         prestamo.setTipoPrestamo(dto.getTipoPrestamo());
         prestamo.setFechaDevolucion(dto.getFechaDevolucion());
-        prestamo.setDocumentoEmpleado(dto.getDocumentoEmpleado());
-        prestamo.setDocumentoCliente(dto.getDocumentoCliente());
+        prestamo.setClienteDocumento(dto.getClienteDocumento());
+        prestamo.setEmpleadoDocumento(dto.getEmpleadoDocumento());
+        
         return prestamo;
     }
 
@@ -23,8 +23,9 @@ public class PrestamoMapper {
         dto.setEstadoComponentes(prestamo.getEstadoComponentes());
         dto.setTipoPrestamo(prestamo.getTipoPrestamo());
         dto.setFechaDevolucion(prestamo.getFechaDevolucion());
-        dto.setDocumentoEmpleado(prestamo.getDocumentoEmpleado());
-        dto.setDocumentoCliente(prestamo.getDocumentoCliente());
+        dto.setClienteDocumento(prestamo.getClienteDocumento());
+        dto.setEmpleadoDocumento(prestamo.getEmpleadoDocumento());
+       
         return dto;
 
     }

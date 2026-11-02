@@ -11,12 +11,13 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PrestamoRequestDTO {
-    private Integer idPrestamo;
+   
     private LocalDate fechaSalida;
     private String estadoComponentes;
     private String tipoPrestamo;
     private LocalDate fechaDevolucion;
-    private String documentoEmpleado;
-    private String documentoCliente;
+    private String clienteDocumento;
+    private String empleadoDocumento;
+    
 
 }

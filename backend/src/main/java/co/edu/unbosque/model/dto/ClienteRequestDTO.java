@@ -11,12 +11,12 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ClienteRequestDTO {
-    private String documento;
-    private LocalDate fechaNacimiento;
-    private String primerNombre;
-    private String segundoNombre;
-    private String primerApellido;
-    private String segundoApellido;
-    private String direccion;
+     private String documento; // PK
+     private String primerApellido;
+     private String segundoApellido;
+     private String primerNombre;
+     private String segundoNombre;
+     private String direccion;
+     private LocalDate fechaNacimiento;
 
 }

@@ -23,11 +23,7 @@ public class PrestamoServicio implements IPrestamoServicio {
         if (request == null) {
             return false;
         }
-
-        if (request.getIdPrestamo() <= 0) {
-            return false;
-        }
-
+        
         if (request.getFechaSalida() == null) {
             return false;
         }
@@ -50,13 +46,13 @@ public class PrestamoServicio implements IPrestamoServicio {
             return false;
         }
 
-        if (request.getDocumentoEmpleado() == null
-                || request.getDocumentoEmpleado().isBlank()) {
+        if (request.getEmpleadoDocumento() == null
+                || request.getEmpleadoDocumento().isBlank()) {
             return false;
         }
 
-        if (request.getDocumentoCliente() == null
-                || request.getDocumentoCliente().isBlank()) {
+        if (request.getClienteDocumento() == null
+                || request.getClienteDocumento().isBlank()) {
             return false;
         }
 
@@ -129,10 +125,8 @@ public class PrestamoServicio implements IPrestamoServicio {
             return null;
         }
 
-        if (request.getIdPrestamo() != idPrestamo) {
-            return null;
-        }
 
+        
         Prestamo prestamo =
                 prestamoMapper.prestamoRequestDTOToPrestamo(request);
 

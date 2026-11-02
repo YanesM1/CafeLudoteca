@@ -43,14 +43,14 @@ public class ClienteController implements IClienteController {
     @Override
     @GET
     @Path("/buscar")
-    public Response buscarPorNombre(@QueryParam("nombre") String nombre) {
-        List<ClienteResponseDTO> clientes = clienteService.getCliente(nombre);
+    public Response buscarPorNombre(@QueryParam("primer_nombre") String primerNombre) {
+        List<ClienteResponseDTO> clientes = clienteService.getCliente(primerNombre);
         return Response.ok(clientes).build();
     }
 
     @Override
     @GET
-    @Path("/{documento}")
+    @Path("buscar/{documento}")
     public Response buscarPorDocumento(@PathParam("documento") String documento) {
         ClienteResponseDTO cliente = clienteService.getClientePorDocumento(documento);
         if (cliente == null) {
@@ -77,7 +77,7 @@ public class ClienteController implements IClienteController {
 
     @Override
     @DELETE
-    @Path("/{documento}")
+    @Path("delete/{documento}")
     public Response borrarCliente(@PathParam("documento") String documento) {
         ClienteResponseDTO cliente = clienteService.deleteCliente(documento);
         if (cliente == null) {
