@@ -14,11 +14,12 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Empleado {
 
-    private String documento; // PK
+    private String documentoEmp; // PK
+    private String cargo;
     private String nombre;
     private String apellido;
     private String correo;
-    private String cargo;
+    
 
     @Override
     public boolean equals(Object o) {
@@ -26,22 +27,13 @@ public class Empleado {
         if (o == null || getClass() != o.getClass()) return false;
 
         Empleado empleado = (Empleado) o;
-        return Objects.equals(documento, empleado.documento);
+        return Objects.equals(documentoEmp, empleado.documentoEmp);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(documento);
+        return Objects.hash(documentoEmp);
     }
 
-    @Override
-    public String toString() {
-        return "Empleado{" +
-                "documento='" + documento + '\'' +
-                ", nombre='" + nombre + '\'' +
-                ", apellido='" + apellido + '\'' +
-                ", correo='" + correo + '\'' +
-                ", cargo='" + cargo + '\'' +
-                '}';
-    }
+   
 }

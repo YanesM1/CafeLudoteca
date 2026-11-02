@@ -28,8 +28,8 @@ public class EmpleadoService implements IEmpleadoService {
         }
 
         if (validarDocumento &&
-                (request.getDocumento() == null ||
-                 request.getDocumento().isBlank())) {
+                (request.getDocumentoEmp() == null ||
+                 request.getDocumentoEmp().isBlank())) {
             return false;
         }
 
@@ -119,9 +119,9 @@ public class EmpleadoService implements IEmpleadoService {
 
         // El documento de la ruta identifica el registro.
         // Si el cuerpo incluye otro documento, se rechaza.
-        if (request.getDocumento() != null &&
-                !request.getDocumento().isBlank() &&
-                !documento.equals(request.getDocumento())) {
+        if (request.getDocumentoEmp() != null &&
+                !request.getDocumentoEmp().isBlank() &&
+                !documento.equals(request.getDocumentoEmp())) {
             return null;
         }
 
