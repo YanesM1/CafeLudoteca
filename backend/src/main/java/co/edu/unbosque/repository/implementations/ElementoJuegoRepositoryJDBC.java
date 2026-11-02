@@ -1,10 +1,10 @@
-
 package co.edu.unbosque.repository.implementations;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Optional;
 
 import co.edu.unbosque.config.ConnectionBD;
@@ -18,18 +18,28 @@ public class ElementoJuegoRepositoryJDBC implements IElementoJuegoRepository {
     public boolean saveElementoJuego(ElementoJuego elementoJuego) {
 
         String sql = """
-                INSERT INTO ELEMENTO_JUEGO (id_elemento_juego, elemento_juego, num_serie)
-                VALUES (?, ?, ?)
+                INSERT INTO ELEMENTO_JUEGO (elemento_juego, num_serie)
+                VALUES (?, ?)
                 """;
 
         try (Connection conexion = ConnectionBD.obtenerConexion();
-                PreparedStatement ps = conexion.prepareStatement(sql)) {
+                PreparedStatement ps = conexion.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            ps.setInt(1, elementoJuego.getIdElementoJuego());
-            ps.setString(2, elementoJuego.getElementoJuego());
-            ps.setString(3, elementoJuego.getNumSerie());
+            ps.setString(1, elementoJuego.getElementoJuego());
+            ps.setString(2, elementoJuego.getNumSerie());
 
-            return ps.executeUpdate() > 0;
+            int filas = ps.executeUpdate();
+
+            if (filas > 0) {
+                try (ResultSet rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        elementoJuego.setIdElementoJuego(rs.getInt(1));
+                    }
+                }
+                return true;
+            }
+
+            return false;
 
         } catch (SQLException e) {
             throw new PersistenceException("Error al guardar en la base de datos", e);

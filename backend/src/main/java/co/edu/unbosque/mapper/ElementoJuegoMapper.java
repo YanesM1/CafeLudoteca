@@ -7,7 +7,6 @@ import co.edu.unbosque.model.entity.ElementoJuego;
 public class ElementoJuegoMapper {
     public ElementoJuego elementoJuegoRequestDTOToElementoJuego(ElementoJuegoRequestDTO dto){
         ElementoJuego elementoJuego=new ElementoJuego();
-        elementoJuego.setIdElementoJuego(dto.getIdElementoJuego());
         elementoJuego.setElementoJuego(dto.getElementoJuego());
         elementoJuego.setNumSerie(dto.getNumSerie());
         return elementoJuego;

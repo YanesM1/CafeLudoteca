@@ -22,9 +22,7 @@ public class ElementoJuegoService implements IElementoJuegoService {
             return false;
         }
 
-        if (request.getIdElementoJuego() <= 0) {
-            return false;
-        }
+     
 
         if (request.getElementoJuego() == null || request.getElementoJuego().isBlank()) {
             return false;
