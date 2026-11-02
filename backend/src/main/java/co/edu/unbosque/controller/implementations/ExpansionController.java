@@ -47,7 +47,6 @@ public Response buscarPorNombre(@PathParam("nombre") String nombre) {
     List<ExpansionResponseDTO> expansiones = expansionService.getExpansion(nombre);
     return Response.ok(expansiones).build();
 }
-
     
 
 @Override
