@@ -1,4 +1,9 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    Output
+} from '@angular/core';
 
 import { BadgeComponent } from '../../atoms/badge/badge.component';
 import { ButtonComponent } from '../../atoms/button/button.component';
@@ -17,25 +22,16 @@ import { IconComponent } from '../../atoms/icon/icon.component';
 })
 export class GameCardComponent {
 
-    @Input() numSerie: string = '';
-
-    @Input() nombre: string = '';
-
-    @Input() categoria: string = '';
-
-    @Input() imageUrl: string = '';
-
-    @Input() cantidadMinimaJugador: number = 1;
-
-    @Input() cantidadMaximaJugador: number = 4;
-
-    @Input() edadMinima: number = 0;
-
-    @Input() duracionPartida: number = 30;
-
-    @Input() unidadesDisponibles: number = 0;
-
-    @Input() selected: boolean = false;
+    @Input() numSerie = '';
+    @Input() nombre = '';
+    @Input() categoria: string | null = null;
+    @Input() imageUrl = '';
+    @Input() cantidadMinimaJugador = 1;
+    @Input() cantidadMaximaJugador = 4;
+    @Input() edadMinima = 0;
+    @Input() duracionPartida = 30;
+    @Input() unidadesDisponibles: number | null = null;
+    @Input() selected = false;
 
     @Output() details = new EventEmitter<string>();
 
@@ -49,7 +45,12 @@ export class GameCardComponent {
     }
 
     cambiarSeleccion(): void {
-        if (this.unidadesDisponibles > 0 || this.selected) {
+
+        if (
+            (this.unidadesDisponibles !== null &&
+                this.unidadesDisponibles > 0) ||
+            this.selected
+        ) {
             this.selectionChange.emit({
                 numSerie: this.numSerie,
                 selected: !this.selected

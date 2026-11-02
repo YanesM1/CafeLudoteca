@@ -20,9 +20,15 @@
 
         <div class="game-card__status">
             <app-badge
-                [variant]="unidadesDisponibles > 0 ? 'success' : 'danger'"
+                [variant]="unidadesDisponibles === null
+                    ? 'info'
+                    : (unidadesDisponibles > 0 ? 'success' : 'danger')"
             >
-                {{ unidadesDisponibles > 0 ? 'Disponible' : 'No disponible' }}
+                {{ unidadesDisponibles === null
+                    ? 'Disponibilidad pendiente'
+                    : (unidadesDisponibles > 0
+                        ? 'Disponible'
+                        : 'No disponible') }}
             </app-badge>
         </div>
 
@@ -72,7 +78,11 @@
 
         <div class="game-card__availability">
             <span>Unidades disponibles</span>
-            <strong>{{ unidadesDisponibles }}</strong>
+            <strong>
+                {{ unidadesDisponibles === null
+                    ? 'Por consultar'
+                    : unidadesDisponibles }}
+            </strong>
         </div>
 
         <div class="game-card__actions">
@@ -86,7 +96,8 @@
 
             <app-button
                 [variant]="selected ? 'danger' : 'gold'"
-                [disabled]="unidadesDisponibles <= 0 && !selected"
+                [disabled]="unidadesDisponibles === null ||
+                    (unidadesDisponibles <= 0 && !selected)"
                 (click)="cambiarSeleccion()"
             >
                 {{ selected ? 'Quitar' : 'Preseleccionar' }}

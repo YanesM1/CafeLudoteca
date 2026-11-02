@@ -62,13 +62,15 @@ export class GameCatalogComponent {
         const categories = [
             ...new Set(
                 this.games
-                    .map(game => game.categoria)
+                    .map(game => game.categoria ?? '')
                     .filter(category => category.trim() !== '')
             )
         ].sort();
 
-        return [
-            {
+        const definitions: FilterDefinition[] = [];
+
+        if (categories.length > 0) {
+            definitions.push({
                 name: 'categoria',
                 label: 'Categoría',
                 placeholder: 'Todas las categorías',
@@ -76,30 +78,24 @@ export class GameCatalogComponent {
                     value: category,
                     label: category
                 }))
-            },
-            {
-                name: 'jugadores',
-                label: 'Jugadores',
-                placeholder: 'Cualquier cantidad',
-                options: [
-                    { value: '1', label: '1 jugador' },
-                    { value: '2', label: '2 jugadores' },
-                    { value: '3', label: '3 jugadores' },
-                    { value: '4', label: '4 jugadores' },
-                    { value: '5', label: '5 jugadores' },
-                    { value: '6', label: '6 jugadores' }
-                ]
-            },
-            {
-                name: 'disponibilidad',
-                label: 'Disponibilidad',
-                placeholder: 'Todos',
-                options: [
-                    { value: 'disponible', label: 'Disponible' },
-                    { value: 'agotado', label: 'No disponible' }
-                ]
-            }
-        ];
+            });
+        }
+
+        definitions.push({
+            name: 'jugadores',
+            label: 'Jugadores',
+            placeholder: 'Cualquier cantidad',
+            options: [
+                { value: '1', label: '1 jugador' },
+                { value: '2', label: '2 jugadores' },
+                { value: '3', label: '3 jugadores' },
+                { value: '4', label: '4 jugadores' },
+                { value: '5', label: '5 jugadores' },
+                { value: '6', label: '6 jugadores' }
+            ]
+        });
+
+        return definitions;
     }
 
     get filteredGames(): GameCatalogItem[] {
@@ -108,14 +104,16 @@ export class GameCatalogComponent {
 
         return this.games.filter(game => {
 
+            const category = game.categoria ?? '';
+
             const matchesSearch =
                 game.nombre.toLowerCase().includes(term) ||
-                game.categoria.toLowerCase().includes(term) ||
+                category.toLowerCase().includes(term) ||
                 game.numSerie.toLowerCase().includes(term);
 
             const matchesCategory =
                 !this.filterValues['categoria'] ||
-                game.categoria === this.filterValues['categoria'];
+                category === this.filterValues['categoria'];
 
             const players = Number(this.filterValues['jugadores']);
 
@@ -126,18 +124,7 @@ export class GameCatalogComponent {
                     game.cantidadMaximaJugador >= players
                 );
 
-            const matchesAvailability =
-                !this.filterValues['disponibilidad'] ||
-                (
-                    this.filterValues['disponibilidad'] === 'disponible'
-                        ? game.unidadesDisponibles > 0
-                        : game.unidadesDisponibles === 0
-                );
-
-            return matchesSearch &&
-                matchesCategory &&
-                matchesPlayers &&
-                matchesAvailability;
+            return matchesSearch && matchesCategory && matchesPlayers;
         });
     }
 

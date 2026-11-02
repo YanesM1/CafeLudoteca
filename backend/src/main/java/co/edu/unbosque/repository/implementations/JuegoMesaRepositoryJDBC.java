@@ -47,13 +47,16 @@ public class JuegoMesaRepositoryJDBC implements IJuegoMesaRepository {
         String sql = """
                 SELECT *
                 FROM JUEGO_MESA
-                WHERE nombre=?
-                """;
+                """ + (nombre == null || nombre.isBlank()
+                        ? ""
+                        : " WHERE LOWER(nombre) LIKE LOWER(?)");
 
         try (Connection conexion = ConnectionBD.obtenerConexion();
                 PreparedStatement ps = conexion.prepareStatement(sql)) {
 
-            ps.setString(1, nombre);
+            if (nombre != null && !nombre.isBlank()) {
+                ps.setString(1, "%" + nombre.trim() + "%");
+            }
 
             try (ResultSet rs = ps.executeQuery()) {
 

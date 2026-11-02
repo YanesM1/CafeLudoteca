@@ -1,4 +1,9 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    Output
+} from '@angular/core';
 
 import { ButtonComponent } from '../../atoms/button/button.component';
 import { BadgeComponent } from '../../atoms/badge/badge.component';
@@ -7,13 +12,13 @@ import { IconComponent } from '../../atoms/icon/icon.component';
 export interface GameDetailsData {
     numSerie: string;
     nombre: string;
-    categoria: string;
+    categoria: string | null;
     imageUrl?: string;
     cantidadMinimaJugador: number;
     cantidadMaximaJugador: number;
     edadMinima: number;
     duracionPartida: number;
-    unidadesDisponibles: number;
+    unidadesDisponibles: number | null;
 }
 
 @Component({
@@ -30,6 +35,7 @@ export interface GameDetailsData {
 export class GameDetailsModalComponent {
 
     @Input() visible = false;
+
     @Input() game: GameDetailsData | null = null;
 
     @Output() close = new EventEmitter<void>();

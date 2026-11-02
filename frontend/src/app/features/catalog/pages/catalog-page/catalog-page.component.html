@@ -1,7 +1,8 @@
 <app-game-catalog
     [games]="games"
     [loading]="loading"
-    (gameDetails)="onGameDetails($event)"
+    [errorMessage]="errorMessage"
     (preselectionChange)="onPreselectionChange($event)"
     (continueReservation)="onContinueReservation($event)"
+    (retry)="onRetry()"
 />

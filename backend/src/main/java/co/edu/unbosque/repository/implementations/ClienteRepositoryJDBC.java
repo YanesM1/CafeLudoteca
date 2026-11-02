@@ -49,37 +49,34 @@ public class ClienteRepositoryJDBC implements IClienteRepository {
 
     @Override
     public List<Cliente> findByNombre(String nombre) {
-
         List<Cliente> clientes = new ArrayList<>();
+        boolean filtrar = nombre != null && !nombre.isBlank();
 
         String sql = "SELECT documento, primer_apellido, segundo_apellido, "
                 + "primer_nombre, segundo_nombre, direccion, fecha_nacimiento "
-                + "FROM CLIENTE WHERE primer_nombre LIKE ?";
-
-        if (nombre == null || nombre.isBlank()) {
-            return clientes;
-        }
+                + "FROM CLIENTE"
+                + (filtrar ? " WHERE primer_nombre LIKE ?" : "");
 
         try (Connection conexion = ConnectionBD.obtenerConexion();
              PreparedStatement statement = conexion.prepareStatement(sql)) {
 
-            statement.setString(1, "%" + nombre.trim() + "%");
+            if (filtrar) {
+                statement.setString(1, "%" + nombre.trim() + "%");
+            }
 
             try (ResultSet resultado = statement.executeQuery()) {
-
                 while (resultado.next()) {
                     clientes.add(mapearCliente(resultado));
                 }
             }
-
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error al consultar clientes", e);
         }
 
         return clientes;
     }
 
-    @Override
+        @Override
     public Optional<Cliente> findByDocumento(String documento) {
 
         String sql = "SELECT documento, primer_apellido, segundo_apellido, "

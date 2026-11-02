@@ -33,18 +33,10 @@
                 <div class="game-details__cover">
 
                     @if (game.imageUrl) {
-
-                        <img
-                            [src]="game.imageUrl"
-                            [alt]="game.nombre"
-                        />
-
+                        <img [src]="game.imageUrl" [alt]="game.nombre"/>
                     } @else {
-
                         <app-icon name="dice" [size]="65"/>
-
                         <strong>{{ game.nombre }}</strong>
-
                     }
 
                 </div>
@@ -57,9 +49,15 @@
 
                     <h3>{{ game.nombre }}</h3>
 
-                    <app-badge variant="info">
-                        {{ game.categoria }}
-                    </app-badge>
+                    @if (game.categoria) {
+                        <app-badge variant="info">
+                            {{ game.categoria }}
+                        </app-badge>
+                    } @else {
+                        <app-badge variant="warning">
+                            Categoría pendiente de consulta
+                        </app-badge>
+                    }
 
                     <div class="game-details__specifications">
 
@@ -88,21 +86,29 @@
                         <div>
                             <app-icon name="dice" [size]="19"/>
                             <span>
-                                {{ game.unidadesDisponibles }}
-                                unidades disponibles
+                                @if (game.unidadesDisponibles === null) {
+                                    Disponibilidad pendiente de consulta
+                                } @else {
+                                    {{ game.unidadesDisponibles }}
+                                    unidades disponibles
+                                }
                             </span>
                         </div>
 
                     </div>
 
                     <app-badge
-                        [variant]="game.unidadesDisponibles > 0
-                            ? 'success'
-                            : 'danger'"
+                        [variant]="game.unidadesDisponibles === null
+                            ? 'info'
+                            : (game.unidadesDisponibles > 0
+                                ? 'success'
+                                : 'danger')"
                     >
-                        {{ game.unidadesDisponibles > 0
-                            ? 'Disponible para reservar'
-                            : 'Actualmente agotado' }}
+                        {{ game.unidadesDisponibles === null
+                            ? 'Disponibilidad pendiente'
+                            : (game.unidadesDisponibles > 0
+                                ? 'Disponible para reservar'
+                                : 'Actualmente agotado') }}
                     </app-badge>
 
                 </div>
@@ -111,10 +117,7 @@
 
             <footer class="game-details__footer">
 
-                <app-button
-                    variant="gold"
-                    (click)="onClose()"
-                >
+                <app-button variant="gold" (click)="onClose()">
                     Cerrar
                 </app-button>
 

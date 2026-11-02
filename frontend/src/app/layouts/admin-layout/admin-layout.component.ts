@@ -23,6 +23,13 @@ export class AdminLayoutComponent {
 
     navigationLinks: NavbarLink[] = [
         {
+            label: 'Clientes',
+            route: '/admin/clientes',
+            icon: 'users',
+            exact: true
+        },
+
+        {
             label: 'Socios',
             route: '/admin/socios',
             icon: 'users',

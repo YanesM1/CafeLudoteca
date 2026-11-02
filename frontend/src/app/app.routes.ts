@@ -12,6 +12,7 @@ import { ClientSectionPageComponent } from './features/client-sections/pages/cli
 
 import { LoansPageComponent } from './features/loans/pages/loans-page/loans-page.component';
 import { MembershipsPageComponent } from './features/memberships/pages/memberships-page/memberships-page.component';
+import { ClientsPageComponent } from './features/clients/pages/clients-page/clients-page.component';
 
 export const routes: Routes = [
 
@@ -79,6 +80,7 @@ export const routes: Routes = [
         component: AdminLayoutComponent,
         children: [
             { path: '', redirectTo: 'membresias', pathMatch: 'full' },
+            { path: 'clientes', component: ClientsPageComponent },
             { path: 'socios', component: MembershipsPageComponent },
             { path: 'membresias', component: MembershipsPageComponent }
         ]
