@@ -51,7 +51,7 @@ public Response buscarPorNombre(@PathParam("nombre") String nombre) {
 
 @Override
 @GET 
-@Path("/buscar_expansion/{id_expansion}")
+@Path("/{id_expansion}")
 public Response buscarPorIdExpansion(@PathParam("id_expansion") Integer idExpansion) {
     ExpansionResponseDTO expansionJ=expansionService.getExpansionPorIdExpansion(idExpansion);
      if(expansionJ==null){
@@ -64,7 +64,7 @@ public Response buscarPorIdExpansion(@PathParam("id_expansion") Integer idExpans
 
 @Override
 @PUT 
-@Path("/actualizar/{id_expansion}")
+@Path("/{id_expansion}")
 public Response actualizarExpansion(@PathParam("id_expansion") Integer idExpansion, 
 ExpansionRequestDTO request) {
     ExpansionResponseDTO expansionJ=expansionService.updateExpansion(idExpansion, request);
@@ -79,7 +79,7 @@ ExpansionRequestDTO request) {
 
 @Override
  @DELETE 
-@Path("/borrar/{id_expansion}")
+@Path("/{id_expansion}")
 public Response borrarJuegoMesa(@PathParam("id_expansion") Integer idExpansion) {
      ExpansionResponseDTO expansionJ=expansionService.deleteExpansion(idExpansion);
     if(expansionJ==null){
