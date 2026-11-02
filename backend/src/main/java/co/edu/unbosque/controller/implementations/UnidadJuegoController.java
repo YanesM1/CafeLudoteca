@@ -39,7 +39,7 @@ public class UnidadJuegoController implements IUnidadJuegoController{
 
     @Override
     @GET 
-    @Path("/buscar_codigo_num_serie/{codigo}/{num_serie}")
+    @Path("/{codigo}/{num_serie}")
     public Response buscarPorCodigo(
         @PathParam("codigo") String codigo, 
         @PathParam ("num_serie") String numSerie) {

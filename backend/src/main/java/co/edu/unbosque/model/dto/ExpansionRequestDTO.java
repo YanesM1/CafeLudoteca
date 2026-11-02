@@ -9,7 +9,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ExpansionRequestDTO {
-    private Integer idExpansion;
     private String nombre;
     private String descripcion;
     private String contenidoAdicional;

@@ -8,7 +8,6 @@ public class ExpansionMapper{
 
     public Expansion expansionRequestDTOToExpansion(ExpansionRequestDTO dto){
         Expansion expansion=new Expansion();
-        expansion.setIdExpansion(dto.getIdExpansion());
         expansion.setNombre(dto.getNombre());
         expansion.setDescripcion(dto.getDescripcion());
         expansion.setContenidoAdicional(dto.getContenidoAdicional());

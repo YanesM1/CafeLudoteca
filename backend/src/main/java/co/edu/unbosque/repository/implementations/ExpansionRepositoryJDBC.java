@@ -14,27 +14,27 @@ import co.edu.unbosque.model.entity.Expansion;
 import co.edu.unbosque.repository.interfaces.IExpansionRepository;
 
 public class ExpansionRepositoryJDBC implements IExpansionRepository {
-    @Override
-    public boolean saveExpansion(Expansion expansion) {
-        String sql = """
-                INSERT INTO EXPANSION (id_expansion, nombre, descripcion, contenido_adicional, num_serie)
-                VALUES(?,?,?,?,?)""";
+   @Override
+public boolean saveExpansion(Expansion expansion) {
+    String sql = """
+            INSERT INTO EXPANSION (nombre, descripcion, contenido_adicional, num_serie)
+            VALUES(?,?,?,?)""";
 
-        try (Connection conection = ConnectionBD.obtenerConexion();
-                PreparedStatement ps = conection.prepareStatement(sql)) {
+    try (Connection conection = ConnectionBD.obtenerConexion();
+            PreparedStatement ps = conection.prepareStatement(sql)) {
 
-            ps.setInt(1, expansion.getIdExpansion());
-            ps.setString(2, expansion.getNombre());
-            ps.setString(3, expansion.getDescripcion());
-            ps.setString(4, expansion.getContenidoAdicional());
-            ps.setString(5, expansion.getNumSerie());
+        ps.setString(1, expansion.getNombre());
+        ps.setString(2, expansion.getDescripcion());
+        ps.setString(3, expansion.getContenidoAdicional());
+        ps.setString(4, expansion.getNumSerie());
 
-            return ps.executeUpdate() > 0;
+        return ps.executeUpdate() > 0;
 
-        } catch (SQLException e) {
-            throw new PersistenceException("Error al guardar en la base de datos", e);
-        }
+    } catch (SQLException e) {
+        throw new PersistenceException("Error al guardar en la base de datos", e);
     }
+}
+
 
     @Override
     public List<Expansion> findByNombre(String nombre) {
@@ -122,11 +122,11 @@ public class ExpansionRepositoryJDBC implements IExpansionRepository {
         try (Connection conexion = ConnectionBD.obtenerConexion();
                 PreparedStatement ps = conexion.prepareStatement(sql)) {
 
-            ps.setInt(1, expansion.getIdExpansion());
-            ps.setString(2, expansion.getNombre());
-            ps.setString(3, expansion.getDescripcion());
-            ps.setString(4, expansion.getContenidoAdicional());
-            ps.setString(5, expansion.getNumSerie());
+            ps.setString(1, expansion.getNombre());
+            ps.setString(2, expansion.getDescripcion());
+            ps.setString(3, expansion.getContenidoAdicional());
+            ps.setString(4, expansion.getNumSerie());
+            ps.setInt(5, idExpansion);
 
             return ps.executeUpdate() > 0;
 
@@ -152,6 +152,6 @@ public class ExpansionRepositoryJDBC implements IExpansionRepository {
         } catch (SQLException e) {
             throw new PersistenceException("Error no se encontro en la base de datos", e);
         }
-    
+
     }
 }

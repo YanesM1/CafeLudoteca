@@ -77,7 +77,7 @@ public class JuegoMesaController implements IJuegoMesaController {
 
   @Override
   @GET 
-  @Path("/buscar_numSerie/{num_serie}")
+  @Path("/buscar/{num_serie}")
   public Response buscarPorNumSerie(@PathParam("num_serie") String numSerie) {
      JuegoMesaResponseDTO juego=juegoMesaService.getJuegosPorNumSerie(numSerie);
      if(juego==null){

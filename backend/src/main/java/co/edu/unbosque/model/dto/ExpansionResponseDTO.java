@@ -14,5 +14,4 @@ public class ExpansionResponseDTO {
     private String descripcion;
     private String contenidoAdicional;
     private String numSerie;
-
 }
