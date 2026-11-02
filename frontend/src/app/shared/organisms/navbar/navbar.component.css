@@ -259,3 +259,26 @@
         flex-wrap: wrap;
     }
 }
+
+
+.navbar__role-switch {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 9px 13px;
+    color: var(--cl-cyan);
+    background: transparent;
+    border: 1px solid var(--cl-border-cyan);
+    border-radius: var(--cl-radius-md);
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: all .2s ease;
+}
+
+.navbar__role-switch:hover {
+    color: white;
+    background: rgba(37, 213, 229, .10);
+}

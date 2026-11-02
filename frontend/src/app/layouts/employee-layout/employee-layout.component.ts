@@ -23,14 +23,8 @@ export class EmployeeLayoutComponent {
 
     navigationLinks: NavbarLink[] = [
         {
-            label: 'Préstamos',
+            label: 'Préstamos y auditoría',
             route: '/empleado/prestamos',
-            icon: 'dice',
-            exact: true
-        },
-        {
-            label: 'Auditoría',
-            route: '/empleado/auditoria',
             icon: 'clipboard-check',
             exact: true
         }

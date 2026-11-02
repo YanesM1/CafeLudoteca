@@ -28,22 +28,14 @@ export class AdminLayoutComponent {
             icon: 'users',
             exact: true
         },
-
         {
             label: 'Clientes',
             route: '/admin/clientes',
             icon: 'users',
             exact: true
         },
-
         {
-            label: 'Socios',
-            route: '/admin/socios',
-            icon: 'users',
-            exact: true
-        },
-        {
-            label: 'Membresías',
+            label: 'Socios y membresías',
             route: '/admin/membresias',
             icon: 'credit-card',
             exact: true

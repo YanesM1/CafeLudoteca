@@ -15,7 +15,10 @@ import { MembershipsPageComponent } from './features/memberships/pages/membershi
 import { ClientsPageComponent } from './features/clients/pages/clients-page/clients-page.component';
 import { EmployeesPageComponent } from './features/employees/pages/employees-page/employees-page.component';
 
+import { RoleSelectionPageComponent } from './features/role-selection/pages/role-selection-page/role-selection-page.component';
+
 export const routes: Routes = [
+    { path: '', component: RoleSelectionPageComponent, pathMatch: 'full' },
 
     {
         path: '',

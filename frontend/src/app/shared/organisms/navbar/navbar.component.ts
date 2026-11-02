@@ -37,6 +37,7 @@ export class NavbarComponent {
     @Input() cartCount = 0;
 
     @Input() userLabel = 'Usuario';
+    @Input() showRoleSwitch = false;
 
     @Output() actionSelected = new EventEmitter<NavbarAction>();
 

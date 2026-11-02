@@ -51,6 +51,13 @@
         </nav>
 
         <div class="navbar__actions">
+            @if (showRoleSwitch) {
+                <a class="navbar__role-switch"
+                   routerLink="/"
+                   (click)="closeMenu()">
+                    Cambiar de rol
+                </a>
+            }
 
             @if (showCartButton) {
 
