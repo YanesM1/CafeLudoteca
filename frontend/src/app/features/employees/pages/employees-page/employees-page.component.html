@@ -1,0 +1,95 @@
+<main>
+  <header>
+    <div>
+      <small>ADMINISTRACIÓN</small>
+      <h1>Gestión de empleados</h1>
+      <p>Consulta y administra los empleados.</p>
+    </div>
+    <button class="gold" (click)="nuevo()">+ Nuevo empleado</button>
+  </header>
+
+  @if (mensaje) {
+    <p class="message" [class.error]="error">{{ mensaje }}</p>
+  }
+
+  <section class="search">
+    <form (ngSubmit)="buscar()">
+      <input name="nombre" [(ngModel)]="nombre"
+        placeholder="Buscar por nombre">
+      <button>Buscar</button>
+    </form>
+
+    <form (ngSubmit)="buscarDocumento()">
+      <input name="documento" [(ngModel)]="documento"
+        placeholder="Buscar por documento">
+      <button>Consultar</button>
+    </form>
+
+    <button (click)="limpiar()">Limpiar</button>
+  </section>
+
+  <section>
+    @if (empleados.length === 0) {
+      <p>Busca un empleado para visualizar sus registros.</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>Documento</th>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Correo</th>
+            <th>Cargo</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (e of empleados; track e.documentoEmp) {
+            <tr>
+              <td>{{e.documentoEmp}}</td>
+              <td>{{e.nombre}}</td>
+              <td>{{e.apellido}}</td>
+              <td>{{e.correo}}</td>
+              <td>{{e.cargo}}</td>
+              <td>
+                <button (click)="editar(e)">Editar</button>
+                <button (click)="eliminar(e)">Eliminar</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </section>
+
+  @if (modal) {
+    <div class="overlay">
+      <div class="modal">
+        <h2>{{documentoOriginal ? 'Editar empleado' : 'Nuevo empleado'}}</h2>
+
+        <form (ngSubmit)="guardar()">
+          <label>Documento</label>
+          <input name="documentoEmp" [(ngModel)]="form.documentoEmp"
+            [readonly]="!!documentoOriginal" required>
+
+          <label>Cargo</label>
+          <input name="cargo" [(ngModel)]="form.cargo" required>
+
+          <label>Nombre</label>
+          <input name="nombre" [(ngModel)]="form.nombre" required>
+
+          <label>Apellido</label>
+          <input name="apellido" [(ngModel)]="form.apellido" required>
+
+          <label>Correo</label>
+          <input name="correo" type="email" [(ngModel)]="form.correo" required>
+
+          <button class="gold" [disabled]="guardando">
+            {{guardando ? 'Guardando...' : 'Guardar'}}
+          </button>
+          <button type="button" (click)="modal=false">Cancelar</button>
+        </form>
+      </div>
+    </div>
+  }
+</main>
