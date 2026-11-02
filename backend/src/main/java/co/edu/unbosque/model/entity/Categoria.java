@@ -12,23 +12,29 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Categoria {
-    private int numCategoria;
+
+    private Integer numCategoria;
     private String categoria;
+    private String numSerie;
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+
+        if (o == null || getClass() != o.getClass()) {
             return false;
+        }
 
-        Categoria categoria = (Categoria) o;
+        Categoria categoriaObj = (Categoria) o;
 
-        return numCategoria == categoria.numCategoria;
+        return Objects.equals(numCategoria, categoriaObj.numCategoria)
+                && Objects.equals(numSerie, categoriaObj.numSerie);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(numCategoria);
+        return Objects.hash(numCategoria, numSerie);
     }
 }

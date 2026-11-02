@@ -7,9 +7,13 @@ import co.edu.unbosque.model.dto.JuegoMesaResponseDTO;
 
 public interface IJuegoMesaService {
     JuegoMesaResponseDTO addJuegoMesa(JuegoMesaRequestDTO request);
-    List<JuegoMesaResponseDTO>getJuegoMesa(String nombre);
+
+    List<JuegoMesaResponseDTO> getJuegoMesa(String categoria);
+
     JuegoMesaResponseDTO getJuegosPorNumSerie(String numSerie);
+
     JuegoMesaResponseDTO updateJuegoMesa(String numSerie, JuegoMesaRequestDTO request);
+
     JuegoMesaResponseDTO deleteJuegoMesa(String numSerie);
-    
+
 }

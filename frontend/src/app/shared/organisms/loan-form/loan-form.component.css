@@ -1,0 +1,179 @@
+:host {
+    display: block;
+    width: 100%;
+}
+
+.loan-form {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    width: 100%;
+}
+
+.loan-form__header {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.loan-form__eyebrow {
+    color: var(--cl-cyan);
+    font-size: var(--cl-text-xs);
+    font-weight: 700;
+    letter-spacing: 1.5px;
+}
+
+.loan-form__header h2 {
+    color: var(--cl-text);
+    font-size: 24px;
+}
+
+.loan-form__header p {
+    color: var(--cl-text-secondary);
+    font-size: var(--cl-text-sm);
+}
+
+.loan-form__columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 22px;
+}
+
+.loan-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+
+    min-width: 0;
+    padding: 24px;
+
+    background: var(--cl-surface);
+    border: 1px solid var(--cl-border-cyan);
+    border-radius: var(--cl-radius-lg);
+
+    box-shadow: var(--cl-glow-cyan);
+}
+
+.loan-panel--audit {
+    border-color: var(--cl-border-purple);
+}
+
+.loan-panel__heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--cl-border);
+}
+
+.loan-panel__heading h3 {
+    color: var(--cl-cyan);
+    font-size: var(--cl-text-lg);
+}
+
+.loan-panel__heading p {
+    color: var(--cl-text-secondary);
+    font-size: var(--cl-text-sm);
+    margin-top: 5px;
+}
+
+.loan-type-group {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    padding: 3px 0;
+}
+
+.loan-type-option {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    color: var(--cl-text-secondary);
+    font-size: var(--cl-text-sm);
+
+    cursor: pointer;
+    transition: color var(--cl-transition);
+}
+
+.loan-type-option input {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+
+    accent-color: var(--cl-cyan);
+    cursor: pointer;
+}
+
+.loan-type-option.active {
+    color: var(--cl-cyan);
+    font-weight: 600;
+}
+
+.loan-type-option:focus-within {
+    outline: 2px solid var(--cl-cyan);
+    outline-offset: 4px;
+    border-radius: 3px;
+}
+
+.loan-panel__fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.loan-field {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    min-width: 0;
+}
+
+.loan-field--full {
+    grid-column: 1 / -1;
+}
+
+.loan-panel__audit-content {
+    display: flex;
+    flex-direction: column;
+    gap: 19px;
+    flex: 1;
+}
+
+.loan-panel__footer {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--cl-border);
+}
+
+@media (max-width: 950px) {
+    .loan-form__columns {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+    .loan-panel {
+        padding: 15px;
+    }
+
+    .loan-panel__fields {
+        grid-template-columns: 1fr;
+    }
+
+    .loan-field--full {
+        grid-column: auto;
+    }
+
+    .loan-panel__heading {
+        align-items: flex-start;
+    }
+
+    .loan-type-group {
+        gap: 18px;
+    }
+}

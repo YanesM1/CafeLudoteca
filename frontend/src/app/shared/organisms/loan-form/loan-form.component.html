@@ -1,0 +1,260 @@
+<section class="loan-form">
+
+    <header class="loan-form__header">
+        <span class="loan-form__eyebrow">GESTIÓN OPERATIVA</span>
+        <h2>PRÉSTAMOS Y AUDITORÍA</h2>
+        <p>Registro de préstamos y control de devolución de juegos.</p>
+    </header>
+
+    @if (loading) {
+
+        <app-loading-state
+            state="loading"
+            title="Cargando préstamos"
+            message="Consultando préstamos y unidades disponibles."
+        />
+
+    } @else if (errorMessage) {
+
+        <app-loading-state
+            state="error"
+            title="No fue posible cargar los préstamos"
+            [message]="errorMessage"
+            [showRetry]="true"
+            (retry)="onRetry()"
+        />
+
+    } @else {
+
+        <div class="loan-form__columns">
+
+            <section class="loan-panel">
+
+                <div class="loan-panel__heading">
+                    <div>
+                        <h3>REGISTRAR PRÉSTAMO</h3>
+                        <p>Información del préstamo y responsable.</p>
+                    </div>
+
+                    <app-badge variant="info">
+                        Nuevo
+                    </app-badge>
+                </div>
+
+                <div class="loan-type-group">
+
+                    <label
+                        class="loan-type-option"
+                        [class.active]="loanData.tipoPrestamo === 'interno'"
+                    >
+                        <input
+                            type="radio"
+                            name="tipoPrestamo"
+                            value="interno"
+                            [checked]="loanData.tipoPrestamo === 'interno'"
+                            (change)="loanData.tipoPrestamo = 'interno'"
+                        />
+                        Interno
+                    </label>
+
+                    <label
+                        class="loan-type-option"
+                        [class.active]="loanData.tipoPrestamo === 'externo'"
+                    >
+                        <input
+                            type="radio"
+                            name="tipoPrestamo"
+                            value="externo"
+                            [checked]="loanData.tipoPrestamo === 'externo'"
+                            (change)="loanData.tipoPrestamo = 'externo'"
+                        />
+                        Externo
+                    </label>
+
+                </div>
+
+                <div class="loan-panel__fields">
+
+                    <div class="loan-field">
+                        <app-label text="Cliente" forId="loan-client" [required]="true"/>
+
+                        <app-select
+                            inputId="loan-client"
+                            name="cliente"
+                            placeholder="Seleccionar cliente"
+                            [options]="clienteOptions"
+                            [(value)]="loanData.documentoCliente"
+                        />
+                    </div>
+
+                    <div class="loan-field">
+                        <app-label text="Membresía" forId="loan-membership" [required]="true"/>
+
+                        <app-select
+                            inputId="loan-membership"
+                            name="membresia"
+                            placeholder="Seleccionar membresía"
+                            [options]="membershipOptions"
+                            [(value)]="loanData.idMembresia"
+                        />
+                    </div>
+
+                    <div class="loan-field">
+                        <app-label text="Unidad física" forId="loan-unit" [required]="true"/>
+
+                        <app-select
+                            inputId="loan-unit"
+                            name="unidad"
+                            placeholder="Seleccionar unidad"
+                            [options]="unitOptions"
+                            [(value)]="loanData.idUnidad"
+                        />
+                    </div>
+
+                    <div class="loan-field">
+                        <app-label text="Empleado responsable" forId="loan-employee" [required]="true"/>
+
+                        <app-select
+                            inputId="loan-employee"
+                            name="empleado"
+                            placeholder="Seleccionar empleado"
+                            [options]="employeeOptions"
+                            [(value)]="loanData.documentoEmpleado"
+                        />
+                    </div>
+
+                    <div class="loan-field loan-field--full">
+                        <app-label text="Fecha de salida" forId="loan-date" [required]="true"/>
+
+                        <app-input
+                            inputId="loan-date"
+                            name="fechaSalida"
+                            type="date"
+                            [(value)]="loanData.fechaSalida"
+                        />
+                    </div>
+
+                </div>
+
+                <footer class="loan-panel__footer">
+                    <app-action-buttons
+                        [actions]="loanActions"
+                        alignment="end"
+                        (actionSelected)="onLoanAction($event)"
+                    />
+                </footer>
+
+            </section>
+
+            <section class="loan-panel loan-panel--audit">
+
+                <div class="loan-panel__heading">
+                    <div>
+                        <h3>CONTROL DE DEVOLUCIÓN</h3>
+                        <p>Selecciona un préstamo para realizar su auditoría.</p>
+                    </div>
+
+                    <app-badge
+                        [variant]="activeLoanId ? 'success' : 'warning'"
+                    >
+                        {{ activeLoanId ? 'Seleccionado' : 'Pendiente' }}
+                    </app-badge>
+                </div>
+
+                <div class="loan-field">
+                    <app-label
+                        text="Préstamo activo"
+                        forId="active-loan"
+                        [required]="true"
+                    />
+
+                    <app-select
+                        inputId="active-loan"
+                        name="prestamoActivo"
+                        placeholder="Seleccionar préstamo"
+                        [options]="activeLoanOptions"
+                        [value]="activeLoanId"
+                        (valueChange)="onActiveLoanChange($event)"
+                    />
+                </div>
+
+                @if (activeLoanId) {
+
+                    <div class="loan-panel__audit-content">
+
+                        <div class="loan-field">
+                            <app-label
+                                text="Fecha de devolución"
+                                forId="return-date"
+                                [required]="true"
+                            />
+
+                            <app-input
+                                inputId="return-date"
+                                name="fechaDevolucion"
+                                type="date"
+                                [(value)]="auditData.fechaDevolucion"
+                                [disabled]="submitting"
+                            />
+                        </div>
+
+                        <div class="loan-field">
+                            <app-label
+                                text="Estado de los componentes"
+                                forId="component-status"
+                                [required]="true"
+                            />
+
+                            <app-select
+                                inputId="component-status"
+                                name="estadoComponentes"
+                                placeholder="Seleccionar estado"
+                                [options]="componentStatusOptions"
+                                [(value)]="auditData.estadoComponentes"
+                                [disabled]="submitting"
+                            />
+                        </div>
+
+                        <div class="loan-field">
+                            <app-label
+                                text="Observaciones detalladas de auditoría"
+                                forId="audit-notes"
+                            />
+
+                            <app-textarea
+                                inputId="audit-notes"
+                                name="observaciones"
+                                placeholder="Describe el estado de los componentes, daños o novedades..."
+                                [rows]="9"
+                                [(value)]="auditData.observaciones"
+                                [disabled]="submitting"
+                            />
+                        </div>
+
+                    </div>
+
+                    <footer class="loan-panel__footer">
+                        <app-action-buttons
+                            [actions]="auditActions"
+                            alignment="end"
+                            (actionSelected)="onAuditAction($event)"
+                        />
+                    </footer>
+
+                } @else {
+
+                    <app-loading-state
+                        state="empty"
+                        title="Selecciona un préstamo"
+                        message="Selecciona un préstamo activo para registrar su devolución y realizar la auditoría."
+                    />
+
+                }
+
+            </section>
+
+        </div>
+
+    }
+
+</section>

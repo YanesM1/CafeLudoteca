@@ -5,8 +5,10 @@ import co.edu.unbosque.model.dto.UnidadJuegoResponseDTO;
 
 public interface IUnidadJuegoService {
     UnidadJuegoResponseDTO addUnidadJuego(UnidadJuegoRequestDTO request);
-    UnidadJuegoResponseDTO findByCodigo(String codigo);
-    UnidadJuegoResponseDTO updateUnidadJuego(String codigo, UnidadJuegoRequestDTO request);
-    UnidadJuegoResponseDTO deleteUnidadJuego(String codigo);
 
+    UnidadJuegoResponseDTO findByCodigo(String codigo, String numSerie);
+
+    UnidadJuegoResponseDTO updateUnidadJuego(String codigo, String numSerie, UnidadJuegoRequestDTO request);
+
+    UnidadJuegoResponseDTO deleteUnidadJuego(String codigo, String numSerie);
 }

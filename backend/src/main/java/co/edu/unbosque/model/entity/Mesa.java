@@ -34,13 +34,5 @@ public class Mesa {
         return Objects.hash(idMesa);
     }
 
-    @Override
-    public String toString() {
-        return "Mesa{" +
-                "idMesa='" + idMesa + '\'' +
-                ", capacidad=" + capacidad +
-                ", tematica='" + tematica + '\'' +
-                ", ubicacion='" + ubicacion + '\'' +
-                '}';
-    }
+   
 }

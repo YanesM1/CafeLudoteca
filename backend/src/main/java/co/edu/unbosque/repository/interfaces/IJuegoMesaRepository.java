@@ -7,9 +7,12 @@ import co.edu.unbosque.model.entity.JuegoMesa;
 
 public interface IJuegoMesaRepository {
     boolean saveJuegoMesa(JuegoMesa juegoMesa);
-    List<JuegoMesa>findByNombre(String nombre);
-    Optional<JuegoMesa> findByNumSerie(String numSerie);
-    boolean updateJuegoMesa(String numSerie, JuegoMesa juegoMesa);
-    boolean deleteJuegoMesa(String numSerie);
 
+    List<JuegoMesa> findByNombre(String nombre);
+
+    Optional<JuegoMesa> findByNumSerie(String numSerie);
+
+    boolean updateJuegoMesa(String numSerie, JuegoMesa juegoMesa);
+
+    boolean deleteJuegoMesa(String numSerie);
 }

@@ -1,0 +1,42 @@
+<div class="filter-group" role="group" aria-label="Filtros de búsqueda">
+
+    @for (filter of filters; track filter.name) {
+
+        <div class="filter-group__item">
+
+            <app-label
+                [text]="filter.label"
+                [forId]="filter.name"
+            />
+
+            <app-select
+                [inputId]="filter.name"
+                [name]="filter.name"
+                [placeholder]="filter.placeholder || 'Seleccionar'"
+                [options]="filter.options"
+                [value]="values[filter.name] || ''"
+                [disabled]="filter.disabled || false"
+                (valueChange)="onFilterChange(filter.name, $event)"
+            />
+
+        </div>
+
+    }
+
+    @if (showClearButton && filters.length > 0) {
+
+        <div class="filter-group__actions">
+
+            <app-button
+                variant="ghost"
+                (click)="clearFilters()"
+            >
+                <app-icon name="close" [size]="16" />
+                {{ clearButtonText }}
+            </app-button>
+
+        </div>
+
+    }
+
+</div>

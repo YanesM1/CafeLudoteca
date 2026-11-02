@@ -7,7 +7,6 @@ import java.util.Optional;
 import co.edu.unbosque.model.entity.Empleado;
 
 public interface IEmpleadoRepository {
-
     boolean saveEmpleado(Empleado empleado);
 
     List<Empleado> findByNombre(String nombre);
@@ -17,5 +16,4 @@ public interface IEmpleadoRepository {
     boolean updateEmpleado(String documento, Empleado empleado);
 
     boolean deleteEmpleado(String documento);
-
 }

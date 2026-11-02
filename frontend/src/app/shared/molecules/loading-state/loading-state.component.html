@@ -1,0 +1,64 @@
+<section
+    class="loading-state"
+    [class.loading-state--loading]="state === 'loading'"
+    [class.loading-state--empty]="state === 'empty'"
+    [class.loading-state--error]="state === 'error'"
+    [attr.role]="state === 'error' ? 'alert' : 'status'"
+    aria-live="polite"
+>
+
+    @if (state === 'loading') {
+
+        <div class="loading-state__spinner"></div>
+
+    } @else if (state === 'empty') {
+
+        <div class="loading-state__icon">
+            ◇
+        </div>
+
+    } @else if (state === 'error') {
+
+        <div class="loading-state__icon">
+            !
+        </div>
+
+    }
+
+    <div class="loading-state__content">
+
+        <h3>
+            {{ title || (
+                state === 'loading'
+                    ? 'Cargando información'
+                    : state === 'empty'
+                        ? 'No hay registros'
+                        : 'Ocurrió un error'
+            ) }}
+        </h3>
+
+        <p>
+            {{ message || (
+                state === 'loading'
+                    ? 'Por favor espera un momento.'
+                    : state === 'empty'
+                        ? 'Todavía no hay información disponible.'
+                        : 'No fue posible completar la operación.'
+            ) }}
+        </p>
+
+    </div>
+
+    @if (state === 'error' && showRetry) {
+
+        <button
+            type="button"
+            class="loading-state__retry"
+            (click)="onRetry()"
+        >
+            {{ retryLabel }}
+        </button>
+
+    }
+
+</section>

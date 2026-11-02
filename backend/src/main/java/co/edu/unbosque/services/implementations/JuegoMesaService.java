@@ -67,8 +67,7 @@ public class JuegoMesaService implements IJuegoMesaService {
  }
 
     @Override
-    public List<JuegoMesaResponseDTO> getJuegoMesa(
-            String nombre) {
+    public List<JuegoMesaResponseDTO> getJuegoMesa(String nombre) {
 
         List<JuegoMesa> juegos = juegoMesaRepository.findByNombre(nombre);
         List<JuegoMesaResponseDTO> response = new ArrayList<>();
@@ -100,9 +99,7 @@ public class JuegoMesaService implements IJuegoMesaService {
     }
 
     @Override
-    public JuegoMesaResponseDTO updateJuegoMesa(
-            String numSerie,
-            JuegoMesaRequestDTO request) {
+    public JuegoMesaResponseDTO updateJuegoMesa(String numSerie, JuegoMesaRequestDTO request) {
 
         if (!validarJuegoMesa(request)) {
             return null;
@@ -110,9 +107,7 @@ public class JuegoMesaService implements IJuegoMesaService {
 
         JuegoMesa juegoMesa = juegoMesaMapper.juegoMesaRequestDTOToJuegoMesa(request);
 
-        if (!juegoMesaRepository.updateJuegoMesa(
-                numSerie,
-                juegoMesa)) {
+        if (!juegoMesaRepository.updateJuegoMesa(numSerie, juegoMesa)) {
             return null;
         }
 
@@ -122,8 +117,7 @@ public class JuegoMesaService implements IJuegoMesaService {
             return null;
         }
 
-        return juegoMesaMapper.juegoMesaToResponseDTO(
-                actualizado.get());
+        return juegoMesaMapper.juegoMesaToResponseDTO(actualizado.get());
     }
 
     @Override

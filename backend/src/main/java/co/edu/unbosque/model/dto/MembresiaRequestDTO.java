@@ -11,7 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MembresiaRequestDTO {
-     private String idMembresia;
+     private int idMembresia;
      private String plan;
      private String estado;
      private LocalDate fechaInicio;

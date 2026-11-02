@@ -9,7 +9,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ElementoJuegoRequestDTO {
-    private int idElementoJuego;
+    private Integer idElementoJuego;
     private String elementoJuego;
+    private String numSerie;
 
 }

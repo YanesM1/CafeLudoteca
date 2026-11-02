@@ -1,0 +1,13 @@
+package co.edu.unbosque.controller.interfaces;
+
+import co.edu.unbosque.model.dto.TelefonoRequestDTO;
+import jakarta.ws.rs.core.Response;
+
+public interface ITelefonoController {
+    Response guardarTelefono(TelefonoRequestDTO request);
+    Response buscarPorDocumento(String documento);
+    Response buscarPorNumero(String documento, String numero);
+    Response actualizarTelefono(String documento, String numeroActual, TelefonoRequestDTO request);
+    Response borrarTelefono(String documento, String numero);
+
+}

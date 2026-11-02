@@ -12,24 +12,31 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UnidadJuego {
+
     private String codigo;
     private String estado;
     private String observaciones;
+    private String numSerie;
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+
+        if (o == null || getClass() != o.getClass()) {
             return false;
+        }
 
         UnidadJuego that = (UnidadJuego) o;
 
-        return Objects.equals(codigo, that.codigo);
+        return Objects.equals(codigo, that.codigo)
+                && Objects.equals(numSerie, that.numSerie);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(codigo);
+        return Objects.hash(codigo, numSerie);
     }
 }

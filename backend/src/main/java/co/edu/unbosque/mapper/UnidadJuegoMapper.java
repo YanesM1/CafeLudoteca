@@ -1,3 +1,4 @@
+
 package co.edu.unbosque.mapper;
 
 import co.edu.unbosque.model.dto.UnidadJuegoRequestDTO;
@@ -12,6 +13,7 @@ public class UnidadJuegoMapper {
         unidadJuego.setCodigo(dto.getCodigo());
         unidadJuego.setEstado(dto.getEstado());
         unidadJuego.setObservaciones(dto.getObservaciones());
+        unidadJuego.setNumSerie(dto.getNumSerie());
 
         return unidadJuego;
     }
@@ -21,6 +23,7 @@ public class UnidadJuegoMapper {
         dto.setCodigo(unidadJuego.getCodigo());
         dto.setEstado(unidadJuego.getEstado());
         dto.setObservaciones(unidadJuego.getObservaciones());
+        dto.setNumSerie(unidadJuego.getNumSerie());
         return dto;
     }
 

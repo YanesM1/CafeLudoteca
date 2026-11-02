@@ -1,0 +1,83 @@
+<section class="memberships-page">
+
+    <div class="memberships-page__notification">
+
+        <app-notification-toast
+            [visible]="notificationVisible"
+            [type]="notificationType"
+            [title]="notificationTitle"
+            [message]="notificationMessage"
+            (dismiss)="closeNotification()"
+        />
+
+    </div>
+
+    <app-membership-table
+        [members]="members"
+        [loading]="loading"
+        (createMember)="openCreate()"
+        (editMember)="openEdit($event)"
+        (deleteMember)="requestDelete($event)"
+    />
+
+    <app-membership-form-modal
+        [visible]="showModal"
+        [mode]="modalMode"
+        [member]="selectedMember"
+        [membershipOptions]="membershipOptions"
+        [saving]="saving"
+        (save)="saveMember($event)"
+        (close)="closeModal()"
+    />
+
+    @if (memberToDelete) {
+
+        <div
+            class="memberships-page__backdrop"
+            (click)="cancelDelete()"
+        >
+
+            <section
+                class="memberships-page__confirm"
+                role="alertdialog"
+                aria-modal="true"
+                aria-labelledby="delete-membership-title"
+                (click)="$event.stopPropagation()"
+            >
+
+                <h3 id="delete-membership-title">
+                    Eliminar membresía
+                </h3>
+
+                <p>
+                    ¿Estás seguro de eliminar la membresía de
+                    <strong>{{ memberToDelete.nombre }}</strong>?
+                </p>
+
+                <div class="memberships-page__confirm-actions">
+
+                    <button
+                        type="button"
+                        class="memberships-page__cancel"
+                        (click)="cancelDelete()"
+                    >
+                        Cancelar
+                    </button>
+
+                    <button
+                        type="button"
+                        class="memberships-page__delete"
+                        (click)="confirmDelete()"
+                    >
+                        Eliminar
+                    </button>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    }
+
+</section>

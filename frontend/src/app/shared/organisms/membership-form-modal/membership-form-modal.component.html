@@ -1,0 +1,199 @@
+@if (visible) {
+
+    <div
+        class="membership-modal__backdrop"
+        (click)="onClose()"
+    >
+
+        <section
+            class="membership-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="membership-modal-title"
+            (click)="$event.stopPropagation()"
+        >
+
+            <header class="membership-modal__header">
+
+                <div>
+                    <span>GESTIÓN ADMINISTRATIVA</span>
+
+                    <h2 id="membership-modal-title">
+                        {{ mode === 'create'
+                            ? 'Registrar nuevo socio'
+                            : 'Editar socio y membresía' }}
+                    </h2>
+                </div>
+
+                <button
+                    type="button"
+                    class="membership-modal__close"
+                    aria-label="Cerrar ventana"
+                    (click)="onClose()"
+                >
+                    ×
+                </button>
+
+            </header>
+
+            <div class="membership-modal__body">
+
+                <div class="membership-modal__field">
+
+                    <app-label
+                        text="Nombre del socio"
+                        forId="member-name"
+                        [required]="true"
+                    />
+
+                    <app-input
+                        inputId="member-name"
+                        name="nombre"
+                        placeholder="Nombre completo"
+                        [(value)]="form.nombre"
+                        [required]="true"
+                    />
+
+                </div>
+
+                <div class="membership-modal__field">
+
+                    <app-label
+                        text="Documento"
+                        forId="member-document"
+                        [required]="true"
+                    />
+
+                    <app-input
+                        inputId="member-document"
+                        name="documento"
+                        placeholder="Número de documento"
+                        [(value)]="form.documento"
+                        [required]="true"
+                    />
+
+                </div>
+
+                <div class="membership-modal__field">
+
+                    <app-label
+                        text="Categoría de membresía"
+                        forId="member-plan"
+                        [required]="true"
+                    />
+
+                    <app-select
+                        inputId="member-plan"
+                        name="plan"
+                        placeholder="Seleccionar categoría"
+                        [options]="membershipOptions"
+                        [(value)]="form.plan"
+                        [required]="true"
+                    />
+
+                </div>
+
+                <div class="membership-modal__field">
+
+                    <app-label
+                        text="Tarifa (COP)"
+                        forId="member-tariff"
+                        [required]="true"
+                    />
+
+                    <app-input
+                        inputId="member-tariff"
+                        name="tarifa"
+                        type="number"
+                        placeholder="Valor de la tarifa"
+                        [(value)]="form.tarifa"
+                        [min]="'1'"
+                        [required]="true"
+                    />
+
+                </div>
+
+                <div class="membership-modal__field">
+
+                    <app-label
+                        text="Fecha de inicio"
+                        forId="member-start"
+                        [required]="true"
+                    />
+
+                    <app-input
+                        inputId="member-start"
+                        name="fechaInicio"
+                        type="date"
+                        [(value)]="form.fechaInicio"
+                        [required]="true"
+                    />
+
+                </div>
+
+                <div class="membership-modal__field">
+
+                    <app-label
+                        text="Fecha de finalización"
+                        forId="member-end"
+                        [required]="true"
+                    />
+
+                    <app-input
+                        inputId="member-end"
+                        name="fechaFin"
+                        type="date"
+                        [(value)]="form.fechaFin"
+                        [required]="true"
+                    />
+
+                </div>
+
+                <div class="membership-modal__field">
+
+                    <app-label
+                        text="Estado de la membresía"
+                        forId="member-status"
+                        [required]="true"
+                    />
+
+                    <app-select
+                        inputId="member-status"
+                        name="estado"
+                        [options]="statusOptions"
+                        [(value)]="form.estado"
+                    />
+
+                </div>
+
+            </div>
+
+            <footer class="membership-modal__footer">
+
+                <app-button
+                    variant="danger"
+                    [disabled]="saving"
+                    (click)="onClose()"
+                >
+                    Cancelar
+                </app-button>
+
+                <app-button
+                    variant="gold"
+                    [disabled]="!canSave || saving"
+                    (click)="onSave()"
+                >
+                    {{ saving
+                        ? 'Guardando...'
+                        : mode === 'create'
+                            ? 'Registrar socio'
+                            : 'Guardar cambios' }}
+                </app-button>
+
+            </footer>
+
+        </section>
+
+    </div>
+
+}

@@ -11,20 +11,23 @@ import java.util.List;
 import java.util.Optional;
 
 import co.edu.unbosque.config.ConnectionBD;
+import co.edu.unbosque.exceptions.PersistenceException;
 import co.edu.unbosque.model.entity.Reserva;
 import co.edu.unbosque.repository.interfaces.IReservaRepository;
 
 public class ReservaRepositoryJDBC implements IReservaRepository {
 
+    // REGISTRAR RESERVA
     @Override
     public boolean saveReserva(Reserva reserva) {
-        String sql = "INSERT INTO RESERVA "
-                + "(id_reserva, fecha, horario, documento, id_mesa) "
-                + "VALUES (?, ?, ?, ?, ?)";
 
         if (reserva == null) {
             return false;
         }
+
+        String sql = "INSERT INTO RESERVA "
+                + "(id_reserva, fecha, horario, documento, id_mesa) "
+                + "VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conexion = ConnectionBD.obtenerConexion();
              PreparedStatement statement = conexion.prepareStatement(sql)) {
@@ -45,21 +48,23 @@ public class ReservaRepositoryJDBC implements IReservaRepository {
             return statement.executeUpdate() == 1;
 
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new PersistenceException(
+                    "Error al registrar la reserva", e);
         }
     }
 
+    // BUSCAR RESERVAS POR DOCUMENTO DEL CLIENTE
     @Override
     public List<Reserva> findByDocumento(String documento) {
-        List<Reserva> reservas = new ArrayList<>();
 
-        String sql = "SELECT id_reserva, fecha, horario, documento, id_mesa "
-                + "FROM RESERVA WHERE documento = ?";
+        List<Reserva> reservas = new ArrayList<>();
 
         if (documento == null || documento.isBlank()) {
             return reservas;
         }
+
+        String sql = "SELECT id_reserva, fecha, horario, documento, id_mesa "
+                + "FROM RESERVA WHERE documento = ?";
 
         try (Connection conexion = ConnectionBD.obtenerConexion();
              PreparedStatement statement = conexion.prepareStatement(sql)) {
@@ -67,26 +72,30 @@ public class ReservaRepositoryJDBC implements IReservaRepository {
             statement.setString(1, documento);
 
             try (ResultSet resultado = statement.executeQuery()) {
+
                 while (resultado.next()) {
                     reservas.add(mapearReserva(resultado));
                 }
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new PersistenceException(
+                    "Error al consultar las reservas del cliente", e);
         }
 
         return reservas;
     }
 
+    // BUSCAR RESERVA POR IDENTIFICADOR
     @Override
     public Optional<Reserva> findByIdReserva(String idReserva) {
-        String sql = "SELECT id_reserva, fecha, horario, documento, id_mesa "
-                + "FROM RESERVA WHERE id_reserva = ?";
 
         if (idReserva == null || idReserva.isBlank()) {
             return Optional.empty();
         }
+
+        String sql = "SELECT id_reserva, fecha, horario, documento, id_mesa "
+                + "FROM RESERVA WHERE id_reserva = ?";
 
         try (Connection conexion = ConnectionBD.obtenerConexion();
              PreparedStatement statement = conexion.prepareStatement(sql)) {
@@ -94,57 +103,91 @@ public class ReservaRepositoryJDBC implements IReservaRepository {
             statement.setString(1, idReserva);
 
             try (ResultSet resultado = statement.executeQuery()) {
+
                 if (resultado.next()) {
                     return Optional.of(mapearReserva(resultado));
                 }
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new PersistenceException(
+                    "Error al consultar la reserva por identificador", e);
         }
 
         return Optional.empty();
     }
 
+    // ACTUALIZAR RESERVA
     @Override
     public boolean updateReserva(String idReserva, Reserva reserva) {
-        String sql = "UPDATE RESERVA SET fecha = ?, horario = ?, "
-                + "documento = ?, id_mesa = ? WHERE id_reserva = ?";
 
         if (idReserva == null || idReserva.isBlank() || reserva == null) {
             return false;
         }
 
-        try (Connection conexion = ConnectionBD.obtenerConexion();
-             PreparedStatement statement = conexion.prepareStatement(sql)) {
+        String sql = "UPDATE RESERVA SET fecha = ?, horario = ?, "
+                + "documento = ?, id_mesa = ? WHERE id_reserva = ?";
 
-            statement.setDate(
-                    1,
-                    reserva.getFecha() == null
-                            ? null
-                            : Date.valueOf(reserva.getFecha())
-            );
+        try (Connection conexion = ConnectionBD.obtenerConexion()) {
 
-            statement.setString(2, reserva.getHorario());
-            statement.setString(3, reserva.getDocumento());
-            statement.setString(4, reserva.getIdMesa());
-            statement.setString(5, idReserva);
+            int filasAfectadas;
 
-            return statement.executeUpdate() == 1;
+            try (PreparedStatement statement = conexion.prepareStatement(sql)) {
+
+                statement.setDate(
+                        1,
+                        reserva.getFecha() == null
+                                ? null
+                                : Date.valueOf(reserva.getFecha())
+                );
+
+                statement.setString(2, reserva.getHorario());
+                statement.setString(3, reserva.getDocumento());
+                statement.setString(4, reserva.getIdMesa());
+                statement.setString(5, idReserva);
+
+                filasAfectadas = statement.executeUpdate();
+            }
+
+            // Si hubo modificaciones, la actualización fue exitosa.
+            if (filasAfectadas > 0) {
+                return true;
+            }
+
+            // Si no hubo cambios, comprobar si la reserva existe.
+            return existeReserva(conexion, idReserva);
 
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new PersistenceException(
+                    "Error al actualizar la reserva", e);
         }
     }
 
+    // VERIFICAR SI EXISTE UNA RESERVA
+    private boolean existeReserva(Connection conexion, String idReserva)
+            throws SQLException {
+
+        String sql = "SELECT 1 FROM RESERVA WHERE id_reserva = ?";
+
+        try (PreparedStatement statement = conexion.prepareStatement(sql)) {
+
+            statement.setString(1, idReserva);
+
+            try (ResultSet resultado = statement.executeQuery()) {
+                return resultado.next();
+            }
+        }
+    }
+
+    // ELIMINAR RESERVA
     @Override
     public boolean deleteReserva(String idReserva) {
-        String sql = "DELETE FROM RESERVA WHERE id_reserva = ?";
 
         if (idReserva == null || idReserva.isBlank()) {
             return false;
         }
+
+        String sql = "DELETE FROM RESERVA WHERE id_reserva = ?";
 
         try (Connection conexion = ConnectionBD.obtenerConexion();
              PreparedStatement statement = conexion.prepareStatement(sql)) {
@@ -154,11 +197,12 @@ public class ReservaRepositoryJDBC implements IReservaRepository {
             return statement.executeUpdate() == 1;
 
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new PersistenceException(
+                    "Error al eliminar la reserva", e);
         }
     }
 
+    // CONVERTIR RESULTSET A ENTIDAD RESERVA
     private Reserva mapearReserva(ResultSet resultado)
             throws SQLException {
 
@@ -167,7 +211,10 @@ public class ReservaRepositoryJDBC implements IReservaRepository {
         reserva.setIdReserva(resultado.getString("id_reserva"));
 
         Date fecha = resultado.getDate("fecha");
-        reserva.setFecha(fecha == null ? null : fecha.toLocalDate());
+
+        reserva.setFecha(
+                fecha == null ? null : fecha.toLocalDate()
+        );
 
         reserva.setHorario(resultado.getString("horario"));
         reserva.setDocumento(resultado.getString("documento"));

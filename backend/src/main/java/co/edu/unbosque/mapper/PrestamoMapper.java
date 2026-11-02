@@ -11,16 +11,20 @@ public class PrestamoMapper {
         prestamo.setEstadoComponentes(dto.getEstadoComponentes());
         prestamo.setTipoPrestamo(dto.getTipoPrestamo());
         prestamo.setFechaDevolucion(dto.getFechaDevolucion());
+        prestamo.setDocumentoEmpleado(dto.getDocumentoEmpleado());
+        prestamo.setDocumentoCliente(dto.getDocumentoCliente());
         return prestamo;
     }
 
-    public PrestamoResponseDTO PrestamoToPrestamoResponseDTO(Prestamo prestamo){
+    public PrestamoResponseDTO prestamoToPrestamoResponseDTO(Prestamo prestamo){
         PrestamoResponseDTO dto=new PrestamoResponseDTO();
         dto.setIdPrestamo(prestamo.getIdPrestamo());
         dto.setFechaSalida(prestamo.getFechaSalida());
         dto.setEstadoComponentes(prestamo.getEstadoComponentes());
         dto.setTipoPrestamo(prestamo.getTipoPrestamo());
         dto.setFechaDevolucion(prestamo.getFechaDevolucion());
+        dto.setDocumentoEmpleado(prestamo.getDocumentoEmpleado());
+        dto.setDocumentoCliente(prestamo.getDocumentoCliente());
         return dto;
 
     }

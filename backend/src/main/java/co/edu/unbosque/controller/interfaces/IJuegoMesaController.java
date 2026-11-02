@@ -5,11 +5,13 @@ import jakarta.ws.rs.core.Response;
 
 public interface IJuegoMesaController {
     Response guardarJuego(JuegoMesaRequestDTO request);
-    Response buscarPorNombre(String nombre);
-    Response buscarPorNumSerie(String numSerie);
-    Response actualizarJuegoMesa(String numSerie, JuegoMesaRequestDTO request);
-    Response borrarJuegoMesa(String numSerie);
-    
 
+    Response buscarPorNombre(String nombre);
+
+    Response buscarPorNumSerie(String numSerie);
+
+    Response actualizarJuegoMesa(String numSerie, JuegoMesaRequestDTO request);
+
+    Response borrarJuegoMesa(String numSerie);
 
 }

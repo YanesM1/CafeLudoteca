@@ -49,8 +49,8 @@ public class JuegoMesaController implements IJuegoMesaController {
   
   @Override
   @PUT 
-  @Path("/{numSerie}")
-  public Response actualizarJuegoMesa(@PathParam("numSerie") String numSerie, JuegoMesaRequestDTO request) {
+  @Path("/{num_serie}")
+  public Response actualizarJuegoMesa(@PathParam("num_serie") String numSerie, JuegoMesaRequestDTO request) {
       JuegoMesaResponseDTO juego=juegoMesaService.updateJuegoMesa(numSerie, request);
       if(juego==null){
         return Response.status(Response.Status.NOT_FOUND)
@@ -63,8 +63,8 @@ public class JuegoMesaController implements IJuegoMesaController {
   
   @Override
   @DELETE 
-  @Path("/{numSerie}")
-  public Response borrarJuegoMesa(@PathParam("numSerie") String numSerie) {
+  @Path("/{num_serie}")
+  public Response borrarJuegoMesa(@PathParam("num_serie") String numSerie) {
     JuegoMesaResponseDTO juego=juegoMesaService.deleteJuegoMesa(numSerie);
     if(juego==null){
         return Response.status(Response.Status.NOT_FOUND)
@@ -77,8 +77,8 @@ public class JuegoMesaController implements IJuegoMesaController {
 
   @Override
   @GET 
-  @Path("/buscar_numSerie")
-  public Response buscarPorNumSerie(@PathParam("numSerie") String numSerie) {
+  @Path("/buscar_numSerie/{num_serie}")
+  public Response buscarPorNumSerie(@PathParam("num_serie") String numSerie) {
      JuegoMesaResponseDTO juego=juegoMesaService.getJuegosPorNumSerie(numSerie);
      if(juego==null){
         return Response.status(Response.Status.NOT_FOUND)

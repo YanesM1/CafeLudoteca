@@ -2,8 +2,12 @@
 package co.edu.unbosque.controller.implementations;
 
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import co.edu.unbosque.controller.interfaces.IMesaController;
+import co.edu.unbosque.exceptions.PersistenceException;
 import co.edu.unbosque.model.dto.MesaRequestDTO;
 import co.edu.unbosque.model.dto.MesaResponseDTO;
 import co.edu.unbosque.services.implementations.MesaService;
@@ -26,31 +30,86 @@ import jakarta.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class MesaController implements IMesaController {
 
-    private final IMesaService mesaService = new MesaService();
+    private static final Logger LOGGER =
+            Logger.getLogger(MesaController.class.getName());
 
-    @Override
-    @POST
-    public Response crearMesa(MesaRequestDTO request) {
+    private final IMesaService mesaService =
+            new MesaService();
+
+    // VALIDAR DATOS DE LA MESA
+    private boolean validarMesa(
+            MesaRequestDTO request,
+            boolean validarId) {
+
         if (request == null) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("Los datos de la mesa son obligatorios.")
-                    .build();
+            return false;
         }
 
-        MesaResponseDTO mesa = mesaService.addMesa(request);
-
-        if (mesa == null) {
-            return Response.status(
-                    Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("No fue posible registrar la mesa.")
-                    .build();
+        if (validarId &&
+                (request.getIdMesa() == null ||
+                 request.getIdMesa().isBlank())) {
+            return false;
         }
 
-        return Response.status(Response.Status.CREATED)
-                .entity(mesa)
+        return request.getCapacidad() > 0
+                && request.getTematica() != null
+                && !request.getTematica().isBlank()
+                && request.getUbicacion() != null
+                && !request.getUbicacion().isBlank();
+    }
+
+    // GENERAR RESPUESTAS DE ERROR EN JSON
+    private Response respuestaError(
+            Response.Status estado,
+            String mensaje) {
+
+        return Response.status(estado)
+                .entity(Map.of("mensaje", mensaje))
                 .build();
     }
 
+    // MANEJAR ERRORES DE PERSISTENCIA
+    private Response errorPersistencia(PersistenceException e) {
+
+        LOGGER.log(Level.SEVERE,
+                "Error de persistencia en el módulo de mesas", e);
+
+        return respuestaError(
+                Response.Status.INTERNAL_SERVER_ERROR,
+                "Ocurrió un error al acceder a la base de datos.");
+    }
+
+    // REGISTRAR MESA
+    @Override
+    @POST
+    public Response crearMesa(MesaRequestDTO request) {
+
+        if (!validarMesa(request, true)) {
+            return respuestaError(
+                    Response.Status.BAD_REQUEST,
+                    "Los datos de la mesa son incompletos o inválidos.");
+        }
+
+        try {
+            MesaResponseDTO mesa =
+                    mesaService.addMesa(request);
+
+            if (mesa == null) {
+                return respuestaError(
+                        Response.Status.INTERNAL_SERVER_ERROR,
+                        "No fue posible registrar la mesa.");
+            }
+
+            return Response.status(Response.Status.CREATED)
+                    .entity(mesa)
+                    .build();
+
+        } catch (PersistenceException e) {
+            return errorPersistencia(e);
+        }
+    }
+
+    // BUSCAR MESAS POR TEMÁTICA
     @Override
     @GET
     @Path("/buscar")
@@ -58,33 +117,53 @@ public class MesaController implements IMesaController {
             @QueryParam("tematica") String tematica) {
 
         if (tematica == null || tematica.isBlank()) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("Debes indicar la temática que deseas buscar.")
-                    .build();
+            return respuestaError(
+                    Response.Status.BAD_REQUEST,
+                    "Debes indicar la temática que deseas buscar.");
         }
 
-        List<MesaResponseDTO> mesas = mesaService.getMesa(tematica);
+        try {
+            List<MesaResponseDTO> mesas =
+                    mesaService.getMesa(tematica.trim());
 
-        return Response.ok(mesas).build();
+            return Response.ok(mesas).build();
+
+        } catch (PersistenceException e) {
+            return errorPersistencia(e);
+        }
     }
 
+    // CONSULTAR MESA POR IDENTIFICADOR
     @Override
     @GET
     @Path("/{idMesa}")
     public Response obtenerMesa(
             @PathParam("idMesa") String idMesa) {
 
-        MesaResponseDTO mesa = mesaService.getMesasPorIdMesa(idMesa);
-
-        if (mesa == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("No se encontró la mesa.")
-                    .build();
+        if (idMesa == null || idMesa.isBlank()) {
+            return respuestaError(
+                    Response.Status.BAD_REQUEST,
+                    "Debes proporcionar el identificador de la mesa.");
         }
 
-        return Response.ok(mesa).build();
+        try {
+            MesaResponseDTO mesa =
+                    mesaService.getMesasPorIdMesa(idMesa);
+
+            if (mesa == null) {
+                return respuestaError(
+                        Response.Status.NOT_FOUND,
+                        "No se encontró la mesa.");
+            }
+
+            return Response.ok(mesa).build();
+
+        } catch (PersistenceException e) {
+            return errorPersistencia(e);
+        }
     }
 
+    // ACTUALIZAR MESA
     @Override
     @PUT
     @Path("/{idMesa}")
@@ -92,51 +171,67 @@ public class MesaController implements IMesaController {
             @PathParam("idMesa") String idMesa,
             MesaRequestDTO request) {
 
-        if (request == null) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("Los datos para actualizar son obligatorios.")
-                    .build();
+        if (idMesa == null || idMesa.isBlank()
+                || !validarMesa(request, false)) {
+
+            return respuestaError(
+                    Response.Status.BAD_REQUEST,
+                    "Los datos para actualizar la mesa son inválidos.");
         }
 
-        if (mesaService.getMesasPorIdMesa(idMesa) == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("No se encontró la mesa.")
-                    .build();
+        if (request.getIdMesa() != null
+                && !request.getIdMesa().isBlank()
+                && !idMesa.equals(request.getIdMesa())) {
+
+            return respuestaError(
+                    Response.Status.BAD_REQUEST,
+                    "No se permite modificar el identificador de la mesa.");
         }
 
-        MesaResponseDTO mesa = mesaService.updateMesa(idMesa, request);
+        try {
+            MesaResponseDTO mesa =
+                    mesaService.updateMesa(idMesa, request);
 
-        if (mesa == null) {
-            return Response.status(
-                    Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("No fue posible actualizar la mesa.")
-                    .build();
+            if (mesa == null) {
+                return respuestaError(
+                        Response.Status.NOT_FOUND,
+                        "No se encontró la mesa para actualizar.");
+            }
+
+            return Response.ok(mesa).build();
+
+        } catch (PersistenceException e) {
+            return errorPersistencia(e);
         }
-
-        return Response.ok(mesa).build();
     }
 
+    // ELIMINAR MESA
     @Override
     @DELETE
     @Path("/{idMesa}")
     public Response eliminarMesa(
             @PathParam("idMesa") String idMesa) {
 
-        if (mesaService.getMesasPorIdMesa(idMesa) == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("No se encontró la mesa.")
-                    .build();
+        if (idMesa == null || idMesa.isBlank()) {
+            return respuestaError(
+                    Response.Status.BAD_REQUEST,
+                    "Debes proporcionar el identificador de la mesa.");
         }
 
-        MesaResponseDTO mesa = mesaService.deleteMesa(idMesa);
+        try {
+            MesaResponseDTO mesa =
+                    mesaService.deleteMesa(idMesa);
 
-        if (mesa == null) {
-            return Response.status(
-                    Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("No fue posible eliminar la mesa.")
-                    .build();
+            if (mesa == null) {
+                return respuestaError(
+                        Response.Status.NOT_FOUND,
+                        "No se encontró la mesa.");
+            }
+
+            return Response.ok(mesa).build();
+
+        } catch (PersistenceException e) {
+            return errorPersistencia(e);
         }
-
-        return Response.ok(mesa).build();
     }
 }

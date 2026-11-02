@@ -2,8 +2,12 @@
 package co.edu.unbosque.controller.implementations;
 
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import co.edu.unbosque.controller.interfaces.IReservaController;
+import co.edu.unbosque.exceptions.PersistenceException;
 import co.edu.unbosque.model.dto.ReservaRequestDTO;
 import co.edu.unbosque.model.dto.ReservaResponseDTO;
 import co.edu.unbosque.services.implementations.ReservaService;
@@ -26,31 +30,88 @@ import jakarta.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class ReservaController implements IReservaController {
 
-    private final IReservaService reservaService = new ReservaService();
+    private static final Logger LOGGER =
+            Logger.getLogger(ReservaController.class.getName());
 
-    @Override
-    @POST
-    public Response crearReserva(ReservaRequestDTO request) {
+    private final IReservaService reservaService =
+            new ReservaService();
+
+    // VALIDAR DATOS DE LA RESERVA
+    private boolean validarReserva(
+            ReservaRequestDTO request,
+            boolean validarId) {
+
         if (request == null) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("Los datos de la reserva son obligatorios.")
-                    .build();
+            return false;
         }
 
-        ReservaResponseDTO reserva = reservaService.addReserva(request);
-
-        if (reserva == null) {
-            return Response.status(
-                    Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("No fue posible registrar la reserva.")
-                    .build();
+        if (validarId &&
+                (request.getIdReserva() == null ||
+                 request.getIdReserva().isBlank())) {
+            return false;
         }
 
-        return Response.status(Response.Status.CREATED)
-                .entity(reserva)
+        return request.getFecha() != null
+                && request.getHorario() != null
+                && !request.getHorario().isBlank()
+                && request.getDocumento() != null
+                && !request.getDocumento().isBlank()
+                && request.getIdMesa() != null
+                && !request.getIdMesa().isBlank();
+    }
+
+    // GENERAR RESPUESTAS DE ERROR EN JSON
+    private Response respuestaError(
+            Response.Status estado,
+            String mensaje) {
+
+        return Response.status(estado)
+                .entity(Map.of("mensaje", mensaje))
                 .build();
     }
 
+    // MANEJAR ERRORES DE PERSISTENCIA
+    private Response errorPersistencia(PersistenceException e) {
+
+        LOGGER.log(Level.SEVERE,
+                "Error de persistencia en el módulo de reservas", e);
+
+        return respuestaError(
+                Response.Status.INTERNAL_SERVER_ERROR,
+                "Ocurrió un error al acceder a la base de datos.");
+    }
+
+    // REGISTRAR RESERVA
+    @Override
+    @POST
+    public Response crearReserva(ReservaRequestDTO request) {
+
+        if (!validarReserva(request, true)) {
+            return respuestaError(
+                    Response.Status.BAD_REQUEST,
+                    "Los datos de la reserva son incompletos o inválidos.");
+        }
+
+        try {
+            ReservaResponseDTO reserva =
+                    reservaService.addReserva(request);
+
+            if (reserva == null) {
+                return respuestaError(
+                        Response.Status.INTERNAL_SERVER_ERROR,
+                        "No fue posible registrar la reserva.");
+            }
+
+            return Response.status(Response.Status.CREATED)
+                    .entity(reserva)
+                    .build();
+
+        } catch (PersistenceException e) {
+            return errorPersistencia(e);
+        }
+    }
+
+    // CONSULTAR RESERVAS POR DOCUMENTO DEL CLIENTE
     @Override
     @GET
     @Path("/buscar")
@@ -58,35 +119,53 @@ public class ReservaController implements IReservaController {
             @QueryParam("documento") String documento) {
 
         if (documento == null || documento.isBlank()) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("Debes indicar el documento del cliente.")
-                    .build();
+            return respuestaError(
+                    Response.Status.BAD_REQUEST,
+                    "Debes indicar el documento del cliente.");
         }
 
-        List<ReservaResponseDTO> reservas =
-                reservaService.getReserva(documento);
+        try {
+            List<ReservaResponseDTO> reservas =
+                    reservaService.getReserva(documento.trim());
 
-        return Response.ok(reservas).build();
+            return Response.ok(reservas).build();
+
+        } catch (PersistenceException e) {
+            return errorPersistencia(e);
+        }
     }
 
+    // CONSULTAR RESERVA POR IDENTIFICADOR
     @Override
     @GET
     @Path("/{idReserva}")
     public Response obtenerReserva(
             @PathParam("idReserva") String idReserva) {
 
-        ReservaResponseDTO reserva =
-                reservaService.getReservasPorIdReserva(idReserva);
-
-        if (reserva == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("No se encontró la reserva.")
-                    .build();
+        if (idReserva == null || idReserva.isBlank()) {
+            return respuestaError(
+                    Response.Status.BAD_REQUEST,
+                    "Debes proporcionar el identificador de la reserva.");
         }
 
-        return Response.ok(reserva).build();
+        try {
+            ReservaResponseDTO reserva =
+                    reservaService.getReservasPorIdReserva(idReserva);
+
+            if (reserva == null) {
+                return respuestaError(
+                        Response.Status.NOT_FOUND,
+                        "No se encontró la reserva.");
+            }
+
+            return Response.ok(reserva).build();
+
+        } catch (PersistenceException e) {
+            return errorPersistencia(e);
+        }
     }
 
+    // ACTUALIZAR RESERVA
     @Override
     @PUT
     @Path("/{idReserva}")
@@ -94,53 +173,67 @@ public class ReservaController implements IReservaController {
             @PathParam("idReserva") String idReserva,
             ReservaRequestDTO request) {
 
-        if (request == null) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("Los datos para actualizar son obligatorios.")
-                    .build();
+        if (idReserva == null || idReserva.isBlank()
+                || !validarReserva(request, false)) {
+
+            return respuestaError(
+                    Response.Status.BAD_REQUEST,
+                    "Los datos para actualizar la reserva son inválidos.");
         }
 
-        if (reservaService.getReservasPorIdReserva(idReserva) == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("No se encontró la reserva.")
-                    .build();
+        if (request.getIdReserva() != null
+                && !request.getIdReserva().isBlank()
+                && !idReserva.equals(request.getIdReserva())) {
+
+            return respuestaError(
+                    Response.Status.BAD_REQUEST,
+                    "No se permite modificar el identificador de la reserva.");
         }
 
-        ReservaResponseDTO reserva =
-                reservaService.updateReserva(idReserva, request);
+        try {
+            ReservaResponseDTO reserva =
+                    reservaService.updateReserva(idReserva, request);
 
-        if (reserva == null) {
-            return Response.status(
-                    Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("No fue posible actualizar la reserva.")
-                    .build();
+            if (reserva == null) {
+                return respuestaError(
+                        Response.Status.NOT_FOUND,
+                        "No se encontró la reserva para actualizar.");
+            }
+
+            return Response.ok(reserva).build();
+
+        } catch (PersistenceException e) {
+            return errorPersistencia(e);
         }
-
-        return Response.ok(reserva).build();
     }
 
+    // ELIMINAR RESERVA
     @Override
     @DELETE
     @Path("/{idReserva}")
     public Response eliminarReserva(
             @PathParam("idReserva") String idReserva) {
 
-        if (reservaService.getReservasPorIdReserva(idReserva) == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("No se encontró la reserva.")
-                    .build();
+        if (idReserva == null || idReserva.isBlank()) {
+            return respuestaError(
+                    Response.Status.BAD_REQUEST,
+                    "Debes proporcionar el identificador de la reserva.");
         }
 
-        ReservaResponseDTO reserva =
-                reservaService.deleteReserva(idReserva);
+        try {
+            ReservaResponseDTO reserva =
+                    reservaService.deleteReserva(idReserva);
 
-        if (reserva == null) {
-            return Response.status(
-                    Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("No fue posible eliminar la reserva.")
-                    .build();
+            if (reserva == null) {
+                return respuestaError(
+                        Response.Status.NOT_FOUND,
+                        "No se encontró la reserva.");
+            }
+
+            return Response.ok(reserva).build();
+
+        } catch (PersistenceException e) {
+            return errorPersistencia(e);
         }
-
-        return Response.ok(reserva).build();
     }
 }

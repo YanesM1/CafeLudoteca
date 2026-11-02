@@ -1,6 +1,7 @@
 
 package co.edu.unbosque.services.implementations;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,9 +18,43 @@ public class MesaService implements IMesaService {
     private final IMesaRepository mesaRepository =
             new MesaRepositoryJDBC();
 
+    // VALIDAR DATOS DE LA MESA
+    private boolean validarMesa(
+            MesaRequestDTO request,
+            boolean validarId) {
+
+        if (request == null) {
+            return false;
+        }
+
+        if (validarId &&
+                (request.getIdMesa() == null ||
+                 request.getIdMesa().isBlank())) {
+            return false;
+        }
+
+        if (request.getCapacidad() <= 0) {
+            return false;
+        }
+
+        if (request.getTematica() == null ||
+                request.getTematica().isBlank()) {
+            return false;
+        }
+
+        if (request.getUbicacion() == null ||
+                request.getUbicacion().isBlank()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    // REGISTRAR MESA
     @Override
     public MesaResponseDTO addMesa(MesaRequestDTO request) {
-        if (request == null) {
+
+        if (!validarMesa(request, true)) {
             return null;
         }
 
@@ -32,28 +67,54 @@ public class MesaService implements IMesaService {
         return MesaMapper.toResponse(mesa);
     }
 
+    // CONSULTAR MESAS POR TEMATICA
     @Override
     public List<MesaResponseDTO> getMesa(String tematica) {
-        List<Mesa> mesas = mesaRepository.findByTematica(tematica);
+
+        if (tematica == null || tematica.isBlank()) {
+            return new ArrayList<>();
+        }
+
+        List<Mesa> mesas =
+                mesaRepository.findByTematica(tematica.trim());
 
         return MesaMapper.toResponseList(mesas);
     }
 
+    // CONSULTAR MESA POR IDENTIFICADOR
     @Override
     public MesaResponseDTO getMesasPorIdMesa(String idMesa) {
-        Optional<Mesa> mesa = mesaRepository.findByIdMesa(idMesa);
+
+        if (idMesa == null || idMesa.isBlank()) {
+            return null;
+        }
+
+        Optional<Mesa> mesa =
+                mesaRepository.findByIdMesa(idMesa.trim());
 
         return mesa
                 .map(MesaMapper::toResponse)
                 .orElse(null);
     }
 
+    // ACTUALIZAR MESA
     @Override
     public MesaResponseDTO updateMesa(
             String idMesa,
             MesaRequestDTO request) {
 
-        if (idMesa == null || request == null) {
+        if (idMesa == null || idMesa.isBlank()) {
+            return null;
+        }
+
+        if (!validarMesa(request, false)) {
+            return null;
+        }
+
+        // Evitar modificar accidentalmente la clave primaria
+        if (request.getIdMesa() != null &&
+                !request.getIdMesa().isBlank() &&
+                !idMesa.equals(request.getIdMesa())) {
             return null;
         }
 
@@ -68,9 +129,16 @@ public class MesaService implements IMesaService {
                 .orElse(null);
     }
 
+    // ELIMINAR MESA
     @Override
     public MesaResponseDTO deleteMesa(String idMesa) {
-        Optional<Mesa> mesa = mesaRepository.findByIdMesa(idMesa);
+
+        if (idMesa == null || idMesa.isBlank()) {
+            return null;
+        }
+
+        Optional<Mesa> mesa =
+                mesaRepository.findByIdMesa(idMesa);
 
         if (mesa.isEmpty()) {
             return null;

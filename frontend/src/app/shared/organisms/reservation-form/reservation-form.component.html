@@ -1,0 +1,262 @@
+<section class="reservation-form">
+
+    <header class="reservation-form__header">
+        <span class="reservation-form__eyebrow">CAFÉ & LUDECA</span>
+        <h2>RESERVAS DE MESAS Y JUEGOS</h2>
+        <p>Organiza tu visita y selecciona los juegos que deseas disfrutar.</p>
+    </header>
+
+    @if (loading) {
+
+        <app-loading-state
+            state="loading"
+            title="Cargando reservas"
+            message="Consultando mesas y juegos disponibles."
+        />
+
+    } @else if (errorMessage) {
+
+        <app-loading-state
+            state="error"
+            title="No fue posible cargar la información"
+            [message]="errorMessage"
+            [showRetry]="true"
+            (retry)="onRetry()"
+        />
+
+    } @else {
+
+        <section class="reservation-form__section">
+
+            <div class="reservation-form__section-heading">
+                <span class="reservation-form__number">1.</span>
+                <div>
+                    <h3>Fecha y horario</h3>
+                    <p>Selecciona el día y la hora de tu reserva.</p>
+                </div>
+            </div>
+
+            <app-date-time-picker
+                dateLabel="Fecha"
+                timeLabel="Horario"
+                dateInputId="reservation-date"
+                timeInputId="reservation-time"
+                [date]="date"
+                [time]="time"
+                [minDate]="minDate"
+                [required]="true"
+                (dateChange)="onDateChange($event)"
+                (timeChange)="onTimeChange($event)"
+            />
+
+        </section>
+
+        <section class="reservation-form__section">
+
+            <div class="reservation-form__section-heading">
+                <span class="reservation-form__number">2.</span>
+                <div>
+                    <h3>Selecciona la mesa</h3>
+                    <p>Elige una mesa disponible para tu visita.</p>
+                </div>
+                <app-badge variant="info">
+                    {{ tables.length }} mesas
+                </app-badge>
+            </div>
+
+            <div class="reservation-form__table-field">
+                <app-label
+                    text="Mesa seleccionada"
+                    forId="reservation-table"
+                    [required]="true"
+                />
+
+                <app-select
+                    inputId="reservation-table"
+                    name="mesa"
+                    placeholder="Selecciona una mesa"
+                    [options]="tableOptions"
+                    [value]="selectedTableId"
+                    [required]="true"
+                    (valueChange)="onTableChange($event)"
+                />
+            </div>
+
+            <div class="reservation-form__table-grid">
+
+                @for (table of tables; track table.idMesa) {
+
+                    <button
+                        type="button"
+                        class="reservation-table-card"
+                        [class.reservation-table-card--selected]="selectedTableId === table.idMesa"
+                        [class.reservation-table-card--unavailable]="table.disponible === false"
+                        [disabled]="table.disponible === false"
+                        [attr.aria-pressed]="selectedTableId === table.idMesa"
+                        (click)="onTableChange(table.idMesa)"
+                    >
+
+                        <div class="reservation-table-card__top">
+                            <span class="reservation-table-card__code">
+                                {{ table.idMesa }}
+                            </span>
+
+                            <app-badge
+                                [variant]="table.disponible !== false ? 'success' : 'danger'"
+                            >
+                                {{ table.disponible !== false ? 'Disponible' : 'Ocupada' }}
+                            </app-badge>
+                        </div>
+
+                        <div class="reservation-table-card__diagram">
+                            <span class="reservation-table-card__seat"></span>
+                            <span class="reservation-table-card__seat"></span>
+
+                            <div class="reservation-table-card__center">
+                                <app-icon name="table" [size]="28"/>
+                            </div>
+
+                            <span class="reservation-table-card__seat"></span>
+                            <span class="reservation-table-card__seat"></span>
+                        </div>
+
+                        <strong class="reservation-table-card__name">
+                            {{ table.label }}
+                        </strong>
+
+                        <span class="reservation-table-card__capacity">
+                            <app-icon name="user" [size]="15"/>
+                            Capacidad: {{ table.capacidad }} personas
+                        </span>
+
+                        <span class="reservation-table-card__theme">
+                            {{ table.tematica }}
+                        </span>
+
+                        @if (selectedTableId === table.idMesa) {
+                            <span class="reservation-table-card__selected">
+                                ✓ Mesa seleccionada
+                            </span>
+                        }
+
+                    </button>
+
+                }
+
+            </div>
+
+            @if (selectedTable) {
+                <div class="reservation-form__table-summary">
+                    <app-icon name="check" [size]="22"/>
+                    <div>
+                        <strong>{{ selectedTable.label }}</strong>
+                        <span>
+                            {{ selectedTable.capacidad }} personas ·
+                            {{ selectedTable.tematica }} ·
+                            {{ selectedTable.ubicacion }}
+                        </span>
+                    </div>
+                </div>
+            }
+
+        </section>
+
+        <section class="reservation-form__section">
+
+            <div class="reservation-form__section-heading">
+                <span class="reservation-form__number">3.</span>
+                <div>
+                    <h3>Juegos preseleccionados</h3>
+                    <p>Revisa los juegos que deseas incluir en tu reserva.</p>
+                </div>
+                <app-badge variant="info">
+                    {{ games.length }} juegos
+                </app-badge>
+            </div>
+
+            @if (games.length > 0) {
+
+                <div class="reservation-form__games">
+
+                    @for (game of games; track game.numSerie) {
+
+                        <article class="reservation-game">
+
+                            <div class="reservation-game__info">
+                                <span class="reservation-game__code">
+                                    {{ game.numSerie }}
+                                </span>
+
+                                <strong>{{ game.nombre }}</strong>
+
+                                <app-badge
+                                    [variant]="game.unidadesDisponibles > 0 ? 'success' : 'danger'"
+                                >
+                                    {{ game.unidadesDisponibles > 0 ? 'Disponible' : 'Agotado' }}
+                                </app-badge>
+                            </div>
+
+                            <div class="reservation-game__quantity">
+                                <app-label
+                                    text="Unidades"
+                                    [forId]="'quantity-' + game.numSerie"
+                                />
+
+                                <app-input
+                                    [inputId]="'quantity-' + game.numSerie"
+                                    [name]="'quantity-' + game.numSerie"
+                                    type="number"
+                                    [value]="quantityValue(game)"
+                                    [min]="'1'"
+                                    [max]="maxQuantity(game)"
+                                    [disabled]="game.unidadesDisponibles <= 0"
+                                    ariaLabel="Cantidad de unidades"
+                                    (valueChange)="onQuantityChange(game, $event)"
+                                />
+
+                                <small>
+                                    {{ game.unidadesDisponibles }} disponibles
+                                </small>
+                            </div>
+
+                        </article>
+
+                    }
+
+                </div>
+
+            } @else {
+
+                <app-loading-state
+                    state="empty"
+                    title="No hay juegos preseleccionados"
+                    message="Puedes regresar al catálogo para elegir tus juegos."
+                />
+
+            }
+
+            <div class="reservation-form__summary">
+                <div>
+                    <span>Juegos seleccionados</span>
+                    <strong>{{ games.length }}</strong>
+                </div>
+
+                <div>
+                    <span>Unidades solicitadas</span>
+                    <strong>{{ totalUnits }}</strong>
+                </div>
+            </div>
+
+        </section>
+
+        <footer class="reservation-form__footer">
+            <app-action-buttons
+                [actions]="actions"
+                alignment="end"
+                (actionSelected)="onActionSelected($event)"
+            />
+        </footer>
+
+    }
+
+</section>

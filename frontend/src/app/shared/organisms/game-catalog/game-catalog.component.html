@@ -1,0 +1,134 @@
+<section class="game-catalog">
+
+    <header class="game-catalog__header">
+
+        <div>
+            <h2 class="page-title">
+                BÚSQUEDA DE JUEGOS
+            </h2>
+
+            <p class="game-catalog__description">
+                Explora nuestro catálogo y selecciona tus juegos favoritos.
+            </p>
+        </div>
+
+        <div class="game-catalog__results">
+            <strong>{{ filteredGames.length }}</strong>
+            <span>juegos encontrados</span>
+        </div>
+
+    </header>
+
+    <div class="game-catalog__search">
+
+        <app-search-bar
+            placeholder="Búsqueda de juegos"
+            buttonText="Buscar"
+            [(value)]="searchTerm"
+            (search)="onSearch($event)"
+        />
+
+    </div>
+
+    <div class="game-catalog__filters">
+
+        <app-filter-group
+            [filters]="filters"
+            [(values)]="filterValues"
+        />
+
+    </div>
+
+    <div class="game-catalog__content" aria-live="polite">
+
+        @if (loading) {
+
+            <app-loading-state
+                state="loading"
+                title="Cargando catálogo"
+                message="Estamos consultando los juegos disponibles."
+            />
+
+        } @else if (errorMessage) {
+
+            <app-loading-state
+                state="error"
+                title="No fue posible cargar el catálogo"
+                [message]="errorMessage"
+                [showRetry]="true"
+                (retry)="onRetry()"
+            />
+
+        } @else if (filteredGames.length > 0) {
+
+            <div class="game-catalog__grid">
+
+                @for (game of filteredGames; track game.numSerie) {
+
+                    <app-game-card
+                        [numSerie]="game.numSerie"
+                        [nombre]="game.nombre"
+                        [categoria]="game.categoria"
+                        [imageUrl]="game.imageUrl || ''"
+                        [cantidadMinimaJugador]="game.cantidadMinimaJugador"
+                        [cantidadMaximaJugador]="game.cantidadMaximaJugador"
+                        [edadMinima]="game.edadMinima"
+                        [duracionPartida]="game.duracionPartida"
+                        [unidadesDisponibles]="game.unidadesDisponibles"
+                        [selected]="selectedGameIds.has(game.numSerie)"
+                        (details)="onGameDetails($event)"
+                        (selectionChange)="onSelectionChange($event)"
+                    />
+
+                }
+
+            </div>
+
+        } @else {
+
+            <app-loading-state
+                state="empty"
+                title="No encontramos juegos"
+                message="Modifica la búsqueda o los filtros para encontrar juegos."
+            />
+
+        }
+
+    </div>
+
+    <footer class="game-catalog__selection">
+
+        <div class="game-catalog__selection-info">
+
+            <app-icon name="dice" [size]="25" />
+
+            <div>
+                <strong>
+                    {{ selectedCount }} juegos seleccionados
+                </strong>
+
+                <span>
+                    Preparados para tu reserva
+                </span>
+            </div>
+
+        </div>
+
+        <app-button
+            variant="gold"
+            [disabled]="selectedCount === 0"
+            (click)="onContinueReservation()"
+        >
+            Continuar a reserva
+            <app-icon name="chevron-right" [size]="18" />
+        </app-button>
+
+    </footer>
+
+    <app-game-details-modal
+        [visible]="detailsOpen"
+        [game]="selectedGame"
+        (close)="closeDetails()"
+    />
+
+</section>

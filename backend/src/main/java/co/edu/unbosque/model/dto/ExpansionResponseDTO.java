@@ -9,9 +9,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ExpansionResponseDTO {
-    private int idExpansion;
+    private Integer idExpansion;
     private String nombre;
     private String descripcion;
     private String contenidoAdicional;
+    private String numSerie;
 
 }

@@ -1,0 +1,21 @@
+<section class="reservations-page">
+
+    <app-reservation-form
+        [date]="fecha"
+        [time]="hora"
+        [minDate]="minDate"
+        [selectedTableId]="mesaSeleccionada"
+        [tables]="mesas"
+        [games]="juegos"
+        [loading]="loading"
+        [submitting]="submitting"
+        [errorMessage]="errorMessage"
+        (dateChange)="fecha = $event"
+        (timeChange)="hora = $event"
+        (tableChange)="mesaSeleccionada = $event"
+        (gameQuantityChange)="onGameQuantityChange($event)"
+        (cancel)="onCancel()"
+        (retry)="onRetry()"
+    />
+
+</section>

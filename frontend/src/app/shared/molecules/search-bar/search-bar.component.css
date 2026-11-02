@@ -1,0 +1,22 @@
+:host {
+    display: block;
+    width: 100%;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.search-bar__input {
+    flex: 1;
+    min-width: 0;
+}
+
+@media (max-width: 480px) {
+    .search-bar {
+        gap: 6px;
+    }
+}

@@ -1,0 +1,9 @@
+:host {
+    display: block;
+}
+
+.required-mark {
+    color: var(--cl-danger-light);
+    margin-left: 3px;
+    font-weight: 700;
+}

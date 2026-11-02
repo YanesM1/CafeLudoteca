@@ -12,8 +12,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ElementoJuego {
-    private int idElementoJuego;
+    private Integer idElementoJuego;
     private String elementoJuego;
+    private String numSerie;
 
     @Override
     public boolean equals(Object o) {
@@ -22,14 +23,16 @@ public class ElementoJuego {
         if (o == null || getClass() != o.getClass())
             return false;
 
-        ElementoJuego elementoJuego = (ElementoJuego) o;
+        ElementoJuego elemento = (ElementoJuego) o;
 
-        return idElementoJuego == elementoJuego.idElementoJuego;
+        return idElementoJuego == elemento.idElementoJuego
+                && Objects.equals(elementoJuego, elemento.elementoJuego)
+                && Objects.equals(numSerie, elemento.numSerie);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(idElementoJuego);
+        return Objects.hash(idElementoJuego, elementoJuego, numSerie);
     }
 
 }

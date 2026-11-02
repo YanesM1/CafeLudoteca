@@ -1,0 +1,127 @@
+@if (visible && game) {
+
+    <div class="game-details__backdrop" (click)="onClose()">
+
+        <section
+            class="game-details"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="game-details-title"
+            (click)="$event.stopPropagation()"
+        >
+
+            <header class="game-details__header">
+
+                <div>
+                    <span>CAFÉ & LUDECA</span>
+                    <h2 id="game-details-title">Detalles del juego</h2>
+                </div>
+
+                <button
+                    type="button"
+                    class="game-details__close"
+                    aria-label="Cerrar"
+                    (click)="onClose()"
+                >
+                    ×
+                </button>
+
+            </header>
+
+            <div class="game-details__body">
+
+                <div class="game-details__cover">
+
+                    @if (game.imageUrl) {
+
+                        <img
+                            [src]="game.imageUrl"
+                            [alt]="game.nombre"
+                        />
+
+                    } @else {
+
+                        <app-icon name="dice" [size]="65"/>
+
+                        <strong>{{ game.nombre }}</strong>
+
+                    }
+
+                </div>
+
+                <div class="game-details__information">
+
+                    <span class="game-details__serial">
+                        {{ game.numSerie }}
+                    </span>
+
+                    <h3>{{ game.nombre }}</h3>
+
+                    <app-badge variant="info">
+                        {{ game.categoria }}
+                    </app-badge>
+
+                    <div class="game-details__specifications">
+
+                        <div>
+                            <app-icon name="user" [size]="19"/>
+                            <span>
+                                {{ game.cantidadMinimaJugador }} -
+                                {{ game.cantidadMaximaJugador }} jugadores
+                            </span>
+                        </div>
+
+                        <div>
+                            <app-icon name="clock" [size]="19"/>
+                            <span>
+                                {{ game.duracionPartida }} minutos
+                            </span>
+                        </div>
+
+                        <div>
+                            <app-icon name="user" [size]="19"/>
+                            <span>
+                                Edad mínima: {{ game.edadMinima }}+
+                            </span>
+                        </div>
+
+                        <div>
+                            <app-icon name="dice" [size]="19"/>
+                            <span>
+                                {{ game.unidadesDisponibles }}
+                                unidades disponibles
+                            </span>
+                        </div>
+
+                    </div>
+
+                    <app-badge
+                        [variant]="game.unidadesDisponibles > 0
+                            ? 'success'
+                            : 'danger'"
+                    >
+                        {{ game.unidadesDisponibles > 0
+                            ? 'Disponible para reservar'
+                            : 'Actualmente agotado' }}
+                    </app-badge>
+
+                </div>
+
+            </div>
+
+            <footer class="game-details__footer">
+
+                <app-button
+                    variant="gold"
+                    (click)="onClose()"
+                >
+                    Cerrar
+                </app-button>
+
+            </footer>
+
+        </section>
+
+    </div>
+
+}

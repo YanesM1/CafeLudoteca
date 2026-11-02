@@ -8,8 +8,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClienteFrecuenteResponseDTO {
-    private String documento;
+public class ClienteFrecuenteResponseDTO extends  ClienteResponseDTO{
     private int puntosAcumulados;
     private String nivelFidelidad;
 

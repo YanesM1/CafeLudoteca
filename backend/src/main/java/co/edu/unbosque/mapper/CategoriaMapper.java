@@ -9,6 +9,7 @@ public class CategoriaMapper {
         Categoria categoria=new Categoria();
         categoria.setNumCategoria(dto.getNumCategoria());
         categoria.setCategoria(dto.getCategoria());
+        categoria.setNumSerie(dto.getNumSerie());
         return categoria;
     }
 
@@ -16,6 +17,7 @@ public class CategoriaMapper {
         CategoriaResponseDTO dto=new CategoriaResponseDTO();
         dto.setNumCategoria(categoria.getNumCategoria());
         dto.setCategoria(categoria.getCategoria());
+        dto.setNumSerie(categoria.getNumSerie());
         return dto;
 
 

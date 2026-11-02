@@ -1,0 +1,22 @@
+<div class="client-layout">
+
+    <app-navbar
+        [brand]="brand"
+        [homeRoute]="'/inicio'"
+        [links]="navigationLinks"
+        [showCartButton]="false"
+        [showUserButton]="false"
+        (actionSelected)="onNavbarAction($event)"
+    />
+
+    <main class="client-layout__main">
+
+        <div class="client-layout__content">
+
+            <router-outlet />
+
+        </div>
+
+    </main>
+
+</div>

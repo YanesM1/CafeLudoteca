@@ -11,5 +11,6 @@ import lombok.Setter;
 public class CategoriaRequestDTO {
     private int numCategoria;
     private String categoria;
+    private String numSerie;
 
 }

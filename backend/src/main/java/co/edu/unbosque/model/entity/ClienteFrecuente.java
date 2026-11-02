@@ -10,9 +10,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClienteFrecuente {
-
-    private String documento; // PK FK
+public class ClienteFrecuente extends Cliente{
     private int puntosAcumulados;
     private String nivelFidelidad;
 
@@ -22,21 +20,14 @@ public class ClienteFrecuente {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ClienteFrecuente that = (ClienteFrecuente) o;
-        return Objects.equals(documento, that.documento);
+        return Objects.equals(this.getDocumento(), that.getDocumento());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(documento);
+        return Objects.hash(getDocumento());
     }
 
-    @Override
-    public String toString() {
-        return "ClienteFrecuente{" +
-                "documento='" + documento + '\'' +
-                ", puntosAcumulados=" + puntosAcumulados +
-                ", nivelFidelidad='" + nivelFidelidad + '\'' +
-                '}';
-    }
+   
 
 }

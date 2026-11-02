@@ -1,0 +1,10 @@
+:host {
+    display: block;
+    width: 100%;
+}
+
+.form-error {
+    color: var(--cl-danger-light);
+    font-size: var(--cl-text-xs);
+    margin-top: 2px;
+}

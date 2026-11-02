@@ -1,1 +1,555 @@
-/* You can add global styles to this file, and also import other style files */
+
+/* 1. VARIABLES GLOBALES */
+
+:root {
+    --cl-bg: #0B1020;
+    --cl-bg-secondary: #101729;
+
+    --cl-surface: #1B1F2C;
+    --cl-surface-secondary: #252B3A;
+    --cl-surface-input: #111827;
+
+    --cl-purple: #3A1F4D;
+    --cl-purple-light: #56336B;
+    --cl-purple-dark: #261536;
+
+    --cl-cyan: #25D5E5;
+    --cl-cyan-dark: #1496A8;
+
+    --cl-gold: #D6B65E;
+    --cl-gold-dark: #A88B3D;
+
+    --cl-danger: #A32154;
+    --cl-danger-light: #D13D70;
+
+    --cl-success: #39C98A;
+    --cl-warning: #E8B95B;
+
+    --cl-text: #F3F4F6;
+    --cl-text-secondary: #C4C9D2;
+    --cl-text-muted: #8993A4;
+
+    --cl-border: #465366;
+    --cl-border-cyan: rgba(37, 213, 229, 0.65);
+    --cl-border-purple: rgba(86, 51, 107, 0.8);
+
+    --cl-font: 'Roboto Condensed', 'Arial Narrow', 'Segoe UI', sans-serif;
+
+    --cl-text-xs: 12px;
+    --cl-text-sm: 14px;
+    --cl-text-md: 16px;
+    --cl-text-lg: 20px;
+    --cl-text-xl: 26px;
+    --cl-text-title: 32px;
+
+    --cl-space-1: 4px;
+    --cl-space-2: 8px;
+    --cl-space-3: 12px;
+    --cl-space-4: 16px;
+    --cl-space-5: 24px;
+    --cl-space-6: 32px;
+    --cl-space-7: 48px;
+
+    --cl-radius-sm: 6px;
+    --cl-radius-md: 10px;
+    --cl-radius-lg: 16px;
+    --cl-radius-xl: 22px;
+
+    --cl-glow-cyan:
+        0 0 8px rgba(37, 213, 229, 0.25),
+        0 0 18px rgba(37, 213, 229, 0.10);
+
+    --cl-glow-purple:
+        0 0 12px rgba(86, 51, 107, 0.30);
+
+    --cl-glow-gold:
+        0 0 12px rgba(214, 182, 94, 0.25);
+
+    --cl-transition: 0.2s ease;
+
+    --cl-container-width: 1440px;
+}
+
+
+/* 2. RESET GLOBAL */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    min-height: 100%;
+    scroll-behavior: smooth;
+}
+
+body {
+    min-height: 100vh;
+    width: 100%;
+
+    background:
+        radial-gradient(
+            circle at 15% 10%,
+            rgba(58, 31, 77, 0.20),
+            transparent 35%
+        ),
+        radial-gradient(
+            circle at 90% 90%,
+            rgba(37, 213, 229, 0.06),
+            transparent 35%
+        ),
+        var(--cl-bg);
+
+    color: var(--cl-text);
+    font-family: var(--cl-font);
+    font-size: var(--cl-text-md);
+    line-height: 1.5;
+
+    overflow-x: hidden;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+}
+
+ul,
+ol {
+    list-style: none;
+}
+
+
+/* 3. ESTRUCTURA GENERAL */
+
+.app-shell {
+    width: 100%;
+    min-height: 100vh;
+}
+
+.page-container {
+    width: min(100% - 40px, var(--cl-container-width));
+    margin: 0 auto;
+    padding: var(--cl-space-5) 0;
+}
+
+.panel {
+    background: var(--cl-surface);
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius-md);
+    padding: var(--cl-space-5);
+}
+
+.panel--cyan {
+    border-color: var(--cl-border-cyan);
+    box-shadow: var(--cl-glow-cyan);
+}
+
+.panel--purple {
+    border-color: var(--cl-border-purple);
+    box-shadow: var(--cl-glow-purple);
+}
+
+
+/* 4. TITULOS Y TEXTOS */
+
+.page-title {
+    color: var(--cl-text);
+    font-size: var(--cl-text-title);
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    margin-bottom: var(--cl-space-5);
+}
+
+.section-title {
+    color: var(--cl-cyan);
+    font-size: var(--cl-text-lg);
+    font-weight: 600;
+    margin-bottom: var(--cl-space-4);
+}
+
+.text-secondary {
+    color: var(--cl-text-secondary);
+}
+
+.text-muted {
+    color: var(--cl-text-muted);
+}
+
+
+/* 5. BOTONES */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--cl-space-2);
+
+    padding: 9px 18px;
+
+    border: 1px solid transparent;
+    border-radius: var(--cl-radius-sm);
+
+    font-size: var(--cl-text-sm);
+    font-weight: 600;
+
+    transition:
+        background var(--cl-transition),
+        border-color var(--cl-transition),
+        box-shadow var(--cl-transition),
+        transform var(--cl-transition);
+}
+
+.btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+.btn--primary {
+    background: var(--cl-purple);
+    color: white;
+    border-color: var(--cl-cyan);
+    box-shadow: var(--cl-glow-cyan);
+}
+
+.btn--secondary {
+    background: var(--cl-surface-secondary);
+    color: var(--cl-text);
+    border-color: var(--cl-border);
+}
+
+.btn--gold {
+    background: linear-gradient(
+        135deg,
+        var(--cl-gold-dark),
+        var(--cl-gold)
+    );
+    color: #171421;
+    border-color: var(--cl-gold);
+    box-shadow: var(--cl-glow-gold);
+}
+
+.btn--danger {
+    background: var(--cl-danger);
+    color: white;
+    border-color: var(--cl-danger-light);
+}
+
+.btn--ghost {
+    background: transparent;
+    color: var(--cl-cyan);
+    border-color: var(--cl-border-cyan);
+}
+
+.btn:focus-visible {
+    outline: 2px solid var(--cl-cyan);
+    outline-offset: 3px;
+}
+
+
+/* 6. FORMULARIOS */
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+}
+
+.form-label {
+    color: var(--cl-text-secondary);
+    font-size: var(--cl-text-sm);
+    font-weight: 600;
+}
+
+.form-control {
+    width: 100%;
+    min-height: 40px;
+    padding: 9px 12px;
+
+    background: var(--cl-surface-input);
+    color: var(--cl-text);
+
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius-sm);
+
+    outline: none;
+
+    transition:
+        border-color var(--cl-transition),
+        box-shadow var(--cl-transition);
+}
+
+.form-control:focus {
+    border-color: var(--cl-cyan);
+    box-shadow: var(--cl-glow-cyan);
+}
+
+.form-control::placeholder {
+    color: var(--cl-text-muted);
+}
+
+.form-control:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+textarea.form-control {
+    min-height: 120px;
+    resize: vertical;
+}
+
+select.form-control {
+    cursor: pointer;
+}
+
+
+/* 7. INDICADORES DE ESTADO */
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 4px 10px;
+
+    border-radius: 20px;
+
+    font-size: var(--cl-text-xs);
+    font-weight: 600;
+}
+
+.badge--success {
+    color: var(--cl-success);
+    background: rgba(57, 201, 138, 0.12);
+}
+
+.badge--warning {
+    color: var(--cl-warning);
+    background: rgba(232, 185, 91, 0.12);
+}
+
+.badge--danger {
+    color: var(--cl-danger-light);
+    background: rgba(163, 33, 84, 0.15);
+}
+
+.badge--info {
+    color: var(--cl-cyan);
+    background: rgba(37, 213, 229, 0.12);
+}
+
+
+/* 8. EFECTOS VISUALES */
+
+.glow-cyan {
+    box-shadow: var(--cl-glow-cyan);
+}
+
+.glow-purple {
+    box-shadow: var(--cl-glow-purple);
+}
+
+.glow-gold {
+    box-shadow: var(--cl-glow-gold);
+}
+
+
+/* 9. SCROLLBAR */
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--cl-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--cl-purple-light);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--cl-cyan-dark);
+}
+
+
+/* 10. SELECCION DE TEXTO */
+
+::selection {
+    background: var(--cl-purple-light);
+    color: white;
+}
+
+
+/* 11. ACCESIBILIDAD */
+
+:focus-visible {
+    outline: 2px solid var(--cl-cyan);
+    outline-offset: 2px;
+}
+
+
+/* 12. RESPONSIVE */
+
+@media (max-width: 768px) {
+
+    .page-container {
+        width: calc(100% - 24px);
+        padding: var(--cl-space-4) 0;
+    }
+
+    .page-title {
+        font-size: var(--cl-text-xl);
+    }
+
+    .panel {
+        padding: var(--cl-space-4);
+    }
+
+    .btn {
+        padding: 9px 13px;
+    }
+}
+
+/* 11. AJUSTES GENERALES DE ESCRITORIO */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    min-height: 100%;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+app-root {
+    display: block;
+    width: 100%;
+    min-height: 100vh;
+}
+
+.client-layout,
+.employee-layout,
+.admin-layout {
+    width: 100%;
+    min-width: 0;
+    min-height: 100vh;
+    overflow-x: clip;
+}
+
+.client-layout__main,
+.employee-layout__main,
+.admin-layout__main {
+    width: 100%;
+    min-width: 0;
+}
+
+.client-layout__content,
+.employee-layout__content,
+.admin-layout__content {
+    width: 100%;
+    min-width: 0;
+    max-width: 1600px;
+    margin-inline: auto;
+}
+
+.home-page,
+.reservations-page,
+.loans-page,
+.memberships-page {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.home-hero,
+.home-services,
+.home-cta,
+.reservation-form,
+.loan-form,
+.membership-table {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.loan-form__columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+}
+
+.loan-panel {
+    min-width: 0;
+    padding: clamp(14px, 1.6vw, 24px);
+}
+
+.loan-panel__fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.membership-table__container {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.membership-table__scroll {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.membership-table table {
+    width: 100%;
+}
+
+.reservation-form__table-grid {
+    width: 100%;
+    min-width: 0;
+}
+
+.reservation-game {
+    min-width: 0;
+}
+
+.navbar__container {
+    width: calc(100% - 40px);
+    max-width: 1600px;
+    margin-inline: auto;
+}
+
+@media (max-width: 1100px) {
+    .loan-form__columns {
+        grid-template-columns: 1fr;
+    }
+
+    .reservation-form__table-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}

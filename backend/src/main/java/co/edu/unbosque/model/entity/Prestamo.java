@@ -13,13 +13,15 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Prestamo {
-    private int idPrestamo;
+    private Integer idPrestamo;
     private LocalDate fechaSalida;
     private String estadoComponentes;
     private String tipoPrestamo;
     private LocalDate fechaDevolucion;
+    private String documentoEmpleado;
+    private String documentoCliente;
 
-    @Override
+     @Override
     public boolean equals(Object o) {
         if (this == o)
             return true;
@@ -28,12 +30,15 @@ public class Prestamo {
 
         Prestamo prestamo = (Prestamo) o;
 
-        return idPrestamo == prestamo.idPrestamo;
+        return idPrestamo == prestamo.idPrestamo
+                && Objects.equals(documentoEmpleado, prestamo.documentoEmpleado)
+                && Objects.equals(documentoCliente, prestamo.documentoCliente);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(idPrestamo);
+        return Objects.hash(idPrestamo, documentoEmpleado, documentoCliente);
     }
+
 
 }

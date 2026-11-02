@@ -12,22 +12,24 @@ import co.edu.unbosque.services.interfaces.IUnidadJuegoService;
 
 public class UnidadJuegoService implements IUnidadJuegoService {
 
-    private final IUnidadJuegoRepository unidadJuegoRepository =
-     new UnidadJuegoRepositoryJDBC();
+    private final IUnidadJuegoRepository unidadJuegoRepository = new UnidadJuegoRepositoryJDBC();
+    private final UnidadJuegoMapper unidadJuegoMapper = new UnidadJuegoMapper();
 
-     private final UnidadJuegoMapper unidadJuegoMapper=new UnidadJuegoMapper();
+    private boolean validarUnidadJuego(UnidadJuegoRequestDTO request) {
 
-
-       private boolean validarUnidadJuego(UnidadJuegoRequestDTO request){
-
-        if(request==null){
+        if (request == null) {
             return false;
         }
 
-        if(request.getCodigo()==null|| request.getCodigo().isBlank()){
+        if (request.getCodigo() == null || request.getCodigo().isBlank()) {
             return false;
         }
-        if(request.getEstado()==null|| request.getEstado().isBlank()){
+
+        if (request.getNumSerie() == null || request.getNumSerie().isBlank()) {
+            return false;
+        }
+
+        if (request.getEstado() == null || request.getEstado().isBlank()) {
             return false;
         }
 
@@ -35,8 +37,10 @@ public class UnidadJuegoService implements IUnidadJuegoService {
     }
 
     @Override
-    public UnidadJuegoResponseDTO addUnidadJuego(UnidadJuegoRequestDTO request) {
-       if (!validarUnidadJuego(request)) {
+    public UnidadJuegoResponseDTO addUnidadJuego(
+            UnidadJuegoRequestDTO request) {
+
+        if (!validarUnidadJuego(request)) {
             return null;
         }
 
@@ -50,8 +54,9 @@ public class UnidadJuegoService implements IUnidadJuegoService {
     }
 
     @Override
-    public UnidadJuegoResponseDTO findByCodigo(String codigo) {
-        Optional<UnidadJuego> unidad = unidadJuegoRepository.findByCodigo(codigo);
+    public UnidadJuegoResponseDTO findByCodigo(String codigo, String numSerie) {
+
+        Optional<UnidadJuego> unidad = unidadJuegoRepository.findByCodigo(codigo, numSerie);
 
         if (unidad.isEmpty()) {
             return null;
@@ -61,15 +66,41 @@ public class UnidadJuegoService implements IUnidadJuegoService {
     }
 
     @Override
-    public UnidadJuegoResponseDTO updateUnidadJuego(String codigo, UnidadJuegoRequestDTO request) {
-        // TODO Auto-generated method stub
-        return null;
+    public UnidadJuegoResponseDTO updateUnidadJuego(String codigo, String numSerie, UnidadJuegoRequestDTO request) {
+
+        if (!validarUnidadJuego(request)) {
+            return null;
+        }
+
+        UnidadJuego unidadJuego = unidadJuegoMapper.unidadJuegoRequestDTOToUnidadJuego(request);
+
+        if (!unidadJuegoRepository.updateUnidadJuego(codigo, numSerie, unidadJuego)) {
+            return null;
+        }
+
+        Optional<UnidadJuego> actualizada = unidadJuegoRepository.findByCodigo(codigo, numSerie);
+
+        if (actualizada.isEmpty()) {
+            return null;
+        }
+
+        return unidadJuegoMapper.unidadJuegoToUnidadJuegoResponseDTO(actualizada.get());
     }
 
     @Override
-    public UnidadJuegoResponseDTO deleteUnidadJuego(String codigo) {
-        // TODO Auto-generated method stub
-        return null;
+    public UnidadJuegoResponseDTO deleteUnidadJuego(String codigo, String numSerie) {
+
+        Optional<UnidadJuego> unidad = unidadJuegoRepository.findByCodigo(codigo, numSerie);
+
+        if (unidad.isEmpty()) {
+            return null;
+        }
+
+        if (!unidadJuegoRepository.deleteUnidadJuego(codigo, numSerie)) {
+            return null;
+        }
+
+        return unidadJuegoMapper.unidadJuegoToUnidadJuegoResponseDTO(unidad.get());
     }
 
-}// fin class
+}

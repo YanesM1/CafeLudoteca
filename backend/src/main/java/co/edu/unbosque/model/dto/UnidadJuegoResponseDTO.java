@@ -12,5 +12,6 @@ public class UnidadJuegoResponseDTO {
     private String codigo;
     private String estado;
     private String observaciones;
+    private String numSerie;
 
 }

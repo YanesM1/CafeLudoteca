@@ -1,0 +1,92 @@
+<header class="navbar">
+
+    <div class="navbar__container">
+
+        <a
+            class="navbar__brand"
+            [routerLink]="homeRoute"
+            (click)="closeMenu()"
+        >
+
+            <span class="navbar__logo">
+                CL
+            </span>
+
+            <span class="navbar__brand-name">
+                {{ brand }}
+            </span>
+
+        </a>
+
+        <button
+            type="button"
+            class="navbar__menu-toggle"
+            [attr.aria-expanded]="menuOpen"
+            aria-label="Abrir menú de navegación"
+            (click)="toggleMenu()"
+        >
+            <span>{{ menuOpen ? '✕' : '☰' }}</span>
+        </button>
+
+        <nav
+            class="navbar__navigation"
+            [class.navbar__navigation--open]="menuOpen"
+            aria-label="Navegación principal"
+        >
+
+            @for (link of links; track link.route) {
+
+                <a
+                    class="navbar__link"
+                    [routerLink]="link.route"
+                    routerLinkActive="navbar__link--active"
+                    [routerLinkActiveOptions]="{ exact: link.exact === true }"
+                    (click)="closeMenu()"
+                >
+                    {{ link.label }}
+                </a>
+
+            }
+
+        </nav>
+
+        <div class="navbar__actions">
+
+            @if (showCartButton) {
+
+                <button
+                    type="button"
+                    class="navbar__action"
+                    (click)="onCartClick()"
+                >
+                    <span class="navbar__action-icon">🛒</span>
+                    <span>Carrito</span>
+
+                    @if (cartCount > 0) {
+                        <span class="navbar__cart-count">
+                            {{ cartCount }}
+                        </span>
+                    }
+
+                </button>
+
+            }
+
+            @if (showUserButton) {
+
+                <button
+                    type="button"
+                    class="navbar__user"
+                    (click)="onUserClick()"
+                >
+                    <span class="navbar__user-icon">●</span>
+                    <span>{{ userLabel }}</span>
+                </button>
+
+            }
+
+        </div>
+
+    </div>
+
+</header>

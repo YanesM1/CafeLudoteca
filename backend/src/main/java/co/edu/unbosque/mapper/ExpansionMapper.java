@@ -12,16 +12,18 @@ public class ExpansionMapper{
         expansion.setNombre(dto.getNombre());
         expansion.setDescripcion(dto.getDescripcion());
         expansion.setContenidoAdicional(dto.getContenidoAdicional());
+        expansion.setNumSerie(dto.getNumSerie());
         return expansion;
         
     }
 
-    public ExpansionResponseDTO expansionTodto(Expansion expansion){
+    public ExpansionResponseDTO expansionToExpansionResponseDTO(Expansion expansion){
         ExpansionResponseDTO dto=new ExpansionResponseDTO();
         dto.setIdExpansion(expansion.getIdExpansion());
         dto.setNombre(expansion.getNombre());
         dto.setDescripcion(expansion.getDescripcion());
         dto.setContenidoAdicional(expansion.getDescripcion());
+        dto.setNumSerie(expansion.getNumSerie());
         return dto;
     }
 }

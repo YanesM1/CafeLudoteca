@@ -1,0 +1,27 @@
+:host {
+    display: block;
+    width: 100%;
+}
+
+.loans-page {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+}
+
+.loans-page__notification {
+    position: fixed;
+    top: 95px;
+    right: 24px;
+    z-index: 2500;
+    width: min(420px, calc(100% - 48px));
+}
+
+@media (max-width: 520px) {
+    .loans-page__notification {
+        top: 85px;
+        right: 12px;
+        width: calc(100% - 24px);
+    }
+}

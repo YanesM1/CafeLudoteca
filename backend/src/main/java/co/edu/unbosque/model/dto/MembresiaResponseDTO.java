@@ -11,12 +11,12 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MembresiaResponseDTO {
-    private String idMembresia;
+    private int idMembresia;
     private String plan;
     private String estado;
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
-    private String documento;
+    private String docuemnto;
     private double tarifa;
 
 }

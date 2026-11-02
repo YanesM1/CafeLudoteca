@@ -1,0 +1,20 @@
+<div class="admin-layout">
+
+    <app-navbar
+        [brand]="brand"
+        [homeRoute]="'/admin/membresias'"
+        [links]="navigationLinks"
+        [showCartButton]="false"
+        [showUserButton]="true"
+        [userLabel]="userLabel"
+    />
+
+    <main class="admin-layout__main">
+
+        <div class="admin-layout__content">
+            <router-outlet />
+        </div>
+
+    </main>
+
+</div>
