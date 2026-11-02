@@ -41,7 +41,7 @@ public class CategoriaController implements  ICategoriaController{
 
 @Override
 @GET 
-@Path("/buscar/{categoria}") 
+@Path("/{categoria}") 
 public Response buscarPorCategoria(@PathParam ("categoria") String categoria) {
          List<CategoriaResponseDTO>categorias=categoriaService.getCategoria(categoria);
         return Response.ok(categorias).build();
@@ -50,7 +50,7 @@ public Response buscarPorCategoria(@PathParam ("categoria") String categoria) {
 
 @Override
 @GET 
-@Path("/buscar_num_categoria/{num_categoria}/{num_serie}")
+@Path("/{num_categoria}/{num_serie}")
 public Response buscarPorNumCategoria(@PathParam ("num_categoria") Integer numCategoria, 
 @PathParam ("num_serie") String numSerie) {
      CategoriaResponseDTO categoriaJ=categoriaService.getCategoriaNumSerie(numCategoria, numSerie);
@@ -77,7 +77,7 @@ public Response actualizarCategoria(@PathParam ("num_categoria") Integer numCate
 
 @Override
   @DELETE 
-  @Path("/borrar/{num_categoria}/{num_serie}")
+  @Path("/{num_categoria}/{num_serie}")
 public Response borrarCategoria(@PathParam ("num_categoria") Integer numCategoria, @PathParam ("num_serie") String numSerie) {
      CategoriaResponseDTO categoriaJ=categoriaService.deleteCategoria(numCategoria, numSerie);
     if(categoriaJ==null){
