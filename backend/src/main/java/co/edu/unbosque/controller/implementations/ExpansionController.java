@@ -41,13 +41,13 @@ public Response guardarExpansion(ExpansionRequestDTO request) {
 }
 
 
-@Override
-@GET 
-@Path("/buscar") 
-public Response buscarPorNombre(String nombre) {
-   List<ExpansionResponseDTO>expansiones=expansionService.getExpansion(nombre);
-        return Response.ok(expansiones).build();
+@GET
+@Path("/buscar/{nombre}")
+public Response buscarPorNombre(@PathParam("nombre") String nombre) {
+    List<ExpansionResponseDTO> expansiones = expansionService.getExpansion(nombre);
+    return Response.ok(expansiones).build();
 }
+
     
 
 @Override
@@ -66,7 +66,8 @@ public Response buscarPorIdExpansion(@PathParam("id_expansion") Integer idExpans
 @Override
 @PUT 
 @Path("/actualizar/{id_expansion}")
-public Response actualizarExpansion(@PathParam("id_expansion") Integer idExpansion, ExpansionRequestDTO request) {
+public Response actualizarExpansion(@PathParam("id_expansion") Integer idExpansion, 
+ExpansionRequestDTO request) {
     ExpansionResponseDTO expansionJ=expansionService.updateExpansion(idExpansion, request);
       if(expansionJ==null){
         return Response.status(Response.Status.NOT_FOUND)
