@@ -2,6 +2,8 @@
 package co.edu.unbosque.repository.implementations;
 
 import java.sql.Connection;
+import java.sql.Date;
+import java.time.LocalDate;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -41,6 +43,46 @@ public class MesaRepositoryJDBC implements IMesaRepository {
         } catch (SQLException e) {
             throw new PersistenceException(
                     "Error al registrar la mesa", e);
+        }
+    }
+
+    @Override
+    public List<Mesa> findAll() {
+        List<Mesa> mesas = new ArrayList<>();
+        String sql = "SELECT id_mesa, capacidad, tematica, ubicacion FROM MESA";
+        try (Connection conexion = ConnectionBD.obtenerConexion();
+             PreparedStatement statement = conexion.prepareStatement(sql);
+             ResultSet resultado = statement.executeQuery()) {
+            while (resultado.next()) mesas.add(mapearMesa(resultado));
+            return mesas;
+        } catch (SQLException e) {
+            throw new PersistenceException("Error al listar mesas", e);
+        }
+    }
+
+    @Override
+    public List<Mesa> findDisponibles(LocalDate fecha, String horario) {
+        List<Mesa> mesas = new ArrayList<>();
+        String sql = """
+            SELECT m.id_mesa, m.capacidad, m.tematica, m.ubicacion
+            FROM MESA m
+            WHERE NOT EXISTS (
+                SELECT 1 FROM RESERVA r
+                WHERE r.MESA_id_mesa = m.id_mesa
+                  AND r.fecha = ?
+                  AND r.horario = ?
+            )
+            """;
+        try (Connection c = ConnectionBD.obtenerConexion();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setDate(1, Date.valueOf(fecha));
+            ps.setString(2, horario);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) mesas.add(mapearMesa(rs));
+            }
+            return mesas;
+        } catch (SQLException e) {
+            throw new PersistenceException("Error al consultar mesas disponibles", e);
         }
     }
 

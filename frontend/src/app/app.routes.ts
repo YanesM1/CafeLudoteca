@@ -14,9 +14,17 @@ import { LoansPageComponent } from './features/loans/pages/loans-page/loans-page
 import { MembershipsPageComponent } from './features/memberships/pages/memberships-page/memberships-page.component';
 import { ClientsPageComponent } from './features/clients/pages/clients-page/clients-page.component';
 import { EmployeesPageComponent } from './features/employees/pages/employees-page/employees-page.component';
+import { SociosPageComponent } from './features/socios/pages/socios-page/socios-page.component';
+import { GamesPageComponent } from './features/inventory/pages/games-page/games-page.component';
+import { ExpansionsPageComponent } from './features/inventory/pages/expansions-page/expansions-page.component';
+import { ElementsPageComponent } from './features/inventory/pages/elements-page/elements-page.component';
+import { UnitsPageComponent } from './features/inventory/pages/units-page/units-page.component';
+import { TablesPageComponent } from './features/inventory/pages/tables-page/tables-page.component';
+import { CategoriesPageComponent } from './features/inventory/pages/categories-page/categories-page.component';
 
 import { RoleSelectionPageComponent } from './features/role-selection/pages/role-selection-page/role-selection-page.component';
 
+import { RelationshipAdminPageComponent } from './features/relationships/pages/relationship-admin-page/relationship-admin-page.component';
 export const routes: Routes = [
     { path: '', component: RoleSelectionPageComponent, pathMatch: 'full' },
 
@@ -74,6 +82,8 @@ export const routes: Routes = [
         component: EmployeeLayoutComponent,
         children: [
             { path: '', redirectTo: 'prestamos', pathMatch: 'full' },
+            { path: 'catalogo', component: CatalogPageComponent },
+            { path: 'reservas', component: ReservationsPageComponent },
             { path: 'prestamos', component: LoansPageComponent },
             { path: 'auditoria', component: LoansPageComponent }
         ]
@@ -83,11 +93,20 @@ export const routes: Routes = [
         path: 'admin',
         component: AdminLayoutComponent,
         children: [
-            { path: '', redirectTo: 'membresias', pathMatch: 'full' },
+            { path: '', redirectTo: 'clientes', pathMatch: 'full' },
             { path: 'clientes', component: ClientsPageComponent },
             { path: 'empleados', component: EmployeesPageComponent },
-            { path: 'socios', component: MembershipsPageComponent },
-            { path: 'membresias', component: MembershipsPageComponent }
+            { path: 'socios', component: SociosPageComponent },
+            { path: 'membresias', component: MembershipsPageComponent },
+            { path: 'relaciones/beneficios', component: RelationshipAdminPageComponent, data: { kind: 'beneficios' } },
+            { path: 'relaciones/clientes-frecuentes', component: RelationshipAdminPageComponent, data: { kind: 'frecuentes' } },
+            { path: 'relaciones/telefonos', component: RelationshipAdminPageComponent, data: { kind: 'telefonos' } },
+            { path: 'inventario/juegos', component: GamesPageComponent },
+            { path: 'inventario/categorias', component: CategoriesPageComponent },
+            { path: 'inventario/expansiones', component: ExpansionsPageComponent },
+            { path: 'inventario/elementos', component: ElementsPageComponent },
+            { path: 'inventario/unidades', component: UnitsPageComponent },
+            { path: 'operacion/mesas', component: TablesPageComponent }
         ]
     },
 

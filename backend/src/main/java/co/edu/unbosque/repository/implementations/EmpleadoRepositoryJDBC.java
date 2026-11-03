@@ -45,6 +45,21 @@ public class EmpleadoRepositoryJDBC implements IEmpleadoRepository {
         }
     }
 
+
+    @Override
+    public List<Empleado> findAll() {
+        List<Empleado> lista=new ArrayList<>();
+        String sql="SELECT documento_emp,cargo,nombre,apellido,correo FROM EMPLEADO ORDER BY apellido,nombre";
+        try(Connection c=ConnectionBD.obtenerConexion();
+            PreparedStatement ps=c.prepareStatement(sql);
+            ResultSet rs=ps.executeQuery()) {
+            while(rs.next()) lista.add(mapearEmpleado(rs));
+            return lista;
+        } catch(SQLException e) {
+            throw new PersistenceException("Error al listar empleados",e);
+        }
+    }
+
     // BUSCAR EMPLEADOS POR NOMBRE
     @Override
     public List<Empleado> findByNombre(String nombre) {

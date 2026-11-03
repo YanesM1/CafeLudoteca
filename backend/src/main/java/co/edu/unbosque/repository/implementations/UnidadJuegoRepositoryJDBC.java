@@ -161,4 +161,26 @@ public class UnidadJuegoRepositoryJDBC implements IUnidadJuegoRepository {
         return resultado;
     }
 
+
+    @Override
+    public List<UnidadJuego> findDisponibles() {
+        List<UnidadJuego> lista = new ArrayList<>();
+        String sql = "SELECT codigo,estado,observaciones,num_serie FROM UNIDAD_JUEGO WHERE UPPER(TRIM(estado))='DISPONIBLE' ORDER BY num_serie,codigo";
+        try (Connection c=ConnectionBD.obtenerConexion();
+             PreparedStatement ps=c.prepareStatement(sql);
+             ResultSet rs=ps.executeQuery()) {
+            while(rs.next()) {
+                UnidadJuego u=new UnidadJuego();
+                u.setCodigo(rs.getString("codigo"));
+                u.setEstado(rs.getString("estado"));
+                u.setObservaciones(rs.getString("observaciones"));
+                u.setNumSerie(rs.getString("num_serie"));
+                lista.add(u);
+            }
+            return lista;
+        } catch(SQLException e) {
+            throw new PersistenceException("Error al listar unidades disponibles",e);
+        }
+    }
+
 }

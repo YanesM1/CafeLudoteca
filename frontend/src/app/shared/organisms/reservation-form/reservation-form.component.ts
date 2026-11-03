@@ -112,7 +112,8 @@ export class ReservationFormComponent {
             && this.selectedTable.disponible !== false
             && !this.submitting
             && !this.loading
-            && !this.errorMessage;
+            && !this.errorMessage
+            && this.games.some(game => game.unidadesDisponibles > 0);
     }
 
     get totalUnits(): number {

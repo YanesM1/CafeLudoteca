@@ -12,5 +12,6 @@ public class BeneficioRequestDTO {
      private Integer idBeneficio;
      private String beneficio;
      private Integer idMembresia;
+    private String documentoSocio;
 
 }

@@ -1,167 +1,86 @@
-
 package co.edu.unbosque.services.implementations;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
+import java.util.*;
 import co.edu.unbosque.mapper.PrestamoMapper;
-import co.edu.unbosque.model.dto.PrestamoRequestDTO;
-import co.edu.unbosque.model.dto.PrestamoResponseDTO;
+import co.edu.unbosque.model.dto.*;
 import co.edu.unbosque.model.entity.Prestamo;
 import co.edu.unbosque.repository.implementations.PrestamoRepositoryJDBC;
 import co.edu.unbosque.repository.interfaces.IPrestamoRepository;
 import co.edu.unbosque.services.interfaces.IPrestamoServicio;
 
 public class PrestamoServicio implements IPrestamoServicio {
+    private final IPrestamoRepository repository=new PrestamoRepositoryJDBC();
+    private final PrestamoMapper mapper=new PrestamoMapper();
 
-    private final IPrestamoRepository prestamoRepository = new PrestamoRepositoryJDBC();
-    private final PrestamoMapper prestamoMapper = new PrestamoMapper();
+    private boolean validar(PrestamoRequestDTO r) {
+        return r!=null && r.getFechaSalida()!=null
+            && r.getFechaDevolucion()!=null
+            && !r.getFechaDevolucion().isBefore(r.getFechaSalida())
+            && r.getDocumentoCliente()!=null && !r.getDocumentoCliente().isBlank()
+            && r.getDocumentoEmp()!=null && !r.getDocumentoEmp().isBlank()
+            && r.getTipoPrestamo()!=null && !r.getTipoPrestamo().isBlank()
+            && r.getCodigoUnidad()!=null && !r.getCodigoUnidad().isBlank()
+            && r.getNumSerieUnidad()!=null && !r.getNumSerieUnidad().isBlank();
+    }
 
-    private boolean validarPrestamo(PrestamoRequestDTO request) {
-
-        if (request == null) {
-            return false;
-        }
-        
-        if (request.getFechaSalida() == null) {
-            return false;
-        }
-
-        if (request.getEstadoComponentes() == null
-                || request.getEstadoComponentes().isBlank()) {
-            return false;
-        }
-
-        if (request.getTipoPrestamo() == null
-                || request.getTipoPrestamo().isBlank()) {
-            return false;
-        }
-
-        if (request.getFechaDevolucion() == null) {
-            return false;
-        }
-
-        if (request.getFechaDevolucion().isBefore(request.getFechaSalida())) {
-            return false;
-        }
-
-        if (request.getDocumentoEmp() == null
-                || request.getDocumentoEmp().isBlank()) {
-            return false;
-        }
-
-        if (request.getDocumentoCliente() == null
-                || request.getDocumentoCliente().isBlank()) {
-            return false;
-        }
-
-        return true;
+    private List<PrestamoResponseDTO> convertir(List<Prestamo> lista) {
+        return lista.stream().map(mapper::prestamoToPrestamoResponseDTO).toList();
     }
 
     @Override
-    public PrestamoResponseDTO addPrestamo(PrestamoRequestDTO request) {
-
-        if (!validarPrestamo(request)) {
-            return null;
-        }
-
-        Prestamo prestamo = prestamoMapper.prestamoRequestDTOToPrestamo(request);
-
-        if (!prestamoRepository.savePrestamo(prestamo)) {
-            return null;
-        }
-
-        return prestamoMapper.prestamoToPrestamoResponseDTO(prestamo);
+    public PrestamoResponseDTO addPrestamo(PrestamoRequestDTO r) {
+        if(!validar(r)) return null;
+        Prestamo p=mapper.prestamoRequestDTOToPrestamo(r);
+        p.setEstadoComponentes("PENDIENTE_DEVOLUCION");
+        return repository.savePrestamo(p)?mapper.prestamoToPrestamoResponseDTO(p):null;
     }
 
     @Override
-    public List<PrestamoResponseDTO> getPrestamo(String tipoPrestamo) {
-
-        List<PrestamoResponseDTO> response = new ArrayList<>();
-
-        if (tipoPrestamo == null || tipoPrestamo.isBlank()) {
-            return response;
-        }
-
-        List<Prestamo> prestamos =
-                prestamoRepository.findByTipoPrestamo(tipoPrestamo);
-
-        for (Prestamo prestamo : prestamos) {
-            response.add(
-                    prestamoMapper.prestamoToPrestamoResponseDTO(prestamo)
-            );
-        }
-
-        return response;
+    public List<PrestamoResponseDTO> getPrestamo(String tipo) {
+        return convertir(tipo==null||tipo.isBlank()
+            ?repository.findAll():repository.findByTipoPrestamo(tipo));
     }
 
     @Override
-    public PrestamoResponseDTO getPrestamoByIdPrestamo(Integer idPrestamo) {
-
-        if (idPrestamo == null || idPrestamo <= 0) {
-            return null;
-        }
-
-        Optional<Prestamo> prestamo =
-                prestamoRepository.findByIdPrestamo(idPrestamo);
-
-        if (prestamo.isEmpty()) {
-            return null;
-        }
-
-        return prestamoMapper.prestamoToPrestamoResponseDTO(prestamo.get());
+    public List<PrestamoResponseDTO> getActivos() {
+        return convertir(repository.findActivos());
     }
 
     @Override
-    public PrestamoResponseDTO updatePrestamo(
-            Integer idPrestamo, PrestamoRequestDTO request) {
-
-        if (idPrestamo == null || idPrestamo <= 0) {
-            return null;
-        }
-
-        if (!validarPrestamo(request)) {
-            return null;
-        }
-
-
-        
-        Prestamo prestamo =
-                prestamoMapper.prestamoRequestDTOToPrestamo(request);
-
-        if (!prestamoRepository.updatePrestamo(idPrestamo, prestamo)) {
-            return null;
-        }
-
-        Optional<Prestamo> actualizado =
-                prestamoRepository.findByIdPrestamo(idPrestamo);
-
-        if (actualizado.isEmpty()) {
-            return null;
-        }
-
-        return prestamoMapper.prestamoToPrestamoResponseDTO(actualizado.get());
+    public List<PrestamoResponseDTO> getHistorial() {
+        return convertir(repository.findAll());
     }
 
     @Override
-    public PrestamoResponseDTO deletePrestamo(Integer idPrestamo) {
+    public PrestamoResponseDTO getPrestamoByIdPrestamo(Integer id) {
+        if(id==null||id<=0)return null;
+        return repository.findByIdPrestamo(id)
+            .map(mapper::prestamoToPrestamoResponseDTO).orElse(null);
+    }
 
-        if (idPrestamo == null || idPrestamo <= 0) {
-            return null;
-        }
+    @Override
+    public PrestamoResponseDTO updatePrestamo(Integer id,PrestamoRequestDTO r) {
+        if(id==null||id<=0||!validar(r))return null;
+        Prestamo p=mapper.prestamoRequestDTOToPrestamo(r);
+        if(!repository.updatePrestamo(id,p))return null;
+        return getPrestamoByIdPrestamo(id);
+    }
 
-        Optional<Prestamo> prestamo =
-                prestamoRepository.findByIdPrestamo(idPrestamo);
+    @Override
+    public PrestamoResponseDTO registrarDevolucion(
+            Integer id,DevolucionPrestamoRequestDTO r) {
+        if(id==null||id<=0||r==null||r.getFechaDevolucionReal()==null
+            ||r.getEstadoComponentes()==null||r.getEstadoComponentes().isBlank())return null;
+        if(getPrestamoByIdPrestamo(id)==null)return null;
+        return repository.registrarDevolucion(id,r)
+            ?getPrestamoByIdPrestamo(id):null;
+    }
 
-        if (prestamo.isEmpty()) {
-            return null;
-        }
-
-        if (!prestamoRepository.deletePrestamo(idPrestamo)) {
-            return null;
-        }
-
-        return prestamoMapper.prestamoToPrestamoResponseDTO(prestamo.get());
+    @Override
+    public PrestamoResponseDTO deletePrestamo(Integer id) {
+        if(id==null||id<=0)return null;
+        PrestamoResponseDTO p=getPrestamoByIdPrestamo(id);
+        if(p==null||!repository.deletePrestamo(id))return null;
+        return p;
     }
 }

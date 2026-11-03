@@ -11,6 +11,7 @@ public class BeneficioMapper {
         beneficio.setIdBeneficio(dto.getIdBeneficio());
         beneficio.setBeneficio(dto.getBeneficio());
         beneficio.setIdMembresia(dto.getIdMembresia());
+        beneficio.setDocumentoSocio(dto.getDocumentoSocio());
 
         return beneficio;
     }
@@ -20,6 +21,7 @@ public class BeneficioMapper {
         dto.setIdBeneficio(beneficio.getIdBeneficio());
         dto.setBeneficio(beneficio.getBeneficio());
         dto.setIdMembresia(beneficio.getIdMembresia());
+        dto.setDocumentoSocio(beneficio.getDocumentoSocio());
 
         return dto;
     }

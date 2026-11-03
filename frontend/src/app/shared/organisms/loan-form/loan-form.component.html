@@ -134,6 +134,16 @@
                         />
                     </div>
 
+                    <div class="loan-field loan-field--full">
+                        <app-label text="Fecha prevista de devolución" forId="loan-return-date" [required]="true"/>
+                        <app-input
+                            inputId="loan-return-date"
+                            name="fechaDevolucion"
+                            type="date"
+                            [(value)]="loanData.fechaDevolucion"
+                        />
+                    </div>
+
                 </div>
 
                 <footer class="loan-panel__footer">

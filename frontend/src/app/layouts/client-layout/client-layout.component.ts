@@ -66,8 +66,9 @@ export class ClientLayoutComponent {
             route: '/carta',
             icon: 'coffee',
             exact: true
-        }
+        },
 
+        { label: 'Cambiar rol', route: '/', icon: 'repeat', exact: true },
     ];
 
     onNavbarAction(action: NavbarAction): void {

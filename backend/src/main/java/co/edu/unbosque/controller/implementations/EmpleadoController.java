@@ -106,6 +106,17 @@ public class EmpleadoController implements IEmpleadoController {
         }
     }
 
+
+    @GET
+    @Path("/listar")
+    public Response listarEmpleados() {
+        try {
+            return Response.ok(empleadoService.getTodos()).build();
+        } catch(PersistenceException e) {
+            return errorPersistencia(e);
+        }
+    }
+
     @Override
     @GET
     @Path("/buscar")

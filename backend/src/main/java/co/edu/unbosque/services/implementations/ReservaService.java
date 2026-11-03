@@ -27,12 +27,6 @@ public class ReservaService implements IReservaService {
             return false;
         }
 
-        if (validarId &&
-                (request.getIdReserva() == null ||
-                 request.getIdReserva().isBlank())) {
-            return false;
-        }
-
         if (request.getFecha() == null) {
             return false;
         }
@@ -52,20 +46,21 @@ public class ReservaService implements IReservaService {
             return false;
         }
 
-        return true;
+        return request.getJuegos() != null
+                && !request.getJuegos().isEmpty();
     }
 
     // REGISTRAR RESERVA
     @Override
     public ReservaResponseDTO addReserva(ReservaRequestDTO request) {
 
-        if (!validarReserva(request, true)) {
+        if (!validarReserva(request, false)) {
             return null;
         }
 
         Reserva reserva = ReservaMapper.toEntity(request);
 
-        if (!reservaRepository.saveReserva(reserva)) {
+        if (!reservaRepository.saveReserva(reserva, request.getJuegos())) {
             return null;
         }
 
@@ -125,7 +120,7 @@ public class ReservaService implements IReservaService {
 
         Reserva reserva = ReservaMapper.toEntity(request);
 
-        if (!reservaRepository.updateReserva(idReserva, reserva)) {
+        if (!reservaRepository.updateReserva(idReserva, reserva, request.getJuegos())) {
             return null;
         }
 

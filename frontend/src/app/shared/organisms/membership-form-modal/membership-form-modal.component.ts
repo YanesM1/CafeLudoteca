@@ -86,7 +86,9 @@ export class MembershipFormModalComponent implements OnChanges {
 
         const tarifa = Number(this.form.tarifa);
 
-        return !!this.form.documento.trim()
+        return !!this.form.identificador.trim()
+            && Number(this.form.identificador) > 0
+            && !!this.form.documento.trim()
             && !!this.form.nombre.trim()
             && !!this.form.plan
             && !!this.form.fechaInicio

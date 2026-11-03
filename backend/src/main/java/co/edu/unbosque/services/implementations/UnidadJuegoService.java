@@ -107,6 +107,13 @@ public class UnidadJuegoService implements IUnidadJuegoService {
 
 
 
+
+    @Override
+    public List<UnidadJuegoResponseDTO> listarDisponibles() {
+        return unidadJuegoRepository.findDisponibles().stream()
+            .map(unidadJuegoMapper::unidadJuegoToUnidadJuegoResponseDTO).toList();
+    }
+
     @Override
     public List<DisponibilidadUnidadJuegoDTO> consultarDisponibilidad() {
         return unidadJuegoRepository.consultarDisponibilidad();

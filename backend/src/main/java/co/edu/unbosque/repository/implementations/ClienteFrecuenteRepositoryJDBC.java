@@ -18,7 +18,7 @@ public class ClienteFrecuenteRepositoryJDBC implements IClienteFrecuenteReposito
     @Override
     public boolean saveClienteFrecuente(ClienteFrecuente clienteFrecuente) {
         String sql = "INSERT INTO CLIENTE_FRECUENTE "
-                + "(documento, puntos_acumulados, nivel_fidelidad) "
+                + "(CLIENTE_documento, puntos_acumulados, nivel_fidelidad) "
                 + "VALUES (?, ?, ?)";
 
         if (clienteFrecuente == null) {
@@ -44,7 +44,7 @@ public class ClienteFrecuenteRepositoryJDBC implements IClienteFrecuenteReposito
     public List<ClienteFrecuente> findByNivelFidelidad(String nivelFidelidad) {
         List<ClienteFrecuente> clientesFrecuentes = new ArrayList<>();
 
-        String sql = "SELECT documento, puntos_acumulados, nivel_fidelidad "
+        String sql = "SELECT CLIENTE_documento, puntos_acumulados, nivel_fidelidad "
                 + "FROM CLIENTE_FRECUENTE WHERE nivel_fidelidad = ?";
 
         if (nivelFidelidad == null || nivelFidelidad.isBlank()) {
@@ -71,8 +71,8 @@ public class ClienteFrecuenteRepositoryJDBC implements IClienteFrecuenteReposito
 
     @Override
     public Optional<ClienteFrecuente> findByDocumento(String documento) {
-        String sql = "SELECT documento, puntos_acumulados, nivel_fidelidad "
-                + "FROM CLIENTE_FRECUENTE WHERE documento = ?";
+        String sql = "SELECT CLIENTE_documento, puntos_acumulados, nivel_fidelidad "
+                + "FROM CLIENTE_FRECUENTE WHERE CLIENTE_documento = ?";
 
         if (documento == null || documento.isBlank()) {
             return Optional.empty();
@@ -99,7 +99,7 @@ public class ClienteFrecuenteRepositoryJDBC implements IClienteFrecuenteReposito
     @Override
     public boolean updateClienteFrecuente(String documento, ClienteFrecuente clienteFrecuente) {
         String sql = "UPDATE CLIENTE_FRECUENTE SET puntos_acumulados = ?, "
-                + "nivel_fidelidad = ? WHERE documento = ?";
+                + "nivel_fidelidad = ? WHERE CLIENTE_documento = ?";
 
         if (documento == null || clienteFrecuente == null) {
             return false;
@@ -121,7 +121,7 @@ public class ClienteFrecuenteRepositoryJDBC implements IClienteFrecuenteReposito
 
     @Override
     public boolean deleteClienteFrecuente(String documento) {
-        String sql = "DELETE FROM CLIENTE_FRECUENTE WHERE documento = ?";
+        String sql = "DELETE FROM CLIENTE_FRECUENTE WHERE CLIENTE_documento = ?";
 
         if (documento == null || documento.isBlank()) {
             return false;
@@ -145,7 +145,7 @@ public class ClienteFrecuenteRepositoryJDBC implements IClienteFrecuenteReposito
 
         ClienteFrecuente clienteFrecuente = new ClienteFrecuente();
 
-        clienteFrecuente.setDocumentoCliente(resultado.getString("documento"));
+        clienteFrecuente.setDocumentoCliente(resultado.getString("CLIENTE_documento"));
         clienteFrecuente.setPuntosAcumulados(resultado.getInt("puntos_acumulados"));
         clienteFrecuente.setNivelFidelidad(resultado.getString("nivel_fidelidad"));
 

@@ -67,6 +67,20 @@ public class MesaService implements IMesaService {
         return MesaMapper.toResponse(mesa);
     }
 
+    @Override
+    public List<MesaResponseDTO> getTodas() {
+        return MesaMapper.toResponseList(mesaRepository.findAll());
+    }
+
+    @Override
+    public List<MesaResponseDTO> getDisponibles(
+            java.time.LocalDate fecha, String horario) {
+        if (fecha == null || horario == null || horario.isBlank())
+            return new ArrayList<>();
+        return MesaMapper.toResponseList(
+                mesaRepository.findDisponibles(fecha, horario));
+    }
+
     // CONSULTAR MESAS POR TEMATICA
     @Override
     public List<MesaResponseDTO> getMesa(String tematica) {

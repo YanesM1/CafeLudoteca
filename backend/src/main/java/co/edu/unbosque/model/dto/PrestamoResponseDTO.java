@@ -1,11 +1,7 @@
 package co.edu.unbosque.model.dto;
 
 import java.time.LocalDate;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
@@ -19,7 +15,6 @@ public class PrestamoResponseDTO {
     private LocalDate fechaDevolucion;
     private String documentoCliente;
     private String documentoEmp;
-    
-    
-
+    private String codigoUnidad;
+    private String numSerieUnidad;
 }

@@ -16,7 +16,7 @@ public class MembresiaResponseDTO {
     private String estado;
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
-    private String docuemnto;
+    private String documento;
     private double tarifa;
 
 }

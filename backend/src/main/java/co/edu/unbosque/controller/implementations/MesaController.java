@@ -2,6 +2,8 @@
 package co.edu.unbosque.controller.implementations;
 
 import java.util.List;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -99,6 +101,38 @@ public class MesaController implements IMesaController {
                     .entity(mesa)
                     .build();
 
+        } catch (PersistenceException e) {
+            return errorPersistencia(e);
+        }
+    }
+
+    @Override
+    @GET
+    @Path("/listar")
+    public Response listarMesas() {
+        try {
+            return Response.ok(mesaService.getTodas()).build();
+        } catch (PersistenceException e) {
+            return errorPersistencia(e);
+        }
+    }
+
+    @Override
+    @GET
+    @Path("/disponibilidad")
+    public Response disponibilidadMesas(
+            @QueryParam("fecha") String fecha,
+            @QueryParam("horario") String horario) {
+        try {
+            if (fecha == null || horario == null || horario.isBlank())
+                return respuestaError(Response.Status.BAD_REQUEST,
+                        "Fecha y horario son obligatorios.");
+            return Response.ok(
+                    mesaService.getDisponibles(LocalDate.parse(fecha), horario)
+            ).build();
+        } catch (DateTimeParseException e) {
+            return respuestaError(Response.Status.BAD_REQUEST,
+                    "La fecha debe tener formato yyyy-MM-dd.");
         } catch (PersistenceException e) {
             return errorPersistencia(e);
         }

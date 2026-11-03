@@ -2,6 +2,7 @@
 package co.edu.unbosque.model.dto;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,5 +20,6 @@ public class ReservaRequestDTO {
     private String horario;
     private String documento;
     private String idMesa;
+    private List<String> juegos;
 
 }

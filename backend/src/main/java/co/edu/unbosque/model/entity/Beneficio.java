@@ -16,6 +16,7 @@ public class Beneficio {
     private Integer idBeneficio;
     private String beneficio;
     private Integer idMembresia;
+    private String documentoSocio;
 
     // Igualdad basada en la llave primaria (idBeneficio) y la FK (idMembresia)
     @Override
@@ -31,11 +32,12 @@ public class Beneficio {
         Beneficio that = (Beneficio) o;
 
         return Objects.equals(idBeneficio, that.idBeneficio)
-                && Objects.equals(idMembresia, that.idMembresia);
+                && Objects.equals(idMembresia, that.idMembresia)
+                && Objects.equals(documentoSocio, that.documentoSocio);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(idBeneficio, idMembresia);
+        return Objects.hash(idBeneficio, idMembresia, documentoSocio);
     }
 }

@@ -20,7 +20,7 @@ public class SocioRepositoryJDBC implements ISocioRepository {
     @Override
     public boolean saveSocio(Socio socio) {
         String sql = "INSERT INTO SOCIO "
-                + "(documento, fecha_afiliacion) "
+                + "(CLIENTE_documento, fecha_afiliacion) "
                 + "VALUES (?, ?)";
 
         if (socio == null) {
@@ -45,7 +45,7 @@ public class SocioRepositoryJDBC implements ISocioRepository {
     public List<Socio> findByFechaAfiliacion(LocalDate fechaAfiliacion) {
         List<Socio> socios = new ArrayList<>();
 
-        String sql = "SELECT documento, fecha_afiliacion "
+        String sql = "SELECT CLIENTE_documento, fecha_afiliacion "
                 + "FROM SOCIO WHERE fecha_afiliacion = ?";
 
         if (fechaAfiliacion == null) {
@@ -72,8 +72,8 @@ public class SocioRepositoryJDBC implements ISocioRepository {
 
     @Override
     public Optional<Socio> findByDocumento(String documento) {
-        String sql = "SELECT documento, fecha_afiliacion "
-                + "FROM SOCIO WHERE documento = ?";
+        String sql = "SELECT CLIENTE_documento, fecha_afiliacion "
+                + "FROM SOCIO WHERE CLIENTE_documento = ?";
 
         if (documento == null || documento.isBlank()) {
             return Optional.empty();
@@ -99,7 +99,7 @@ public class SocioRepositoryJDBC implements ISocioRepository {
 
     @Override
     public boolean updateSocio(String documento, Socio socio) {
-        String sql = "UPDATE SOCIO SET fecha_afiliacion = ? WHERE documento = ?";
+        String sql = "UPDATE SOCIO SET fecha_afiliacion = ? WHERE CLIENTE_documento = ?";
 
         if (documento == null || socio == null) {
             return false;
@@ -121,7 +121,7 @@ public class SocioRepositoryJDBC implements ISocioRepository {
 
     @Override
     public boolean deleteSocio(String documento) {
-        String sql = "DELETE FROM SOCIO WHERE documento = ?";
+        String sql = "DELETE FROM SOCIO WHERE CLIENTE_documento = ?";
 
         if (documento == null || documento.isBlank()) {
             return false;
@@ -145,7 +145,7 @@ public class SocioRepositoryJDBC implements ISocioRepository {
 
         Socio socio = new Socio();
 
-        socio.setDocumentoCliente(resultado.getString("documento"));
+        socio.setDocumentoCliente(resultado.getString("CLIENTE_documento"));
 
         Date fecha = resultado.getDate("fecha_afiliacion");
         if (fecha != null) {

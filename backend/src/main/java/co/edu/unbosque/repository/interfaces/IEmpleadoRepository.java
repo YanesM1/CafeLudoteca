@@ -10,6 +10,7 @@ public interface IEmpleadoRepository {
     boolean saveEmpleado(Empleado empleado);
 
     List<Empleado> findByNombre(String nombre);
+    List<Empleado> findAll();
 
     Optional<Empleado> findByDocumento(String documentoEmp);
 

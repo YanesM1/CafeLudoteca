@@ -13,158 +13,49 @@ import co.edu.unbosque.repository.interfaces.IBeneficioRepository;
 import co.edu.unbosque.services.interfaces.IBeneficioService;
 
 public class BeneficioService implements IBeneficioService {
+    private final IBeneficioRepository repository = new BeneficioRepositoryJDBC();
+    private final BeneficioMapper mapper = new BeneficioMapper();
 
-    private final IBeneficioRepository beneficioRepository =
-            new BeneficioRepositoryJDBC();
-
-    private final BeneficioMapper beneficioMapper =
-            new BeneficioMapper();
-
-    private boolean validarBeneficio(BeneficioRequestDTO request) {
-
-        if (request == null) {
-            return false;
-        }
-
-        if (request.getIdBeneficio() == null
-                || request.getIdBeneficio() <= 0) {
-            return false;
-        }
-
-        if (request.getIdMembresia() == null
-                || request.getIdMembresia() <= 0) {
-            return false;
-        }
-
-        if (request.getBeneficio() == null
-                || request.getBeneficio().isBlank()) {
-            return false;
-        }
-
-        return true;
+    private boolean valido(BeneficioRequestDTO r) {
+        return r != null && r.getIdBeneficio() != null && r.getIdBeneficio() > 0
+            && r.getIdMembresia() != null && r.getIdMembresia() > 0
+            && r.getDocumentoSocio() != null && !r.getDocumentoSocio().isBlank()
+            && r.getBeneficio() != null && !r.getBeneficio().isBlank();
     }
 
     @Override
-    public BeneficioResponseDTO addBeneficio(
-            BeneficioRequestDTO request) {
-
-        if (!validarBeneficio(request)) {
-            return null;
-        }
-
-        Beneficio beneficio =
-                beneficioMapper.beneficioRequestDTOToBeneficio(request);
-
-        if (!beneficioRepository.saveBeneficio(beneficio)) {
-            return null;
-        }
-
-        return beneficioMapper.beneficioToResponseDTO(beneficio);
+    public BeneficioResponseDTO addBeneficio(BeneficioRequestDTO r) {
+        if (!valido(r)) return null;
+        Beneficio b = mapper.beneficioRequestDTOToBeneficio(r);
+        return repository.saveBeneficio(b) ? mapper.beneficioToResponseDTO(b) : null;
     }
 
     @Override
     public List<BeneficioResponseDTO> getBeneficios() {
-
-        List<Beneficio> beneficios =
-                beneficioRepository.findAll();
-
-        List<BeneficioResponseDTO> response =
-                new ArrayList<>();
-
-        for (Beneficio beneficio : beneficios) {
-            response.add(
-                    beneficioMapper.beneficioToResponseDTO(
-                            beneficio));
-        }
-
-        return response;
+        List<BeneficioResponseDTO> salida = new ArrayList<>();
+        for (Beneficio b : repository.findAll())
+            salida.add(mapper.beneficioToResponseDTO(b));
+        return salida;
     }
 
     @Override
-    public BeneficioResponseDTO getBeneficioPorId(
-            Integer idBeneficio,
-            Integer idMembresia) {
-
-        if (idBeneficio == null || idBeneficio <= 0
-                || idMembresia == null || idMembresia <= 0) {
-            return null;
-        }
-
-        Optional<Beneficio> beneficio =
-                beneficioRepository.findByIdBeneficio(
-                        idBeneficio,
-                        idMembresia);
-
-        if (beneficio.isEmpty()) {
-            return null;
-        }
-
-        return beneficioMapper
-                .beneficioToResponseDTO(beneficio.get());
+    public BeneficioResponseDTO getBeneficioPorId(Integer id, Integer membresia, String documento) {
+        Optional<Beneficio> b = repository.findByIdBeneficio(id, membresia, documento);
+        return b.map(mapper::beneficioToResponseDTO).orElse(null);
     }
 
     @Override
-    public BeneficioResponseDTO updateBeneficio(Integer idBeneficio, Integer idMembresia, 
-        BeneficioRequestDTO request) {
-
-        if (idBeneficio == null || idBeneficio <= 0
-                || idMembresia == null || idMembresia <= 0) {
-            return null;
-        }
-
-        if (!validarBeneficio(request)) {
-            return null;
-        }
-
-        Beneficio beneficio =
-                beneficioMapper.beneficioRequestDTOToBeneficio(request);
-
-        if (!beneficioRepository.updateBeneficio(
-                idBeneficio,
-                idMembresia,
-                beneficio)) {
-            return null;
-        }
-
-        Optional<Beneficio> actualizado =
-                beneficioRepository.findByIdBeneficio(
-                        idBeneficio,
-                        idMembresia);
-
-        if (actualizado.isEmpty()) {
-            return null;
-        }
-
-        return beneficioMapper
-                .beneficioToResponseDTO(actualizado.get());
+    public BeneficioResponseDTO updateBeneficio(Integer id, Integer membresia, String documento, BeneficioRequestDTO r) {
+        if (!valido(r)) return null;
+        Beneficio b = mapper.beneficioRequestDTOToBeneficio(r);
+        if (!repository.updateBeneficio(id, membresia, documento, b)) return null;
+        return getBeneficioPorId(id, membresia, documento);
     }
 
     @Override
-    public BeneficioResponseDTO deleteBeneficio(
-            Integer idBeneficio,
-            Integer idMembresia) {
-
-        if (idBeneficio == null || idBeneficio <= 0
-                || idMembresia == null || idMembresia <= 0) {
-            return null;
-        }
-
-        Optional<Beneficio> beneficio =
-                beneficioRepository.findByIdBeneficio(
-                        idBeneficio,
-                        idMembresia);
-
-        if (beneficio.isEmpty()) {
-            return null;
-        }
-
-        if (!beneficioRepository.deleteBeneficio(
-                idBeneficio,
-                idMembresia)) {
-            return null;
-        }
-
-        return beneficioMapper
-                .beneficioToResponseDTO(beneficio.get());
+    public BeneficioResponseDTO deleteBeneficio(Integer id, Integer membresia, String documento) {
+        Beneficio b = repository.findByIdBeneficio(id, membresia, documento).orElse(null);
+        if (b == null || !repository.deleteBeneficio(id, membresia, documento)) return null;
+        return mapper.beneficioToResponseDTO(b);
     }
 }

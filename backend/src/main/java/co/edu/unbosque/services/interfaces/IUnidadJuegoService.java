@@ -15,4 +15,5 @@ public interface IUnidadJuegoService {
     UnidadJuegoResponseDTO deleteUnidadJuego(String codigo, String numSerie);
 
     List<DisponibilidadUnidadJuegoDTO> consultarDisponibilidad();
+    List<UnidadJuegoResponseDTO> listarDisponibles();
 }

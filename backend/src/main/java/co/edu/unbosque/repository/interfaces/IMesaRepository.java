@@ -10,6 +10,10 @@ public interface IMesaRepository {
 
     boolean saveMesa(Mesa mesa);
 
+    List<Mesa> findAll();
+
+    List<Mesa> findDisponibles(java.time.LocalDate fecha, String horario);
+
     List<Mesa> findByTematica(String tematica);
 
     Optional<Mesa> findByIdMesa(String idMesa);

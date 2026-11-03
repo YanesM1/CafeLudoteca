@@ -73,6 +73,14 @@ public class EmpleadoService implements IEmpleadoService {
         return EmpleadoMapper.toResponse(empleado);
     }
 
+
+    @Override
+    public List<EmpleadoResponseDTO> getTodos() {
+        List<EmpleadoResponseDTO> salida=new ArrayList<>();
+        for(Empleado e:empleadoRepository.findAll()) salida.add(EmpleadoMapper.toResponse(e));
+        return salida;
+    }
+
     // CONSULTAR EMPLEADOS POR NOMBRE
     @Override
     public List<EmpleadoResponseDTO> getEmpleado(String nombre) {

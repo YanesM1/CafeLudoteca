@@ -2,11 +2,7 @@ package co.edu.unbosque.model.entity;
 
 import java.time.LocalDate;
 import java.util.Objects;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
@@ -20,26 +16,19 @@ public class Prestamo {
     private LocalDate fechaDevolucion;
     private String documentoCliente;
     private String documentoEmp;
-   
+    private String codigoUnidad;
+    private String numSerieUnidad;
 
-     @Override
+    @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
-
-        Prestamo prestamo = (Prestamo) o;
-
-        return Objects.equals(idPrestamo, prestamo.idPrestamo)
-                && Objects.equals(documentoEmp, prestamo.documentoEmp)
-                && Objects.equals(documentoCliente, prestamo.documentoCliente);
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Prestamo p = (Prestamo) o;
+        return Objects.equals(idPrestamo, p.idPrestamo);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(idPrestamo, documentoEmp, documentoCliente);
+        return Objects.hash(idPrestamo);
     }
-
-
 }

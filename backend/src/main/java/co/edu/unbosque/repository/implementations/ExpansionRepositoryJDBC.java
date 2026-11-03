@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -21,14 +22,23 @@ public boolean saveExpansion(Expansion expansion) {
             VALUES(?,?,?,?)""";
 
     try (Connection conection = ConnectionBD.obtenerConexion();
-            PreparedStatement ps = conection.prepareStatement(sql)) {
+            PreparedStatement ps = conection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
         ps.setString(1, expansion.getNombre());
         ps.setString(2, expansion.getDescripcion());
         ps.setString(3, expansion.getContenidoAdicional());
         ps.setString(4, expansion.getNumSerie());
 
-        return ps.executeUpdate() > 0;
+        int filas = ps.executeUpdate();
+        if (filas != 1) return false;
+
+        try (ResultSet keys = ps.getGeneratedKeys()) {
+            if (keys.next()) {
+                expansion.setIdExpansion(keys.getInt(1));
+                return true;
+            }
+        }
+        return false;
 
     } catch (SQLException e) {
         throw new PersistenceException("Error al guardar en la base de datos", e);

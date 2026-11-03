@@ -8,13 +8,13 @@ import co.edu.unbosque.model.entity.Reserva;
 
 public interface IReservaRepository {
 
-    boolean saveReserva(Reserva reserva);
+    boolean saveReserva(Reserva reserva, List<String> juegos);
 
     List<Reserva> findByDocumento(String documento);
 
     Optional<Reserva> findByIdReserva(String idReserva);
 
-    boolean updateReserva(String idReserva, Reserva reserva);
+    boolean updateReserva(String idReserva, Reserva reserva, List<String> juegos);
 
     boolean deleteReserva(String idReserva);
 

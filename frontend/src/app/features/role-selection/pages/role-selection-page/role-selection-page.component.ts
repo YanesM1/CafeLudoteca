@@ -6,123 +6,59 @@ import { RouterLink } from '@angular/router';
   standalone: true,
   imports: [RouterLink],
   template: `
-    <main class="selection">
-      <section class="panel">
-        <div class="brand">
-          <span class="logo">CL</span>
-          <span>Café & Ludoteca</span>
-        </div>
+  <main class="roles">
+    <header>
+      <span>CAFÉ & LUDECA</span>
+      <h1>Bienvenido</h1>
+      <p>Selecciona tu espacio para continuar</p>
+    </header>
 
-        <span class="eyebrow">CAFÉ · JUEGOS · EXPERIENCIAS</span>
-        <h1>Bienvenido a Café & Ludoteca</h1>
-        <p class="subtitle">Selecciona cómo deseas ingresar a la plataforma.</p>
+    <section class="cards">
+      <a routerLink="/admin" class="card admin">
+        <span class="symbol">♛</span>
+        <h2>Administrador</h2>
+        <p>Gestiona personas, membresías, inventario y operaciones.</p>
+        <strong>INGRESAR →</strong>
+      </a>
 
-        <div class="roles">
-          <a routerLink="/inicio" class="role-card">
-            <span class="role-icon">♙</span>
-            <h2>Cliente</h2>
-            <p>Explora juegos, consulta el catálogo y realiza reservas.</p>
-            <span class="action">Ingresar →</span>
-          </a>
+      <a routerLink="/empleado" class="card employee">
+        <span class="symbol">♙</span>
+        <h2>Empleado</h2>
+        <p>Atiende clientes, reservas, préstamos y devoluciones.</p>
+        <strong>INGRESAR →</strong>
+      </a>
 
-          <a routerLink="/empleado/prestamos" class="role-card">
-            <span class="role-icon">▤</span>
-            <h2>Empleado</h2>
-            <p>Gestiona préstamos y consulta las funciones de auditoría.</p>
-            <span class="action">Ingresar →</span>
-          </a>
+      <a routerLink="/inicio" class="card client">
+        <span class="symbol">🎲</span>
+        <h2>Cliente</h2>
+        <p>Explora juegos, consulta disponibilidad y solicita reservas.</p>
+        <strong>INGRESAR →</strong>
+      </a>
+    </section>
 
-          <a routerLink="/admin/membresias" class="role-card">
-            <span class="role-icon">⚙</span>
-            <h2>Administrador</h2>
-            <p>Administra clientes, empleados, socios y membresías.</p>
-            <span class="action">Ingresar →</span>
-          </a>
-        </div>
-
-        <footer>© Café & Ludoteca</footer>
-      </section>
-    </main>
+    <footer>CAFÉ & LUDECA · SISTEMA DE GESTIÓN</footer>
+  </main>
   `,
   styles: [`
-    :host { display:block; min-height:100vh; }
-    .selection {
-      min-height:100vh;
-      display:grid;
-      place-items:center;
-      padding:35px 20px;
-    }
-    .panel {
-      width:min(1100px,100%);
-      padding:clamp(25px,5vw,65px);
-      background:var(--cl-surface);
-      border:1px solid var(--cl-border-cyan);
-      border-radius:22px;
-      box-shadow:var(--cl-glow-cyan);
-      text-align:center;
-    }
-    .brand {
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:14px;
-      margin-bottom:65px;
-      font-size:20px;
-      font-weight:700;
-    }
-    .logo {
-      display:grid;
-      place-items:center;
-      width:48px;height:48px;
-      color:var(--cl-cyan);
-      background:var(--cl-purple);
-      border:1px solid var(--cl-cyan);
-      border-radius:12px;
-    }
-    .eyebrow {
-      color:var(--cl-cyan);
-      font-size:12px;
-      font-weight:800;
-      letter-spacing:3px;
-    }
-    h1 { font-size:clamp(28px,4vw,42px); margin:15px 0; }
-    .subtitle { color:var(--cl-text-secondary); margin-bottom:45px; }
-    .roles {
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:22px;
-    }
-    .role-card {
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      padding:30px 22px;
-      text-decoration:none;
-      color:var(--cl-text);
-      background:var(--cl-bg-secondary);
-      border:1px solid var(--cl-border);
-      border-radius:16px;
-      transition:.2s ease;
-    }
-    .role-card:hover {
-      transform:translateY(-5px);
-      border-color:var(--cl-cyan);
-      box-shadow:var(--cl-glow-cyan);
-    }
-    .role-icon { font-size:38px; color:var(--cl-cyan); }
-    h2 { margin:17px 0 10px; }
-    .role-card p {
-      min-height:65px;
-      color:var(--cl-text-secondary);
-      font-size:14px;
-    }
-    .action { color:var(--cl-gold); font-weight:700; margin-top:20px; }
-    footer { color:var(--cl-text-muted); font-size:12px; margin-top:50px; }
-    @media(max-width:750px) {
-      .roles { grid-template-columns:1fr; }
-      .brand { margin-bottom:40px; }
-      .role-card p { min-height:0; }
-    }
+    :host{display:block;min-height:100vh}
+    .roles{min-height:100vh;box-sizing:border-box;padding:65px 24px;background:radial-gradient(ellipse at top,#29213d,#0b1020 65%);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
+    header{text-align:center;margin-bottom:48px}
+    header span{color:#d6b65b;font-size:13px;font-weight:800;letter-spacing:5px}
+    h1{font-size:clamp(38px,6vw,58px);margin:15px 0 8px}
+    header p{color:#aeb5c5;font-size:17px}
+    .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;width:100%;max-width:1100px}
+    .card{box-sizing:border-box;text-decoration:none;color:white;background:#1b2030;border:1px solid #465267;border-radius:20px;padding:35px 28px;min-height:290px;display:flex;flex-direction:column;transition:.2s}
+    .card:hover{transform:translateY(-7px);border-color:#d6b65b;box-shadow:0 15px 40px #0005}
+    .symbol{font-size:42px;color:#d6b65b}
+    h2{font-size:23px;margin:22px 0 8px}
+    .card p{color:#aeb5c5;line-height:1.7;flex:1}
+    .card strong{color:#d6b65b;font-size:13px;letter-spacing:1px}
+    .employee .symbol{color:#22d3ee}
+    .employee strong{color:#22d3ee}
+    .client .symbol{color:#bd91ec}
+    .client strong{color:#bd91ec}
+    footer{margin-top:55px;color:#7e8799;font-size:11px;letter-spacing:3px;text-align:center}
+    @media(max-width:750px){.cards{grid-template-columns:1fr;max-width:430px}.card{min-height:220px}.roles{padding:45px 18px}}
   `]
 })
 export class RoleSelectionPageComponent {}

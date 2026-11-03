@@ -9,6 +9,10 @@ import co.edu.unbosque.model.dto.MesaResponseDTO;
 public interface IMesaService {
     MesaResponseDTO addMesa(MesaRequestDTO request);
 
+    List<MesaResponseDTO> getTodas();
+
+    List<MesaResponseDTO> getDisponibles(java.time.LocalDate fecha, String horario);
+
     List<MesaResponseDTO> getMesa(String tematica);
 
     MesaResponseDTO getMesasPorIdMesa(String idMesa);

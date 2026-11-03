@@ -45,19 +45,15 @@ public class ReservaController implements IReservaController {
             return false;
         }
 
-        if (validarId &&
-                (request.getIdReserva() == null ||
-                 request.getIdReserva().isBlank())) {
-            return false;
-        }
-
         return request.getFecha() != null
                 && request.getHorario() != null
                 && !request.getHorario().isBlank()
                 && request.getDocumento() != null
                 && !request.getDocumento().isBlank()
                 && request.getIdMesa() != null
-                && !request.getIdMesa().isBlank();
+                && !request.getIdMesa().isBlank()
+                && request.getJuegos() != null
+                && !request.getJuegos().isEmpty();
     }
 
     // GENERAR RESPUESTAS DE ERROR EN JSON
@@ -86,7 +82,7 @@ public class ReservaController implements IReservaController {
     @POST
     public Response crearReserva(ReservaRequestDTO request) {
 
-        if (!validarReserva(request, true)) {
+        if (!validarReserva(request, false)) {
             return respuestaError(
                     Response.Status.BAD_REQUEST,
                     "Los datos de la reserva son incompletos o inválidos.");

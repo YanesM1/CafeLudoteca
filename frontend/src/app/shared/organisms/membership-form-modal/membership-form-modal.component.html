@@ -37,6 +37,14 @@
             </header>
 
             <div class="membership-modal__body">
+                <div class="membership-modal__field">
+                    <app-label text="ID de membresía" forId="membership-id" [required]="true" />
+                    <app-input inputId="membership-id" name="identificador"
+                        type="number" placeholder="ID único de membresía"
+                        [(value)]="form.identificador" [required]="true"
+                        [disabled]="mode === 'edit'" />
+                </div>
+
 
                 <div class="membership-modal__field">
 
@@ -82,11 +90,10 @@
                         [required]="true"
                     />
 
-                    <app-select
+                    <app-input
                         inputId="member-plan"
                         name="plan"
-                        placeholder="Seleccionar categoría"
-                        [options]="membershipOptions"
+                        placeholder="Nombre del plan"
                         [(value)]="form.plan"
                         [required]="true"
                     />

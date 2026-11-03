@@ -9,6 +9,10 @@ public interface IMesaController {
 
     Response crearMesa(MesaRequestDTO request);
 
+    Response listarMesas();
+
+    Response disponibilidadMesas(String fecha, String horario);
+
     Response buscarMesas(String tematica);
 
     Response obtenerMesa(String idMesa);

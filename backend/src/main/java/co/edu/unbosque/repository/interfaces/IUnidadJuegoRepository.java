@@ -11,4 +11,5 @@ public interface IUnidadJuegoRepository{
     boolean deleteUnidadJuego(String codigo, String numSerie);
 
     List<DisponibilidadUnidadJuegoDTO> consultarDisponibilidad();
+    List<UnidadJuego> findDisponibles();
 }

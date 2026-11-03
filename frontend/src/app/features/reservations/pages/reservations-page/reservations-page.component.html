@@ -1,21 +1,32 @@
 <section class="reservations-page">
+  <div class="reservation-document">
+    <label for="documento-reserva">Documento del cliente</label>
+    <input
+      id="documento-reserva"
+      name="documentoReserva"
+      [(ngModel)]="documento"
+      placeholder="Número de documento"
+    >
+  </div>
 
-    <app-reservation-form
-        [date]="fecha"
-        [time]="hora"
-        [minDate]="minDate"
-        [selectedTableId]="mesaSeleccionada"
-        [tables]="mesas"
-        [games]="juegos"
-        [loading]="loading"
-        [submitting]="submitting"
-        [errorMessage]="errorMessage"
-        (dateChange)="fecha = $event"
-        (timeChange)="hora = $event"
-        (tableChange)="mesaSeleccionada = $event"
-        (gameQuantityChange)="onGameQuantityChange($event)"
-        (cancel)="onCancel()"
-        (retry)="onRetry()"
-    />
+  <app-reservation-form
+    [date]="fecha"
+    [time]="hora"
+    [minDate]="minDate"
+    [selectedTableId]="mesaSeleccionada"
+    [tables]="mesas"
+    [games]="juegos"
+    [loading]="loading"
+    [submitting]="submitting"
+    [errorMessage]="errorMessage"
+    (dateChange)="onDateChange($event)"
+    (timeChange)="onTimeChange($event)"
+    (tableChange)="mesaSeleccionada = $event"
+    (gameQuantityChange)="onGameQuantityChange($event)"
+    (confirm)="onConfirm($event)"
+    (cancel)="onCancel()"
+    (retry)="onRetry()"
+  />
 
+  <p class="reservation-success" *ngIf="mensaje">{{mensaje}}</p>
 </section>

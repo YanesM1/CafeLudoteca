@@ -1,23 +1,12 @@
-
 package co.edu.unbosque.controller.implementations;
 
 import java.util.List;
-
 import co.edu.unbosque.controller.interfaces.IPrestamoController;
-import co.edu.unbosque.model.dto.PrestamoRequestDTO;
-import co.edu.unbosque.model.dto.PrestamoResponseDTO;
+import co.edu.unbosque.exceptions.PersistenceException;
+import co.edu.unbosque.model.dto.*;
 import co.edu.unbosque.services.implementations.PrestamoServicio;
 import co.edu.unbosque.services.interfaces.IPrestamoServicio;
-
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -25,90 +14,77 @@ import jakarta.ws.rs.core.Response;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class PrestamoController implements IPrestamoController {
+    private final IPrestamoServicio service=new PrestamoServicio();
 
-    private final IPrestamoServicio prestamoServicio = new PrestamoServicio();
-
-    @Override
     @POST
+    @Override
     public Response guardarPrestamo(PrestamoRequestDTO request) {
-
-        PrestamoResponseDTO prestamo = prestamoServicio.addPrestamo(request);
-
-        if (prestamo == null) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("No se pudo registrar el préstamo")
-                    .build();
+        try {
+            PrestamoResponseDTO p=service.addPrestamo(request);
+            return p==null?Response.status(400).entity("{\"mensaje\":\"Datos inválidos o unidad no disponible\"}").build()
+                :Response.status(201).entity(p).build();
+        } catch(PersistenceException e) {
+            return Response.serverError().entity("{\"mensaje\":\"Error al registrar préstamo\"}").build();
         }
-
-        return Response.status(Response.Status.CREATED)
-                .entity(prestamo)
-                .build();
     }
 
-    @Override
     @GET
     @Path("/buscar")
-    public Response buscarPorTipoPrestamo(
-            @QueryParam("tipo_prestamo") String tipoPrestamo) {
-
-        List<PrestamoResponseDTO> prestamos =
-                prestamoServicio.getPrestamo(tipoPrestamo);
-
-        return Response.ok(prestamos).build();
+    @Override
+    public Response buscarPorTipoPrestamo(@QueryParam("tipo_prestamo") String tipo) {
+        return Response.ok(service.getPrestamo(tipo)).build();
     }
 
+    @GET
+    @Path("/activos")
     @Override
+    public Response buscarActivos() {
+        return Response.ok(service.getActivos()).build();
+    }
+
+    @GET
+    @Path("/historial")
+    @Override
+    public Response buscarHistorial() {
+        return Response.ok(service.getHistorial()).build();
+    }
+
     @GET
     @Path("/buscar/{id_prestamo}")
-    public Response buscarPorIdPrestamo(
-            @PathParam("id_prestamo") Integer idPrestamo) {
-
-        PrestamoResponseDTO prestamo =
-                prestamoServicio.getPrestamoByIdPrestamo(idPrestamo);
-
-        if (prestamo == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("No se ha encontrado el préstamo")
-                    .build();
-        }
-
-        return Response.ok(prestamo).build();
+    @Override
+    public Response buscarPorIdPrestamo(@PathParam("id_prestamo") Integer id) {
+        var p=service.getPrestamoByIdPrestamo(id);
+        return p==null?Response.status(404).build():Response.ok(p).build();
     }
 
+    @PUT
+    @Path("/{id_prestamo}/devolucion")
     @Override
+    public Response registrarDevolucion(@PathParam("id_prestamo") Integer id,
+            DevolucionPrestamoRequestDTO request) {
+        try {
+            var p=service.registrarDevolucion(id,request);
+            return p==null?Response.status(400).entity("{\"mensaje\":\"No se pudo registrar la devolución\"}").build()
+                :Response.ok(p).build();
+        } catch(PersistenceException e) {
+            return Response.serverError().entity("{\"mensaje\":\"Error al registrar devolución\"}").build();
+        }
+    }
+
     @PUT
     @Path("/{id_prestamo}")
-    public Response actualizarPrestamo(
-            @PathParam("id_prestamo") Integer idPrestamo,
-            PrestamoRequestDTO request) {
-
-        PrestamoResponseDTO prestamo =
-                prestamoServicio.updatePrestamo(idPrestamo, request);
-
-        if (prestamo == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("No se ha encontrado el préstamo que desea actualizar")
-                    .build();
-        }
-
-        return Response.ok(prestamo).build();
+    @Override
+    public Response actualizarPrestamo(@PathParam("id_prestamo") Integer id,PrestamoRequestDTO request) {
+        var p=service.updatePrestamo(id,request);
+        return p==null?Response.status(404).build():Response.ok(p).build();
     }
 
-    @Override
     @DELETE
     @Path("/{id_prestamo}")
-    public Response borrarPrestamo(
-            @PathParam("id_prestamo") Integer idPrestamo) {
-
-        PrestamoResponseDTO prestamo =
-                prestamoServicio.deletePrestamo(idPrestamo);
-
-        if (prestamo == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("No se ha encontrado el préstamo que desea eliminar")
-                    .build();
-        }
-
-        return Response.ok(prestamo).build();
+    @Override
+    public Response borrarPrestamo(@PathParam("id_prestamo") Integer id) {
+        var p=service.deletePrestamo(id);
+        return p==null?Response.status(409).entity("{\"mensaje\":\"No se puede eliminar un préstamo activo\"}").build()
+            :Response.ok(p).build();
     }
 }

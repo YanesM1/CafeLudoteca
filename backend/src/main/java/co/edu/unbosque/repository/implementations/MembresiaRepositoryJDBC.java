@@ -1,15 +1,8 @@
 package co.edu.unbosque.repository.implementations;
 
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
+import java.util.*;
 import co.edu.unbosque.config.ConnectionBD;
 import co.edu.unbosque.exceptions.PersistenceException;
 import co.edu.unbosque.model.entity.Membresia;
@@ -17,202 +10,117 @@ import co.edu.unbosque.repository.interfaces.IMembresiaRepository;
 
 public class MembresiaRepositoryJDBC implements IMembresiaRepository {
 
+    private static final String COLUMNS =
+        "id_membresia, plan, estado, fecha_inicio, fecha_fin, SOCIO_documento, tarifa";
+
     @Override
-    public boolean saveMembresia(Membresia membresia) {
-        if (membresia == null) {
-            return false;
-        }
-
-        String sql = "INSERT INTO MEMBRESIA "
-                + "(id_membresia, plan, estado, fecha_inicio, fecha_fin, documento, tarifa) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?)";
-
-        try (Connection conexion = ConnectionBD.obtenerConexion();
-             PreparedStatement statement = conexion.prepareStatement(sql)) {
-
-            statement.setInt(1, membresia.getIdMembresia());
-            statement.setString(2, membresia.getPlan());
-            statement.setString(3, membresia.getEstado());
-            statement.setDate(4, convertirFecha(membresia.getFechaInicio()));
-            statement.setDate(5, convertirFecha(membresia.getFechaFin()));
-            statement.setString(6, membresia.getDocumento());
-            statement.setDouble(7, membresia.getTarifa());
-
-            return statement.executeUpdate() == 1;
-
+    public boolean saveMembresia(Membresia m) {
+        String sql = "INSERT INTO MEMBRESIA (" + COLUMNS + ") VALUES (?,?,?,?,?,?,?)";
+        try (Connection c = ConnectionBD.obtenerConexion();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, m.getIdMembresia());
+            ps.setString(2, m.getPlan());
+            ps.setString(3, m.getEstado());
+            ps.setDate(4, java.sql.Date.valueOf(m.getFechaInicio()));
+            if (m.getFechaFin() == null) ps.setNull(5, Types.DATE);
+            else ps.setDate(5, java.sql.Date.valueOf(m.getFechaFin()));
+            ps.setString(6, m.getDocumento());
+            ps.setBigDecimal(7, java.math.BigDecimal.valueOf(m.getTarifa()));
+            return ps.executeUpdate() == 1;
         } catch (SQLException e) {
-            throw new PersistenceException(
-                    "Error al guardar la membresía con id " + membresia.getIdMembresia(), e);
+            throw new PersistenceException("Error al registrar membresía", e);
         }
+    }
+
+    @Override
+    public List<Membresia> findAll() {
+        return consultar("SELECT " + COLUMNS + " FROM MEMBRESIA", null);
     }
 
     @Override
     public List<Membresia> findByEstado(String estado) {
-        List<Membresia> membresias = new ArrayList<>();
-
-        if (estado == null || estado.isBlank()) {
-            return membresias;
-        }
-
-        String sql = "SELECT id_membresia, plan, estado, fecha_inicio, fecha_fin, "
-                + "documento, tarifa FROM MEMBRESIA WHERE estado = ?";
-
-        try (Connection conexion = ConnectionBD.obtenerConexion();
-             PreparedStatement statement = conexion.prepareStatement(sql)) {
-
-            statement.setString(1, estado.trim());
-
-            try (ResultSet resultado = statement.executeQuery()) {
-                while (resultado.next()) {
-                    membresias.add(mapearMembresia(resultado));
-                }
-            }
-
-        } catch (SQLException e) {
-            throw new PersistenceException(
-                    "Error al buscar membresías con estado " + estado, e);
-        }
-
-        return membresias;
+        return consultar("SELECT " + COLUMNS + " FROM MEMBRESIA WHERE estado = ?", estado);
     }
 
     @Override
-    public Optional<Membresia> findByIdMembresia(int idMembresia) {
-        if (idMembresia <= 0) {
-            return Optional.empty();
-        }
-
-        String sql = "SELECT id_membresia, plan, estado, fecha_inicio, fecha_fin, "
-                + "documento, tarifa FROM MEMBRESIA WHERE id_membresia = ?";
-
-        try (Connection conexion = ConnectionBD.obtenerConexion();
-             PreparedStatement statement = conexion.prepareStatement(sql)) {
-
-            statement.setInt(1, idMembresia);
-
-            try (ResultSet resultado = statement.executeQuery()) {
-                if (resultado.next()) {
-                    return Optional.of(mapearMembresia(resultado));
-                }
-            }
-
-        } catch (SQLException e) {
-            throw new PersistenceException(
-                    "Error al buscar la membresía con id " + idMembresia, e);
-        }
-
-        return Optional.empty();
-    }
-
-    @Override
-    public boolean updateMembresia(int idMembresia, Membresia membresia) {
-        if (idMembresia <= 0 || membresia == null) {
-            return false;
-        }
-
-        String sql = "UPDATE MEMBRESIA SET plan = ?, estado = ?, fecha_inicio = ?, "
-                + "fecha_fin = ?, documento = ?, tarifa = ? WHERE id_membresia = ?";
-
-        try (Connection conexion = ConnectionBD.obtenerConexion();
-             PreparedStatement statement = conexion.prepareStatement(sql)) {
-
-            statement.setString(1, membresia.getPlan());
-            statement.setString(2, membresia.getEstado());
-            statement.setDate(3, convertirFecha(membresia.getFechaInicio()));
-            statement.setDate(4, convertirFecha(membresia.getFechaFin()));
-            statement.setString(5, membresia.getDocumento());
-            statement.setDouble(6, membresia.getTarifa());
-            statement.setInt(7, idMembresia);
-
-            return statement.executeUpdate() == 1;
-
-        } catch (SQLException e) {
-            throw new PersistenceException(
-                    "Error al actualizar la membresía con id " + idMembresia, e);
-        }
-    }
-
-    @Override
-    public boolean deleteMembresia(int idMembresia) {
-        if (idMembresia <= 0) {
-            return false;
-        }
-
-        String sql = "DELETE FROM MEMBRESIA WHERE id_membresia = ?";
-
-        try (Connection conexion = ConnectionBD.obtenerConexion();
-             PreparedStatement statement = conexion.prepareStatement(sql)) {
-
-            statement.setInt(1, idMembresia);
-
-            return statement.executeUpdate() == 1;
-
-        } catch (SQLException e) {
-            throw new PersistenceException(
-                    "Error al eliminar la membresía con id " + idMembresia, e);
-        }
-    }
-
-    private Membresia mapearMembresia(ResultSet resultado) throws SQLException {
-        Membresia membresia = new Membresia();
-
-        membresia.setIdMembresia(resultado.getInt("id_membresia"));
-        membresia.setPlan(resultado.getString("plan"));
-        membresia.setEstado(resultado.getString("estado"));
-
-        Date inicio = resultado.getDate("fecha_inicio");
-        if (inicio != null) {
-            membresia.setFechaInicio(inicio.toLocalDate());
-        }
-
-        Date fin = resultado.getDate("fecha_fin");
-        if (fin != null) {
-            membresia.setFechaFin(fin.toLocalDate());
-        }
-
-        membresia.setDocumento(resultado.getString("documento"));
-        membresia.setTarifa(resultado.getDouble("tarifa"));
-
-        return membresia;
-    }
-
-    private static Date convertirFecha(LocalDate fecha) {
-        return fecha == null ? null : Date.valueOf(fecha);
-    }
-@Override
     public List<Membresia> findByDocumento(String documento) {
-
-        List<Membresia> membresias = new ArrayList<>();
-
-        if (documento == null || documento.isBlank()) {
-            return membresias;
-        }
-
-        String sql = "SELECT id_membresia, plan, estado, fecha_inicio, fecha_fin, "
-                + "documento, tarifa FROM MEMBRESIA WHERE documento = ?";
-
-        try (Connection conexion = ConnectionBD.obtenerConexion();
-             PreparedStatement statement = conexion.prepareStatement(sql)) {
-
-            statement.setString(1, documento.trim());
-
-            try (ResultSet resultado = statement.executeQuery()) {
-                while (resultado.next()) {
-                    membresias.add(mapearMembresia(resultado));
-                }
-            }
-
-        } catch (SQLException e) {
-            throw new PersistenceException(
-                    "Error al buscar membresías del documento " + documento, e);
-        }
-
-        return membresias;
+        return consultar("SELECT " + COLUMNS + " FROM MEMBRESIA WHERE SOCIO_documento = ?", documento);
     }
 
+    private List<Membresia> consultar(String sql, String parametro) {
+        List<Membresia> lista = new ArrayList<>();
+        try (Connection c = ConnectionBD.obtenerConexion();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            if (parametro != null) ps.setString(1, parametro.trim());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) lista.add(mapear(rs));
+            }
+            return lista;
+        } catch (SQLException e) {
+            throw new PersistenceException("Error al consultar membresías", e);
+        }
+    }
 
+    @Override
+    public Optional<Membresia> findByIdMembresia(int id, String documento) {
+        String sql = "SELECT " + COLUMNS +
+            " FROM MEMBRESIA WHERE id_membresia = ? AND SOCIO_documento = ?";
+        try (Connection c = ConnectionBD.obtenerConexion();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.setString(2, documento);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? Optional.of(mapear(rs)) : Optional.empty();
+            }
+        } catch (SQLException e) {
+            throw new PersistenceException("Error al buscar membresía", e);
+        }
+    }
+
+    @Override
+    public boolean updateMembresia(int id, String documento, Membresia m) {
+        String sql = "UPDATE MEMBRESIA SET plan=?, estado=?, fecha_inicio=?, " +
+            "fecha_fin=?, tarifa=? WHERE id_membresia=? AND SOCIO_documento=?";
+        try (Connection c = ConnectionBD.obtenerConexion();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, m.getPlan());
+            ps.setString(2, m.getEstado());
+            ps.setDate(3, java.sql.Date.valueOf(m.getFechaInicio()));
+            if (m.getFechaFin() == null) ps.setNull(4, Types.DATE);
+            else ps.setDate(4, java.sql.Date.valueOf(m.getFechaFin()));
+            ps.setBigDecimal(5, java.math.BigDecimal.valueOf(m.getTarifa()));
+            ps.setInt(6, id);
+            ps.setString(7, documento);
+            return ps.executeUpdate() == 1;
+        } catch (SQLException e) {
+            throw new PersistenceException("Error al actualizar membresía", e);
+        }
+    }
+
+    @Override
+    public boolean deleteMembresia(int id, String documento) {
+        String sql = "DELETE FROM MEMBRESIA WHERE id_membresia=? AND SOCIO_documento=?";
+        try (Connection c = ConnectionBD.obtenerConexion();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.setString(2, documento);
+            return ps.executeUpdate() == 1;
+        } catch (SQLException e) {
+            throw new PersistenceException("Error al eliminar membresía", e);
+        }
+    }
+
+    private Membresia mapear(ResultSet rs) throws SQLException {
+        Membresia m = new Membresia();
+        m.setIdMembresia(rs.getInt("id_membresia"));
+        m.setPlan(rs.getString("plan"));
+        m.setEstado(rs.getString("estado"));
+        java.sql.Date inicio = rs.getDate("fecha_inicio");
+        java.sql.Date fin = rs.getDate("fecha_fin");
+        m.setFechaInicio(inicio == null ? null : inicio.toLocalDate());
+        m.setFechaFin(fin == null ? null : fin.toLocalDate());
+        m.setDocumento(rs.getString("SOCIO_documento"));
+        m.setTarifa(rs.getDouble("tarifa"));
+        return m;
+    }
 }
-
-
-    
-

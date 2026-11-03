@@ -24,6 +24,7 @@ export interface LoanFormData {
     documentoEmpleado: string;
     tipoPrestamo: string;
     fechaSalida: string;
+    fechaDevolucion: string;
 }
 
 export interface LoanAuditData {
@@ -78,7 +79,8 @@ export class LoanFormComponent {
         idUnidad: '',
         documentoEmpleado: '',
         tipoPrestamo: '',
-        fechaSalida: ''
+        fechaSalida: '',
+        fechaDevolucion: ''
     };
 
     auditData: LoanAuditData = {
@@ -89,11 +91,11 @@ export class LoanFormComponent {
 
     get canRegister(): boolean {
         return !!this.loanData.documentoCliente
-            && !!this.loanData.idMembresia
             && !!this.loanData.idUnidad
             && !!this.loanData.documentoEmpleado
             && !!this.loanData.tipoPrestamo
             && !!this.loanData.fechaSalida
+            && !!this.loanData.fechaDevolucion
             && !this.submitting;
     }
 
@@ -185,7 +187,8 @@ export class LoanFormComponent {
             idUnidad: '',
             documentoEmpleado: '',
             tipoPrestamo: '',
-            fechaSalida: ''
+            fechaSalida: '',
+            fechaDevolucion: ''
         };
 
         this.cancel.emit();

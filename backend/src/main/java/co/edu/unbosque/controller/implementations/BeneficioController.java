@@ -7,14 +7,7 @@ import co.edu.unbosque.model.dto.BeneficioRequestDTO;
 import co.edu.unbosque.model.dto.BeneficioResponseDTO;
 import co.edu.unbosque.services.implementations.BeneficioService;
 import co.edu.unbosque.services.interfaces.IBeneficioService;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -22,94 +15,52 @@ import jakarta.ws.rs.core.Response;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class BeneficioController implements IBeneficioController {
+    private final IBeneficioService service = new BeneficioService();
 
-        private final IBeneficioService beneficioService = new BeneficioService();
+    @POST
+    @Override
+    public Response guardarBeneficio(BeneficioRequestDTO request) {
+        BeneficioResponseDTO r = service.addBeneficio(request);
+        return r == null
+            ? Response.status(Response.Status.BAD_REQUEST).entity("{\"mensaje\":\"Datos inválidos\"}").build()
+            : Response.status(Response.Status.CREATED).entity(r).build();
+    }
 
-        @Override
-        @POST
-        public Response guardarBeneficio(BeneficioRequestDTO request) {
+    @GET
+    @Override
+    public Response obtenerBeneficios() {
+        List<BeneficioResponseDTO> lista = service.getBeneficios();
+        return Response.ok(lista).build();
+    }
 
-                BeneficioResponseDTO beneficio = beneficioService.addBeneficio(request);
+    @GET
+    @Path("/{idBeneficio}/{idMembresia}/{documentoSocio}")
+    @Override
+    public Response buscarPorId(@PathParam("idBeneficio") Integer id,
+            @PathParam("idMembresia") Integer membresia,
+            @PathParam("documentoSocio") String documento) {
+        BeneficioResponseDTO r = service.getBeneficioPorId(id, membresia, documento);
+        return r == null ? Response.status(Response.Status.NOT_FOUND).build() : Response.ok(r).build();
+    }
 
-                if (beneficio == null) {
-                        return Response.status(Response.Status.BAD_REQUEST)
-                                        .entity("No fue posible registrar el beneficio.")
-                                        .build();
-                }
+    @PUT
+    @Path("/{idBeneficio}/{idMembresia}/{documentoSocio}")
+    @Override
+    public Response actualizarBeneficio(@PathParam("idBeneficio") Integer id,
+            @PathParam("idMembresia") Integer membresia,
+            @PathParam("documentoSocio") String documento,
+            BeneficioRequestDTO request) {
+        BeneficioResponseDTO r = service.updateBeneficio(id, membresia, documento, request);
+        return r == null ? Response.status(Response.Status.NOT_FOUND).build() : Response.ok(r).build();
+    }
 
-                return Response.status(Response.Status.CREATED)
-                                .entity(beneficio)
-                                .build();
-        }
-
-        @Override
-        @GET
-        public Response obtenerBeneficios() {
-
-                List<BeneficioResponseDTO> beneficios = beneficioService.getBeneficios();
-
-                return Response.ok(beneficios).build();
-        }
-
-        @Override
-        @GET
-        @Path("/{idBeneficio}/{idMembresia}")
-        public Response buscarPorId(
-                        @PathParam("idBeneficio") Integer idBeneficio,
-                        @PathParam("idMembresia") Integer idMembresia) {
-
-                BeneficioResponseDTO beneficio = beneficioService.getBeneficioPorId(
-                                idBeneficio,
-                                idMembresia);
-
-                if (beneficio == null) {
-                        return Response.status(Response.Status.NOT_FOUND)
-                                        .entity("Beneficio no encontrado.")
-                                        .build();
-                }
-
-                return Response.ok(beneficio).build();
-        }
-
-        @Override
-        @PUT
-        @Path("/{idBeneficio}/{idMembresia}")
-        public Response actualizarBeneficio(
-                        @PathParam("idBeneficio") Integer idBeneficio,
-                        @PathParam("idMembresia") Integer idMembresia,
-                        BeneficioRequestDTO request) {
-
-                BeneficioResponseDTO beneficio = beneficioService.updateBeneficio(
-                                idBeneficio,
-                                idMembresia,
-                                request);
-
-                if (beneficio == null) {
-                        return Response.status(Response.Status.NOT_FOUND)
-                                        .entity("Beneficio no encontrado.")
-                                        .build();
-                }
-
-                return Response.ok(beneficio).build();
-        }
-
-        @Override
-        @DELETE
-        @Path("/{idBeneficio}/{idMembresia}")
-        public Response borrarBeneficio(
-                        @PathParam("idBeneficio") Integer idBeneficio,
-                        @PathParam("idMembresia") Integer idMembresia) {
-
-                BeneficioResponseDTO beneficio = beneficioService.deleteBeneficio(
-                                idBeneficio,
-                                idMembresia);
-
-                if (beneficio == null) {
-                        return Response.status(Response.Status.NOT_FOUND)
-                                        .entity("Beneficio no encontrado.")
-                                        .build();
-                }
-
-                return Response.ok(beneficio).build();
-        }
+    @DELETE
+    @Path("/{idBeneficio}/{idMembresia}/{documentoSocio}")
+    @Override
+    public Response borrarBeneficio(@PathParam("idBeneficio") Integer id,
+            @PathParam("idMembresia") Integer membresia,
+            @PathParam("documentoSocio") String documento) {
+        BeneficioResponseDTO r = service.deleteBeneficio(id, membresia, documento);
+        return r == null ? Response.status(Response.Status.NOT_FOUND).build() : Response.ok(r).build();
+    }
 }

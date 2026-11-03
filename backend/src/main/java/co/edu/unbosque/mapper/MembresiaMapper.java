@@ -12,6 +12,7 @@ public class MembresiaMapper {
         membresia.setEstado(dto.getEstado());
         membresia.setFechaInicio(dto.getFechaInicio());
         membresia.setFechaFin(dto.getFechaFin());
+        membresia.setDocumento(dto.getDocumento());
         membresia.setTarifa(dto.getTarifa());
         return membresia;
     }
@@ -23,6 +24,7 @@ public class MembresiaMapper {
         dto.setEstado(membresia.getEstado());
         dto.setFechaInicio(membresia.getFechaInicio());
         dto.setFechaFin(membresia.getFechaFin());
+        dto.setDocumento(membresia.getDocumento());
         dto.setTarifa(membresia.getTarifa());
         return dto;
     }

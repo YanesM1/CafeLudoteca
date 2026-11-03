@@ -21,7 +21,7 @@ public class ExpansionMapper{
         dto.setIdExpansion(expansion.getIdExpansion());
         dto.setNombre(expansion.getNombre());
         dto.setDescripcion(expansion.getDescripcion());
-        dto.setContenidoAdicional(expansion.getDescripcion());
+        dto.setContenidoAdicional(expansion.getContenidoAdicional());
         dto.setNumSerie(expansion.getNumSerie());
         return dto;
     }
