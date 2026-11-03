@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 import co.edu.unbosque.config.ConnectionBD;
+import co.edu.unbosque.exceptions.PersistenceException;
 import co.edu.unbosque.model.entity.Telefono;
 import co.edu.unbosque.repository.interfaces.ITelefonoRepository;
 
@@ -16,141 +17,129 @@ public class TelefonoRepositoryJDBC implements ITelefonoRepository {
 
     @Override
     public boolean saveTelefono(Telefono telefono) {
-        String sql = "INSERT INTO TELEFONO "
-                + "(documento, telefono) "
-                + "VALUES (?, ?)";
-
-        if (telefono == null) {
-            return false;
-        }
+        String sql = """
+                INSERT INTO TELEFONO (documento_cliente, telefono)
+                VALUES(?, ?)""";
 
         try (Connection conexion = ConnectionBD.obtenerConexion();
-             PreparedStatement statement = conexion.prepareStatement(sql)) {
+                PreparedStatement ps = conexion.prepareStatement(sql)) {
 
-            statement.setString(1, telefono.getDocumento());
-            statement.setString(2, telefono.getTelefono());
+            ps.setString(1, telefono.getDocumentoCliente());
+            ps.setString(2, telefono.getTelefono());
 
-            return statement.executeUpdate() == 1;
+            return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new PersistenceException("Error al guardar en la base de datos", e);
         }
     }
 
     @Override
-    public List<Telefono> findByDocumento(String documento) {
+    public List<Telefono> findByDocumento(String documentoCliente) {
         List<Telefono> telefonos = new ArrayList<>();
 
-        String sql = "SELECT documento, telefono "
-                + "FROM TELEFONO WHERE documento = ?";
-
-        if (documento == null || documento.isBlank()) {
-            return telefonos;
-        }
+        String sql = """
+                SELECT *
+                FROM TELEFONO
+                WHERE documento_cliente=?
+                """;
 
         try (Connection conexion = ConnectionBD.obtenerConexion();
-             PreparedStatement statement = conexion.prepareStatement(sql)) {
+                PreparedStatement ps = conexion.prepareStatement(sql)) {
 
-            statement.setString(1, documento);
+            ps.setString(1, documentoCliente);
 
-            try (ResultSet resultado = statement.executeQuery()) {
-                while (resultado.next()) {
-                    telefonos.add(mapearTelefono(resultado));
+            try (ResultSet rs = ps.executeQuery()) {
+
+                while (rs.next()) {
+                    Telefono telefono = new Telefono();
+
+                    telefono.setDocumentoCliente(rs.getString("documento_cliente"));
+                    telefono.setTelefono(rs.getString("telefono"));
+
+                    telefonos.add(telefono);
                 }
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new PersistenceException("Error al buscar en la base de datos", e);
         }
 
         return telefonos;
     }
 
     @Override
-    public Optional<Telefono> findByDocumentoAndNumero(String documento, String numero) {
-        String sql = "SELECT documento, telefono "
-                + "FROM TELEFONO WHERE documento = ? AND telefono = ?";
-
-        if (documento == null || documento.isBlank()
-                || numero == null || numero.isBlank()) {
-            return Optional.empty();
-        }
+    public Optional<Telefono> findByDocumentoAndNumero(String documentoCliente, String telefono) {
+        String sql = """
+                SELECT *
+                FROM TELEFONO
+                WHERE documento_cliente=? AND telefono=?
+                """;
 
         try (Connection conexion = ConnectionBD.obtenerConexion();
-             PreparedStatement statement = conexion.prepareStatement(sql)) {
+                PreparedStatement ps = conexion.prepareStatement(sql)) {
 
-            statement.setString(1, documento);
-            statement.setString(2, numero);
+            ps.setString(1, documentoCliente);
+            ps.setString(2, telefono);
 
-            try (ResultSet resultado = statement.executeQuery()) {
-                if (resultado.next()) {
-                    return Optional.of(mapearTelefono(resultado));
+            try (ResultSet rs = ps.executeQuery()) {
+
+                if (rs.next()) {
+                    Telefono telefonoC = new Telefono();
+
+                    telefonoC.setDocumentoCliente(rs.getString("documento_cliente"));
+                    telefonoC.setTelefono(rs.getString("telefono"));
+
+                    return Optional.of(telefonoC);
                 }
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new PersistenceException("Error al buscar en la base de datos", e);
         }
 
         return Optional.empty();
     }
 
     @Override
-    public boolean updateTelefono(String documento, String numeroActual, Telefono telefono) {
-        String sql = "UPDATE TELEFONO SET telefono = ? "
-                + "WHERE documento = ? AND telefono = ?";
-
-        if (documento == null || numeroActual == null || telefono == null) {
-            return false;
-        }
+    public boolean updateTelefono(String documentoCliente, String telefonoActual, Telefono telefono) {
+        String sql = """
+                UPDATE TELEFONO
+                SET telefono=?
+                WHERE documento_cliente=? AND telefono=?
+                """;
 
         try (Connection conexion = ConnectionBD.obtenerConexion();
-             PreparedStatement statement = conexion.prepareStatement(sql)) {
+                PreparedStatement ps = conexion.prepareStatement(sql)) {
 
-            statement.setString(1, telefono.getDocumento());
-            statement.setString(2, telefono.getTelefono());
-          
+            ps.setString(1, telefono.getTelefono());
+            ps.setString(2, documentoCliente);
+            ps.setString(3, telefonoActual);
 
-            return statement.executeUpdate() == 1;
+            return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new PersistenceException("Error no se encuentra en la base de datos", e);
         }
     }
 
     @Override
-    public boolean deleteTelefono(String documento, String numero) {
-        String sql = "DELETE FROM TELEFONO WHERE documento = ? AND telefono = ?";
-
-        if (documento == null || documento.isBlank()
-                || numero == null || numero.isBlank()) {
-            return false;
-        }
+    public boolean deleteTelefono(String documentoCliente, String telefono) {
+        String sql = """
+                DELETE FROM TELEFONO
+                WHERE documento_cliente=? AND telefono=?
+                """;
 
         try (Connection conexion = ConnectionBD.obtenerConexion();
-             PreparedStatement statement = conexion.prepareStatement(sql)) {
+                PreparedStatement ps = conexion.prepareStatement(sql)) {
 
-            statement.setString(1, documento);
-            statement.setString(2, numero);
+            ps.setString(1, documentoCliente);
+            ps.setString(2, telefono);
 
-            return statement.executeUpdate() == 1;
+            return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new PersistenceException("Error no se encontro en la base de datos", e);
         }
-    }
-
-    private Telefono mapearTelefono(ResultSet resultado)
-            throws SQLException {
-
-        Telefono telefono = new Telefono();
-
-        telefono.setDocumento(resultado.getString("documento"));
-        telefono.setTelefono(resultado.getString("telefono"));
-
-        return telefono;
     }
 }

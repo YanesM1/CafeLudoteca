@@ -43,55 +43,42 @@ public class TelefonoController implements ITelefonoController {
     @Override
     @GET
     @Path("/buscar")
-    public Response buscarPorDocumento(@QueryParam("documento") String documento) {
+    public Response buscarPorDocumento(@QueryParam("documento_cliente") String documentoCliente) {
         List<TelefonoResponseDTO> telefonos =
-                telefonoService.getTelefonosPorDocumento(documento);
+                telefonoService.getTelefonosPorDocumento(documentoCliente);
         return Response.ok(telefonos).build();
     }
 
-    @Override
-    @GET
-    @Path("/{documento}/{numero}")
-    public Response buscarPorNumero(@PathParam("documento") String documento,
-            @PathParam("numero") String numero) {
-        TelefonoResponseDTO telefono =
-                telefonoService.getTelefonoPorNumero(documento, numero);
-        if (telefono == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("No se ha encontrado el telefono")
-                    .build();
-        }
-        return Response.ok(telefono).build();
-    }
+   
 
     @Override
     @PUT
-    @Path("/{documento}/{numeroActual}")
-    public Response actualizarTelefono(@PathParam("documento") String documento,
-            @PathParam("numeroActual") String numeroActual,
+    @Path("/{documento_cliente}/{telefono}")
+    public Response actualizarTelefono(@PathParam("documento_cliente") String documentoCliente,
+            @PathParam("telefono") String telefono,
             TelefonoRequestDTO request) {
-        TelefonoResponseDTO telefono =
-                telefonoService.updateTelefono(documento, numeroActual, request);
-        if (telefono == null) {
+        TelefonoResponseDTO telefonoC =
+                telefonoService.updateTelefono(documentoCliente, telefono, request);
+        if (telefonoC == null) {
             return Response.status(Response.Status.NOT_FOUND)
                     .entity("No se ha encontrado el telefono que desea actualizar")
                     .build();
         }
-        return Response.ok(telefono).build();
+        return Response.ok(telefonoC).build();
     }
 
     @Override
     @DELETE
-    @Path("/{documento}/{numero}")
-    public Response borrarTelefono(@PathParam("documento") String documento,
-            @PathParam("numero") String numero) {
-        TelefonoResponseDTO telefono = telefonoService.deleteTelefono(documento, numero);
-        if (telefono == null) {
+    @Path("/{documento_cliente}/{telefono}")
+    public Response borrarTelefono(@PathParam("documento_cliente") String documentoCliente,
+            @PathParam("telefono") String telefono) {
+        TelefonoResponseDTO telefonoC =
+                telefonoService.deleteTelefono(documentoCliente, telefono);
+        if (telefonoC == null) {
             return Response.status(Response.Status.NOT_FOUND)
                     .entity("No se ha encontrado el telefono")
                     .build();
         }
-        return Response.ok(telefono).build();
+        return Response.ok(telefonoC).build();
     }
-
 }

@@ -9,12 +9,10 @@ public interface ITelefonoService {
 
     TelefonoResponseDTO addTelefono(TelefonoRequestDTO request);
 
-    List<TelefonoResponseDTO> getTelefonosPorDocumento(String documento);
+    List<TelefonoResponseDTO> getTelefonosPorDocumento(String documentoCliente);
 
-    TelefonoResponseDTO getTelefonoPorNumero(String documento, String numero);
+    TelefonoResponseDTO updateTelefono(String documentoCliente, String telefonoActual,
+            TelefonoRequestDTO request);
 
-    TelefonoResponseDTO updateTelefono(String documento, String numeroActual, TelefonoRequestDTO request);
-
-    TelefonoResponseDTO deleteTelefono(String documento, String numero);
-
+    TelefonoResponseDTO deleteTelefono(String documentoCliente, String telefono);
 }

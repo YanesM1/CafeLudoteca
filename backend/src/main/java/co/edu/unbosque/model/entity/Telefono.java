@@ -11,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Telefono {
 
-    private String documento; // PK FK
+    private String documentoCliente; // PK FK
     private String telefono; // PK
 
     // La igualdad se basa en la llave primaria compuesta (documento + telefono)
@@ -20,19 +20,19 @@ public class Telefono {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Telefono that = (Telefono) o;
-        return Objects.equals(documento, that.documento)
+        return Objects.equals(documentoCliente, that.documentoCliente)
                 && Objects.equals(telefono, that.telefono);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(documento, telefono);
+        return Objects.hash(documentoCliente, telefono);
     }
 
     @Override
     public String toString() {
         return "Telefono{" +
-                "documento='" + documento + '\'' +
+                "documento='" + documentoCliente + '\'' +
                 ", telefono='" + telefono + '\'' +
                 '}';
     }

@@ -8,7 +8,7 @@ public class TelefonoMapper {
 
     public Telefono telefonoRequestDTOToTelefono(TelefonoRequestDTO dto) {
         Telefono telefono = new Telefono();
-        telefono.setDocumento(dto.getDocumento());
+        telefono.setDocumentoCliente(dto.getDocumentoCliente());
         telefono.setTelefono(dto.getTelefono());
 
         return telefono;
@@ -16,7 +16,7 @@ public class TelefonoMapper {
 
     public TelefonoResponseDTO telefonoToResponseDTO(Telefono telefono) {
         TelefonoResponseDTO dto = new TelefonoResponseDTO();
-        dto.setDocumento(telefono.getDocumento());
+        dto.setDocumentoCliente(telefono.getDocumentoCliente());
         dto.setTelefono(telefono.getTelefono());;
 
         return dto;
