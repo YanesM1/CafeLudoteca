@@ -21,12 +21,12 @@ public class Socio extends  Cliente{
         if (o == null || getClass() != o.getClass())
              return false;
 
-        return Objects.equals(this.getDocumento(), getDocumento());
+        return Objects.equals(this.getDocumentoCliente(), getDocumentoCliente());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getDocumento());
+        return Objects.hash(getDocumentoCliente());
     }
 
 }

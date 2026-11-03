@@ -25,7 +25,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@Path("/mesas")
+@Path("/mesa")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class MesaController implements IMesaController {
@@ -45,11 +45,6 @@ public class MesaController implements IMesaController {
             return false;
         }
 
-        if (validarId &&
-                (request.getIdMesa() == null ||
-                 request.getIdMesa().isBlank())) {
-            return false;
-        }
 
         return request.getCapacidad() > 0
                 && request.getTematica() != null
@@ -179,14 +174,7 @@ public class MesaController implements IMesaController {
                     "Los datos para actualizar la mesa son inválidos.");
         }
 
-        if (request.getIdMesa() != null
-                && !request.getIdMesa().isBlank()
-                && !idMesa.equals(request.getIdMesa())) {
 
-            return respuestaError(
-                    Response.Status.BAD_REQUEST,
-                    "No se permite modificar el identificador de la mesa.");
-        }
 
         try {
             MesaResponseDTO mesa =

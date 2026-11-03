@@ -10,8 +10,8 @@ public class PrestamoMapper {
         prestamo.setEstadoComponentes(dto.getEstadoComponentes());
         prestamo.setTipoPrestamo(dto.getTipoPrestamo());
         prestamo.setFechaDevolucion(dto.getFechaDevolucion());
-        prestamo.setClienteDocumento(dto.getClienteDocumento());
-        prestamo.setEmpleadoDocumento(dto.getEmpleadoDocumento());
+        prestamo.setDocumentoCliente(dto.getDocumentoCliente());
+        prestamo.setDocumentoEmp(dto.getDocumentoEmp());
         
         return prestamo;
     }
@@ -23,8 +23,8 @@ public class PrestamoMapper {
         dto.setEstadoComponentes(prestamo.getEstadoComponentes());
         dto.setTipoPrestamo(prestamo.getTipoPrestamo());
         dto.setFechaDevolucion(prestamo.getFechaDevolucion());
-        dto.setClienteDocumento(prestamo.getClienteDocumento());
-        dto.setEmpleadoDocumento(prestamo.getEmpleadoDocumento());
+        dto.setDocumentoCliente(prestamo.getDocumentoCliente());
+        dto.setDocumentoEmp(prestamo.getDocumentoEmp());
        
         return dto;
 

@@ -28,7 +28,7 @@ public class ClienteFrecuenteRepositoryJDBC implements IClienteFrecuenteReposito
         try (Connection conexion = ConnectionBD.obtenerConexion();
              PreparedStatement statement = conexion.prepareStatement(sql)) {
 
-            statement.setString(1, clienteFrecuente.getDocumento());
+            statement.setString(1, clienteFrecuente.getDocumentoCliente());
             statement.setInt(2, clienteFrecuente.getPuntosAcumulados());
             statement.setString(3, clienteFrecuente.getNivelFidelidad());
 
@@ -145,7 +145,7 @@ public class ClienteFrecuenteRepositoryJDBC implements IClienteFrecuenteReposito
 
         ClienteFrecuente clienteFrecuente = new ClienteFrecuente();
 
-        clienteFrecuente.setDocumento(resultado.getString("documento"));
+        clienteFrecuente.setDocumentoCliente(resultado.getString("documento"));
         clienteFrecuente.setPuntosAcumulados(resultado.getInt("puntos_acumulados"));
         clienteFrecuente.setNivelFidelidad(resultado.getString("nivel_fidelidad"));
 

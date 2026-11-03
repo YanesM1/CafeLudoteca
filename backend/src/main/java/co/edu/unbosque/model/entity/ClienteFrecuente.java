@@ -20,12 +20,12 @@ public class ClienteFrecuente extends Cliente{
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ClienteFrecuente that = (ClienteFrecuente) o;
-        return Objects.equals(this.getDocumento(), that.getDocumento());
+        return Objects.equals(this.getDocumentoCliente(), that.getDocumentoCliente());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getDocumento());
+        return Objects.hash(getDocumentoCliente());
     }
 
    

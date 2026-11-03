@@ -49,7 +49,7 @@ public class PrestamoController implements IPrestamoController {
     @GET
     @Path("/buscar")
     public Response buscarPorTipoPrestamo(
-            @QueryParam("tipoPrestamo") String tipoPrestamo) {
+            @QueryParam("tipo_prestamo") String tipoPrestamo) {
 
         List<PrestamoResponseDTO> prestamos =
                 prestamoServicio.getPrestamo(tipoPrestamo);
@@ -59,7 +59,7 @@ public class PrestamoController implements IPrestamoController {
 
     @Override
     @GET
-    @Path("/buscar_id/{id_prestamo}")
+    @Path("/buscar/{id_prestamo}")
     public Response buscarPorIdPrestamo(
             @PathParam("id_prestamo") Integer idPrestamo) {
 

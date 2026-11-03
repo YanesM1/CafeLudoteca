@@ -11,10 +11,10 @@ public interface IClienteRepository {
 
     List<Cliente> findByNombre(String nombre);
 
-    Optional<Cliente> findByDocumento(String documento);
+    Optional<Cliente> findByDocumento(String documentoCliente);
 
-    boolean updateCliente(String documento, Cliente cliente);
+    boolean updateCliente(String documentoCliente, Cliente cliente);
 
-    boolean deleteCliente(String documento);
+    boolean deleteCliente(String documentoCliente);
 
 }

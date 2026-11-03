@@ -8,7 +8,7 @@ public class SocioMapper {
 
     public Socio socioRequestDTOToSocio(SocioRequestDTO dto) {
         Socio socio = new Socio();
-        socio.setDocumento(dto.getDocumento());
+        socio.setDocumentoCliente(dto.getDocumento());
         socio.setFechaAfiliacion(dto.getFechaAfiliacion());
 
         return socio;
@@ -16,7 +16,7 @@ public class SocioMapper {
 
     public SocioResponseDTO socioToResponseDTO(Socio socio) {
         SocioResponseDTO dto = new SocioResponseDTO();
-        dto.setDocumento(socio.getDocumento());
+        dto.setDocumento(socio.getDocumentoCliente());
         dto.setFechaAfiliacion(socio.getFechaAfiliacion());
 
         return dto;

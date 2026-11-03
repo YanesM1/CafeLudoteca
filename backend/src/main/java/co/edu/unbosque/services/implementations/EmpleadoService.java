@@ -106,10 +106,10 @@ public class EmpleadoService implements IEmpleadoService {
     // ACTUALIZAR EMPLEADO
     @Override
     public EmpleadoResponseDTO updateEmpleado(
-            String documento,
+            String documentoEmp,
             EmpleadoRequestDTO request) {
 
-        if (documento == null || documento.isBlank()) {
+        if (documentoEmp == null || documentoEmp.isBlank()) {
             return null;
         }
 
@@ -121,37 +121,37 @@ public class EmpleadoService implements IEmpleadoService {
         // Si el cuerpo incluye otro documento, se rechaza.
         if (request.getDocumentoEmp() != null &&
                 !request.getDocumentoEmp().isBlank() &&
-                !documento.equals(request.getDocumentoEmp())) {
+                !documentoEmp.equals(request.getDocumentoEmp())) {
             return null;
         }
 
         Empleado empleado = EmpleadoMapper.toEntity(request);
 
-        if (!empleadoRepository.updateEmpleado(documento, empleado)) {
+        if (!empleadoRepository.updateEmpleado(documentoEmp, empleado)) {
             return null;
         }
 
-        return empleadoRepository.findByDocumento(documento)
+        return empleadoRepository.findByDocumento(documentoEmp)
                 .map(EmpleadoMapper::toResponse)
                 .orElse(null);
     }
 
     // ELIMINAR EMPLEADO
     @Override
-    public EmpleadoResponseDTO deleteEmpleado(String documento) {
+    public EmpleadoResponseDTO deleteEmpleado(String documentoEmp) {
 
-        if (documento == null || documento.isBlank()) {
+        if (documentoEmp == null || documentoEmp.isBlank()) {
             return null;
         }
 
         Optional<Empleado> empleado =
-                empleadoRepository.findByDocumento(documento);
+                empleadoRepository.findByDocumento(documentoEmp);
 
         if (empleado.isEmpty()) {
             return null;
         }
 
-        if (!empleadoRepository.deleteEmpleado(documento)) {
+        if (!empleadoRepository.deleteEmpleado(documentoEmp)) {
             return null;
         }
 

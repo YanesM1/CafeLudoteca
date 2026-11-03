@@ -9,7 +9,7 @@ public class ClienteFrecuenteMapper {
     public ClienteFrecuente clienteFrecuenteRequestDTOToClienteFrecuente(
             ClienteFrecuenteRequestDTO dto) {
         ClienteFrecuente clienteFrecuente = new ClienteFrecuente();
-        clienteFrecuente.setDocumento(dto.getDocumento());
+        clienteFrecuente.setDocumentoCliente(dto.getDocumentoCliente());
         clienteFrecuente.setPuntosAcumulados(dto.getPuntosAcumulados());
         clienteFrecuente.setNivelFidelidad(dto.getNivelFidelidad());
 
@@ -19,7 +19,7 @@ public class ClienteFrecuenteMapper {
     public ClienteFrecuenteResponseDTO clienteFrecuenteToResponseDTO(
             ClienteFrecuente clienteFrecuente) {
         ClienteFrecuenteResponseDTO dto = new ClienteFrecuenteResponseDTO();
-        dto.setDocumento(clienteFrecuente.getDocumento());
+        dto.setDocumentoCliente(clienteFrecuente.getDocumentoCliente());
         dto.setPuntosAcumulados(clienteFrecuente.getPuntosAcumulados());
         dto.setNivelFidelidad(clienteFrecuente.getNivelFidelidad());
 

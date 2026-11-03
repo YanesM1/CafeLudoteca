@@ -45,9 +45,9 @@ public class ClienteService implements IClienteService {
     }
 
     @Override
-    public ClienteResponseDTO getClientePorDocumento(String documento) {
+    public ClienteResponseDTO getClientePorDocumento(String documentoCliente) {
         Optional<Cliente> cliente =
-                clienteRepository.findByDocumento(documento);
+                clienteRepository.findByDocumento(documentoCliente);
 
         return cliente
                 .map(clienteMapper::clienteToResponseDTO)
@@ -56,34 +56,34 @@ public class ClienteService implements IClienteService {
 
     @Override
     public ClienteResponseDTO updateCliente(
-            String documento,
+            String documentoCliente,
             ClienteRequestDTO request) {
 
-        if (documento == null || request == null) {
+        if (documentoCliente == null || request == null) {
             return null;
         }
 
         Cliente cliente = clienteMapper.clienteRequestDTOToCliente(request);
 
-        if (!clienteRepository.updateCliente(documento, cliente)) {
+        if (!clienteRepository.updateCliente(documentoCliente, cliente)) {
             return null;
         }
 
-        return clienteRepository.findByDocumento(documento)
+        return clienteRepository.findByDocumento(documentoCliente)
                 .map(clienteMapper::clienteToResponseDTO)
                 .orElse(null);
     }
 
     @Override
-    public ClienteResponseDTO deleteCliente(String documento) {
+    public ClienteResponseDTO deleteCliente(String documentoCliente) {
         Optional<Cliente> cliente =
-                clienteRepository.findByDocumento(documento);
+                clienteRepository.findByDocumento(documentoCliente);
 
         if (cliente.isEmpty()) {
             return null;
         }
 
-        if (!clienteRepository.deleteCliente(documento)) {
+        if (!clienteRepository.deleteCliente(documentoCliente)) {
             return null;
         }
 
