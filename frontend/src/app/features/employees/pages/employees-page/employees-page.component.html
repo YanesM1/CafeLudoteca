@@ -1,95 +1,101 @@
-<main>
-  <header>
+<section class="cl-page">
+
+  <header class="cl-page-header">
     <div>
-      <small>ADMINISTRACIÓN</small>
-      <h1>Gestión de empleados</h1>
-      <p>Consulta y administra los empleados.</p>
+      <span class="cl-eyebrow">Administración · Empleados</span>
+      <h1 class="cl-title">Empleados</h1>
+      <p class="cl-subtitle">Consulta y administra los empleados responsables de préstamos y reservas.</p>
     </div>
-    <button class="gold" (click)="nuevo()">+ Nuevo empleado</button>
+    <div class="cl-page-header__aside">
+      <span class="cl-count"><strong>{{ empleados.length }}</strong>registros</span>
+      <button class="btn btn--gold" type="button" (click)="nuevo()">+ Nuevo empleado</button>
+    </div>
   </header>
 
   @if (mensaje) {
-    <p class="message" [class.error]="error">{{ mensaje }}</p>
+    <p class="cl-alert" [class.cl-alert--error]="error" [class.cl-alert--success]="!error">{{ mensaje }}</p>
   }
 
-  <section class="search">
-    <form (ngSubmit)="buscar()">
-      <input name="nombre" [(ngModel)]="nombre"
-        placeholder="Buscar por nombre">
-      <button>Buscar</button>
+  <section class="cl-card">
+    <form class="cl-toolbar" (ngSubmit)="buscarSegunCriterio()">
+      <input class="form-control" name="busqueda" [(ngModel)]="busqueda"
+        [placeholder]="criterio === 'documento' ? 'Documento del empleado' : 'Nombre (vacío = todos)'">
+      <select class="form-control" name="criterio" [(ngModel)]="criterio" aria-label="Buscar por">
+        <option value="nombre">Por nombre</option>
+        <option value="documento">Por documento</option>
+      </select>
+      <button class="btn btn--gold" type="submit">Buscar</button>
+      <button class="btn btn--ghost" type="button" (click)="busqueda='';limpiar()">Ver todos</button>
     </form>
 
-    <form (ngSubmit)="buscarDocumento()">
-      <input name="documento" [(ngModel)]="documento"
-        placeholder="Buscar por documento">
-      <button>Consultar</button>
-    </form>
-
-    <button (click)="limpiar()">Limpiar</button>
-  </section>
-
-  <section>
     @if (empleados.length === 0) {
-      <p>Busca un empleado para visualizar sus registros.</p>
+      <p class="cl-empty">No hay empleados para mostrar.</p>
     } @else {
-      <table>
-        <thead>
-          <tr>
-            <th>Documento</th>
-            <th>Nombre</th>
-            <th>Apellido</th>
-            <th>Correo</th>
-            <th>Cargo</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (e of empleados; track e.documentoEmp) {
+      <div class="cl-table-wrap">
+        <table class="cl-table">
+          <thead>
             <tr>
-              <td>{{e.documentoEmp}}</td>
-              <td>{{e.nombre}}</td>
-              <td>{{e.apellido}}</td>
-              <td>{{e.correo}}</td>
-              <td>{{e.cargo}}</td>
-              <td>
-                <button (click)="editar(e)">Editar</button>
-                <button (click)="eliminar(e)">Eliminar</button>
-              </td>
+              <th>Documento</th>
+              <th>Nombre</th>
+              <th>Correo</th>
+              <th>Cargo</th>
+              <th class="cl-table__actions-head">Acciones</th>
             </tr>
-          }
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            @for (e of empleados; track e.documentoEmp) {
+              <tr>
+                <td>{{ e.documentoEmp }}</td>
+                <td>{{ e.nombre }} {{ e.apellido }}</td>
+                <td>{{ e.correo }}</td>
+                <td>{{ e.cargo }}</td>
+                <td>
+                  <div class="cl-table__actions">
+                    <button class="btn btn--ghost btn--sm" type="button" (click)="editar(e)">Editar</button>
+                    <button class="btn btn--danger btn--sm" type="button" (click)="eliminar(e)">Eliminar</button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     }
   </section>
 
   @if (modal) {
-    <div class="overlay">
-      <div class="modal">
-        <h2>{{documentoOriginal ? 'Editar empleado' : 'Nuevo empleado'}}</h2>
-
-        <form (ngSubmit)="guardar()">
-          <label>Documento</label>
-          <input name="documentoEmp" [(ngModel)]="form.documentoEmp"
-            [readonly]="!!documentoOriginal" required>
-
-          <label>Cargo</label>
-          <input name="cargo" [(ngModel)]="form.cargo" required>
-
-          <label>Nombre</label>
-          <input name="nombre" [(ngModel)]="form.nombre" required>
-
-          <label>Apellido</label>
-          <input name="apellido" [(ngModel)]="form.apellido" required>
-
-          <label>Correo</label>
-          <input name="correo" type="email" [(ngModel)]="form.correo" required>
-
-          <button class="gold" [disabled]="guardando">
-            {{guardando ? 'Guardando...' : 'Guardar'}}
-          </button>
-          <button type="button" (click)="modal=false">Cancelar</button>
+    <div class="cl-modal-overlay" (click)="modal = false">
+      <section class="cl-card cl-modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+        <h2 class="cl-card__title">{{ documentoOriginal ? 'Editar empleado' : 'Nuevo empleado' }}</h2>
+        <form class="cl-form-grid" (ngSubmit)="guardar()">
+          <label class="cl-field">Documento *
+            <input class="form-control" name="documentoEmp" [(ngModel)]="form.documentoEmp"
+              [readonly]="!!documentoOriginal" required>
+          </label>
+          <label class="cl-field">Cargo *
+            <input class="form-control" name="cargo" [(ngModel)]="form.cargo" required
+              list="cargos-existentes" placeholder="Elige uno existente o escribe otro">
+            <datalist id="cargos-existentes">
+              @for (c of cargos; track c) { <option [value]="c"></option> }
+            </datalist>
+          </label>
+          <label class="cl-field">Nombre *
+            <input class="form-control" name="nombre" [(ngModel)]="form.nombre" required>
+          </label>
+          <label class="cl-field">Apellido *
+            <input class="form-control" name="apellido" [(ngModel)]="form.apellido" required>
+          </label>
+          <label class="cl-field cl-field--full">Correo *
+            <input class="form-control" name="correo" type="email" [(ngModel)]="form.correo" required>
+          </label>
+          <div class="cl-form-actions">
+            <button class="btn btn--ghost" type="button" (click)="modal = false">Cancelar</button>
+            <button class="btn btn--gold" type="submit" [disabled]="guardando">
+              {{ guardando ? 'Guardando...' : 'Guardar empleado' }}
+            </button>
+          </div>
         </form>
-      </div>
+      </section>
     </div>
   }
-</main>
+</section>

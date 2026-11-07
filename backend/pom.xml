@@ -45,13 +45,6 @@
             <version>9.5.0</version>
         </dependency>
 
-        <!-- Pool de conexiones -->
-        <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-            <version>7.1.0</version>
-        </dependency>
-
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>

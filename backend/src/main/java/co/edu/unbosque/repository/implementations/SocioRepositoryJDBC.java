@@ -20,7 +20,7 @@ public class SocioRepositoryJDBC implements ISocioRepository {
     @Override
     public boolean saveSocio(Socio socio) {
         String sql = "INSERT INTO SOCIO "
-                + "(CLIENTE_documento, fecha_afiliacion) "
+                + "(documento_cliente, fecha_afiliacion) "
                 + "VALUES (?, ?)";
 
         if (socio == null) {
@@ -36,8 +36,7 @@ public class SocioRepositoryJDBC implements ISocioRepository {
             return statement.executeUpdate() == 1;
 
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new PersistenceException("Error al acceder a la base de datos", e);
         }
     }
 
@@ -45,7 +44,7 @@ public class SocioRepositoryJDBC implements ISocioRepository {
     public List<Socio> findByFechaAfiliacion(LocalDate fechaAfiliacion) {
         List<Socio> socios = new ArrayList<>();
 
-        String sql = "SELECT CLIENTE_documento, fecha_afiliacion "
+        String sql = "SELECT documento_cliente, fecha_afiliacion "
                 + "FROM SOCIO WHERE fecha_afiliacion = ?";
 
         if (fechaAfiliacion == null) {
@@ -72,8 +71,8 @@ public class SocioRepositoryJDBC implements ISocioRepository {
 
     @Override
     public Optional<Socio> findByDocumento(String documento) {
-        String sql = "SELECT CLIENTE_documento, fecha_afiliacion "
-                + "FROM SOCIO WHERE CLIENTE_documento = ?";
+        String sql = "SELECT documento_cliente, fecha_afiliacion "
+                + "FROM SOCIO WHERE documento_cliente = ?";
 
         if (documento == null || documento.isBlank()) {
             return Optional.empty();
@@ -99,7 +98,7 @@ public class SocioRepositoryJDBC implements ISocioRepository {
 
     @Override
     public boolean updateSocio(String documento, Socio socio) {
-        String sql = "UPDATE SOCIO SET fecha_afiliacion = ? WHERE CLIENTE_documento = ?";
+        String sql = "UPDATE SOCIO SET fecha_afiliacion = ? WHERE documento_cliente = ?";
 
         if (documento == null || socio == null) {
             return false;
@@ -121,7 +120,7 @@ public class SocioRepositoryJDBC implements ISocioRepository {
 
     @Override
     public boolean deleteSocio(String documento) {
-        String sql = "DELETE FROM SOCIO WHERE CLIENTE_documento = ?";
+        String sql = "DELETE FROM SOCIO WHERE documento_cliente = ?";
 
         if (documento == null || documento.isBlank()) {
             return false;
@@ -145,7 +144,7 @@ public class SocioRepositoryJDBC implements ISocioRepository {
 
         Socio socio = new Socio();
 
-        socio.setDocumentoCliente(resultado.getString("CLIENTE_documento"));
+        socio.setDocumentoCliente(resultado.getString("documento_cliente"));
 
         Date fecha = resultado.getDate("fecha_afiliacion");
         if (fecha != null) {
@@ -157,5 +156,23 @@ public class SocioRepositoryJDBC implements ISocioRepository {
 
     private Date convertirFecha(LocalDate fecha) {
         return fecha == null ? null : Date.valueOf(fecha);
+    }
+
+    // LISTAR TODOS LOS SOCIOS
+    @Override
+    public List<Socio> findAll() {
+        List<Socio> socios = new ArrayList<>();
+        String sql = "SELECT documento_cliente, fecha_afiliacion FROM SOCIO "
+                + "ORDER BY fecha_afiliacion DESC";
+        try (Connection conexion = ConnectionBD.obtenerConexion();
+             PreparedStatement statement = conexion.prepareStatement(sql);
+             ResultSet resultado = statement.executeQuery()) {
+            while (resultado.next()) {
+                socios.add(mapearSocio(resultado));
+            }
+        } catch (SQLException e) {
+            throw new PersistenceException("Error al listar socios", e);
+        }
+        return socios;
     }
 }

@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
 import {
@@ -15,11 +15,15 @@ import { JuegoMesaService } from '../../../../core/services/juego-mesa.service';
 import { UnidadJuegoService } from '../../../../core/services/unidad-juego.service';
 import { MesaService } from '../../../../core/services/mesa.service';
 import { ReservaService } from '../../../../core/services/reserva.service';
+import { mensajeError } from '../../../../core/utils/http-error';
+import { hoyISO } from '../../../../core/utils/fecha';
+import { Opcion, OpcionesService } from '../../../../core/services/opciones.service';
+import { ReservationsManagementComponent } from '../../components/reservations-management/reservations-management.component';
 
 @Component({
   selector: 'app-reservations-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReservationFormComponent],
+  imports: [CommonModule, FormsModule, ReservationFormComponent, ReservationsManagementComponent],
   templateUrl: './reservations-page.component.html',
   styleUrl: './reservations-page.component.css'
 })
@@ -34,26 +38,44 @@ export class ReservationsPageComponent implements OnInit {
 
   loading = false;
   submitting = false;
+  /** Error al cargar catálogo o mesas (bloquea el formulario y ofrece reintentar). */
   errorMessage = '';
+  /** Error de validación o al guardar (se muestra sin ocultar el formulario). */
+  submitError = '';
   mensaje = '';
 
-  minDate = this.obtenerFechaActual();
+  /** Vista de empleado: muestra además el listado de reservas. */
+  esEmpleado = false;
+  /** Para el empleado: clientes en una lista en vez de escribir el documento. */
+  clientes: Opcion[] = [];
+  private readonly opciones = inject(OpcionesService);
+  /** Se incrementa para que el listado de empleado se recargue. */
+  recargarListado = 0;
+
+  minDate = hoyISO();
+
+  /** Juegos que el cliente marcó en el catálogo antes de llegar aquí. */
+  private preseleccion = new Set<string>();
 
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     private juegosService: JuegoMesaService,
     private unidadesService: UnidadJuegoService,
     private mesasService: MesaService,
     private reservasService: ReservaService
-  ) {}
-
-  ngOnInit(): void {
-    this.cargarCatalogo();
+  ) {
+    const estado = this.router.getCurrentNavigation()?.extras.state ?? history.state;
+    const ids = estado?.['selectedGameIds'];
+    if (Array.isArray(ids)) {
+      ids.forEach((id: unknown) => typeof id === 'string' && this.preseleccion.add(id));
+    }
   }
 
-  private obtenerFechaActual(): string {
-    const f = new Date();
-    return `${f.getFullYear()}-${String(f.getMonth()+1).padStart(2,'0')}-${String(f.getDate()).padStart(2,'0')}`;
+  ngOnInit(): void {
+    this.esEmpleado = this.route.snapshot.data['modo'] === 'empleado';
+    if (this.esEmpleado) this.opciones.clientes().subscribe(c => this.clientes = c);
+    this.cargarCatalogo();
   }
 
   cargarCatalogo(): void {
@@ -72,15 +94,16 @@ export class ReservationsPageComponent implements OnInit {
             numSerie: j.numSerie,
             nombre: j.nombre,
             unidadesDisponibles: disponibles,
-            cantidad: disponibles > 0 ? 1 : 0
+            // Solo quedan marcados los juegos elegidos en el catálogo
+            cantidad: this.preseleccion.has(j.numSerie) ? 1 : 0
           };
         });
         this.loading = false;
       },
       error: e => {
         this.loading = false;
-        this.errorMessage = e.error?.mensaje ||
-          'No fue posible consultar juegos y disponibilidad.';
+        this.errorMessage = mensajeError(e,
+          'No fue posible consultar juegos y disponibilidad.');
       }
     });
   }
@@ -88,14 +111,13 @@ export class ReservationsPageComponent implements OnInit {
   cargarMesasDisponibles(): void {
     if (!this.fecha || !this.hora) return;
 
-    this.loading = true;
-    this.errorMessage = '';
+    this.submitError = '';
 
     this.mesasService.disponibles(this.fecha, this.hora).subscribe({
       next: data => {
         this.mesas = data.map(m => ({
-          idMesa: m.idMesa,
-          label: `${m.tematica} · ${m.ubicacion}`,
+          idMesa: String(m.idMesa),
+          label: `Mesa ${m.idMesa} · ${m.tematica} · ${m.ubicacion}`,
           capacidad: m.capacidad,
           tematica: m.tematica,
           ubicacion: m.ubicacion,
@@ -105,12 +127,14 @@ export class ReservationsPageComponent implements OnInit {
         if (!this.mesas.some(m => m.idMesa === this.mesaSeleccionada)) {
           this.mesaSeleccionada = '';
         }
-        this.loading = false;
+        if (!this.mesas.length) {
+          this.submitError = 'No hay mesas libres en esa fecha y hora. Prueba otro horario.';
+        }
       },
       error: e => {
-        this.loading = false;
-        this.errorMessage = e.error?.mensaje ||
-          'No fue posible consultar las mesas disponibles.';
+        this.mesas = [];
+        this.submitError = mensajeError(e,
+          'No fue posible consultar las mesas disponibles.');
       }
     });
   }
@@ -127,20 +151,24 @@ export class ReservationsPageComponent implements OnInit {
     this.cargarMesasDisponibles();
   }
 
-  onGameQuantityChange(event: {
-    numSerie: string;
-    cantidad: number;
-  }): void {
+  onGameQuantityChange(event: { numSerie: string; cantidad: number }): void {
     this.juegos = this.juegos.map(j =>
-      j.numSerie === event.numSerie
-        ? {...j, cantidad: event.cantidad}
-        : j
+      j.numSerie === event.numSerie ? { ...j, cantidad: event.cantidad } : j
     );
+    this.submitError = '';
+  }
+
+  onDocumentoChange(): void {
+    this.submitError = '';
+    this.mensaje = '';
   }
 
   onConfirm(payload: ReservationPayload): void {
-    if (!/^[0-9]{5,15}$/.test(this.documento.trim())) {
-      this.errorMessage = 'Ingresa un documento válido.';
+    this.mensaje = '';
+    const documento = this.documento.trim();
+
+    if (!documento) {
+      this.submitError = 'Ingresa el documento del cliente que hace la reserva.';
       return;
     }
 
@@ -149,43 +177,45 @@ export class ReservationsPageComponent implements OnInit {
       .map(j => j.numSerie);
 
     if (!seleccionados.length) {
-      this.errorMessage = 'Selecciona al menos un juego disponible.';
+      this.submitError = 'Selecciona al menos un juego.';
       return;
     }
 
     const request = {
-      idReserva: `RES-${Date.now()}`,
+      // El backend genera el identificador de la reserva
+      idReserva: '',
       fecha: payload.fecha,
       horario: payload.horario,
-      documento: this.documento.trim(),
+      documento,
       idMesa: payload.idMesa,
       juegos: seleccionados
     };
 
     this.submitting = true;
-    this.errorMessage = '';
+    this.submitError = '';
 
     this.reservasService.crear(request).subscribe({
-      next: () => {
+      next: reserva => {
         this.submitting = false;
-        this.mensaje = `Reserva ${request.idReserva} registrada correctamente.`;
+        this.mensaje = `Reserva #${reserva.idReserva} registrada para el ${payload.fecha} a las ${payload.horario}.`;
         this.fecha = '';
         this.hora = '';
         this.mesaSeleccionada = '';
         this.mesas = [];
         this.documento = '';
+        this.preseleccion.clear();
+        this.recargarListado++;
         this.cargarCatalogo();
       },
       error: e => {
         this.submitting = false;
-        this.errorMessage = e.error?.mensaje ||
-          'No fue posible registrar la reserva.';
+        this.submitError = mensajeError(e, 'No fue posible registrar la reserva.');
       }
     });
   }
 
   onCancel(): void {
-    this.router.navigate(['/catalogo']);
+    this.router.navigate([this.esEmpleado ? '/empleado/catalogo' : '/catalogo']);
   }
 
   onRetry(): void {

@@ -8,7 +8,7 @@ import { RouterLink } from '@angular/router';
   template: `
   <main class="roles">
     <header>
-      <span>CAFÉ & LUDECA</span>
+      <span>CAFÉ & LUDOTECA</span>
       <h1>Bienvenido</h1>
       <p>Selecciona tu espacio para continuar</p>
     </header>
@@ -17,7 +17,7 @@ import { RouterLink } from '@angular/router';
       <a routerLink="/admin" class="card admin">
         <span class="symbol">♛</span>
         <h2>Administrador</h2>
-        <p>Gestiona personas, membresías, inventario y operaciones.</p>
+        <p>Gestiona clientes, membresías, juegos, mesas y empleados.</p>
         <strong>INGRESAR →</strong>
       </a>
 
@@ -36,7 +36,7 @@ import { RouterLink } from '@angular/router';
       </a>
     </section>
 
-    <footer>CAFÉ & LUDECA · SISTEMA DE GESTIÓN</footer>
+    <footer>CAFÉ & LUDOTECA · SISTEMA DE GESTIÓN</footer>
   </main>
   `,
   styles: [`

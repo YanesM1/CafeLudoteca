@@ -14,6 +14,12 @@ export interface Expansion {
 export class ExpansionService {
   private url='/api/expansion';
   constructor(private http:HttpClient){}
+  /** Todas las expansiones, o las que contienen el texto en el nombre. */
+  listar(nombre=''):Observable<Expansion[]>{
+    const params = nombre.trim() ? { nombre: nombre.trim() } : undefined;
+    return this.http.get<Expansion[]>(this.url, { params });
+  }
+
   buscar(nombre:string):Observable<Expansion[]>{
     return this.http.get<Expansion[]>(`${this.url}/buscar/${encodeURIComponent(nombre)}`);
   }

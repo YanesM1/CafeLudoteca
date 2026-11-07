@@ -49,10 +49,8 @@
     padding: 24px;
 
     background: var(--cl-surface);
-    border: 1px solid var(--cl-border-cyan);
+    border: 1px solid var(--cl-border);
     border-radius: var(--cl-radius-lg);
-
-    box-shadow: var(--cl-glow-cyan);
 }
 
 .loan-panel--audit {
@@ -71,8 +69,9 @@
 }
 
 .loan-panel__heading h3 {
-    color: var(--cl-cyan);
+    color: var(--cl-text);
     font-size: var(--cl-text-lg);
+    font-weight: 700;
 }
 
 .loan-panel__heading p {
@@ -176,4 +175,57 @@
     .loan-type-group {
         gap: 18px;
     }
+}
+
+.loan-field__note {
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px dashed var(--cl-border);
+    border-radius: 8px;
+    color: var(--cl-text-secondary);
+    font-size: var(--cl-text-sm);
+}
+
+/* Unidades agregadas al préstamo */
+.loan-units {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 4px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.loan-units li {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px 6px 12px;
+    color: var(--cl-text);
+    background: rgba(37, 213, 229, 0.08);
+    border: 1px solid var(--cl-border-cyan);
+    border-radius: 999px;
+    font-size: var(--cl-text-sm);
+}
+
+.loan-units button {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    color: var(--cl-text-secondary);
+    background: transparent;
+    border: 0;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.loan-units button:hover {
+    color: #fff;
+    background: var(--cl-danger);
+}
+
+.loan-field__note--warning {
+    color: #ffd58a;
+    border-color: var(--cl-warning, #e0a43a);
 }

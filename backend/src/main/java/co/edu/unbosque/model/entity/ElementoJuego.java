@@ -25,7 +25,7 @@ public class ElementoJuego {
 
         ElementoJuego elemento = (ElementoJuego) o;
 
-        return idElementoJuego == elemento.idElementoJuego
+        return Objects.equals(idElementoJuego, elemento.idElementoJuego)
                 && Objects.equals(elementoJuego, elemento.elementoJuego)
                 && Objects.equals(numSerie, elemento.numSerie);
     }

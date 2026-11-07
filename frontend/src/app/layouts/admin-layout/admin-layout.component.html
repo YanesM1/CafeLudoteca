@@ -2,7 +2,7 @@
 
     <app-navbar
         [brand]="brand"
-        [homeRoute]="'/admin/membresias'"
+        [homeRoute]="'/admin'"
         [links]="navigationLinks"
         [showCartButton]="false"
         [showRoleSwitch]="true"
@@ -10,12 +10,26 @@
         [userLabel]="userLabel"
     />
 
-    <main class="admin-layout__main">
+    @if (activeSection && activeSection.pages.length > 1) {
+        <nav class="admin-tabs" [attr.aria-label]="'Páginas de ' + activeSection.label">
+            <div class="admin-tabs__inner">
+                @for (page of activeSection.pages; track page.route) {
+                    <a
+                        class="admin-tabs__tab"
+                        [routerLink]="page.route"
+                        routerLinkActive="admin-tabs__tab--active"
+                    >
+                        {{ page.label }}
+                    </a>
+                }
+            </div>
+        </nav>
+    }
 
-        <div class="admin-layout__content">
+    <main class="cl-layout-main">
+        <div class="cl-layout-content">
             <router-outlet />
         </div>
-
     </main>
 
 </div>

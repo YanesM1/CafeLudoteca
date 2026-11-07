@@ -1,5 +1,7 @@
 package co.edu.unbosque.controller.implementations;
 
+import co.edu.unbosque.config.ErrorResponses;
+
 import java.util.List;
 
 import co.edu.unbosque.controller.interfaces.IClienteController;
@@ -31,9 +33,7 @@ public class ClienteController implements IClienteController {
     public Response guardarCliente(ClienteRequestDTO request) {
         ClienteResponseDTO cliente = clienteService.addCliente(request);
         if (cliente == null) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("No se pudo registrar el cliente")
-                    .build();
+            return ErrorResponses.of(Response.Status.BAD_REQUEST, "No se pudo registrar el cliente");
         }
         return Response.status(Response.Status.CREATED)
                 .entity(cliente)
@@ -54,9 +54,7 @@ public class ClienteController implements IClienteController {
     public Response buscarPorDocumento(@PathParam("documento") String documento) {
         ClienteResponseDTO cliente = clienteService.getClientePorDocumento(documento);
         if (cliente == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("No se ha encontrado el cliente")
-                    .build();
+            return ErrorResponses.of(Response.Status.NOT_FOUND, "No se ha encontrado el cliente");
         }
         return Response.ok(cliente).build();
     }
@@ -68,9 +66,7 @@ public class ClienteController implements IClienteController {
             ClienteRequestDTO request) {
         ClienteResponseDTO cliente = clienteService.updateCliente(documento, request);
         if (cliente == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("No se ha encontrado el cliente que desea actualizar")
-                    .build();
+            return ErrorResponses.of(Response.Status.NOT_FOUND, "No se ha encontrado el cliente que desea actualizar");
         }
         return Response.ok(cliente).build();
     }
@@ -81,9 +77,7 @@ public class ClienteController implements IClienteController {
     public Response borrarCliente(@PathParam("documento") String documento) {
         ClienteResponseDTO cliente = clienteService.deleteCliente(documento);
         if (cliente == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("No se ha encontrado el cliente")
-                    .build();
+            return ErrorResponses.of(Response.Status.NOT_FOUND, "No se ha encontrado el cliente");
         }
         return Response.ok(cliente).build();
     }

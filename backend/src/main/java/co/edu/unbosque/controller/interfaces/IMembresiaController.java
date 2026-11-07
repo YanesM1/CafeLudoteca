@@ -6,6 +6,7 @@ import jakarta.ws.rs.core.Response;
 public interface IMembresiaController {
     Response guardarMembresia(MembresiaRequestDTO request);
     Response listar();
+    Response planes();
     Response buscarPorDocumento(String documento);
     Response buscarPorEstado(String estado);
     Response buscarPorId(int idMembresia, String documento);

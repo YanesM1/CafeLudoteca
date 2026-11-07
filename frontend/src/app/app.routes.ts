@@ -8,8 +8,6 @@ import { HomePageComponent } from './features/home/pages/home-page/home-page.com
 import { CatalogPageComponent } from './features/catalog/pages/catalog-page/catalog-page.component';
 import { ReservationsPageComponent } from './features/reservations/pages/reservations-page/reservations-page.component';
 
-import { ClientSectionPageComponent } from './features/client-sections/pages/client-section-page/client-section-page.component';
-
 import { LoansPageComponent } from './features/loans/pages/loans-page/loans-page.component';
 import { MembershipsPageComponent } from './features/memberships/pages/memberships-page/memberships-page.component';
 import { ClientsPageComponent } from './features/clients/pages/clients-page/clients-page.component';
@@ -41,39 +39,10 @@ export const routes: Routes = [
 
             { path: 'reservas', component: ReservationsPageComponent },
 
-            {
-                path: 'negociaciones',
-                component: ClientSectionPageComponent,
-                data: {
-                    section: 'negociaciones',
-                    title: 'Hablemos de tu próxima experiencia',
-                    eyebrow: 'PROPUESTAS Y EXPERIENCIAS',
-                    description: 'Comparte tus ideas y propuestas con Café & Ludoteca.'
-                }
-            },
-
-            {
-                path: 'contacto',
-                component: ClientSectionPageComponent,
-                data: {
-                    section: 'contacto',
-                    title: 'Estamos para escucharte',
-                    eyebrow: 'CONTACTO',
-                    description: 'Queremos conocer tus preguntas, comentarios e ideas.'
-                }
-            },
-
-            {
-                path: 'carta',
-                component: ClientSectionPageComponent,
-                data: {
-                    section: 'carta',
-                    title: 'Nuestra carta',
-                    eyebrow: 'CAFÉ & LUDECA',
-                    description: 'Descubre próximamente las opciones disponibles en nuestro espacio.'
-                }
-            }
-
+            // Secciones retiradas: redirigen al inicio
+            { path: 'negociaciones', redirectTo: 'inicio', pathMatch: 'full' },
+            { path: 'contacto', redirectTo: 'inicio', pathMatch: 'full' },
+            { path: 'carta', redirectTo: 'inicio', pathMatch: 'full' }
         ]
     },
 
@@ -83,9 +52,10 @@ export const routes: Routes = [
         children: [
             { path: '', redirectTo: 'prestamos', pathMatch: 'full' },
             { path: 'catalogo', component: CatalogPageComponent },
-            { path: 'reservas', component: ReservationsPageComponent },
+            { path: 'reservas', component: ReservationsPageComponent, data: { modo: 'empleado' } },
             { path: 'prestamos', component: LoansPageComponent },
-            { path: 'auditoria', component: LoansPageComponent }
+            // Auditoría quedó dentro de Préstamos (historial y devoluciones)
+            { path: 'auditoria', redirectTo: 'prestamos', pathMatch: 'full' }
         ]
     },
 
@@ -93,20 +63,48 @@ export const routes: Routes = [
         path: 'admin',
         component: AdminLayoutComponent,
         children: [
-            { path: '', redirectTo: 'clientes', pathMatch: 'full' },
-            { path: 'clientes', component: ClientsPageComponent },
+            { path: '', redirectTo: 'clientes/listado', pathMatch: 'full' },
+
+            // Clientes: clientes, frecuentes, socios y teléfonos
+            { path: 'clientes', redirectTo: 'clientes/listado', pathMatch: 'full' },
+            { path: 'clientes/listado', component: ClientsPageComponent },
+            { path: 'clientes/frecuentes', component: RelationshipAdminPageComponent, data: { kind: 'frecuentes' } },
+            { path: 'clientes/socios', component: SociosPageComponent },
+            { path: 'clientes/telefonos', component: RelationshipAdminPageComponent, data: { kind: 'telefonos' } },
+
+            // Membresías y sus beneficios
+            { path: 'membresias', redirectTo: 'membresias/listado', pathMatch: 'full' },
+            { path: 'membresias/listado', component: MembershipsPageComponent },
+            { path: 'membresias/beneficios', component: RelationshipAdminPageComponent, data: { kind: 'beneficios' } },
+
+            // Juegos: todo lo del inventario
+            { path: 'juegos', redirectTo: 'juegos/catalogo', pathMatch: 'full' },
+            { path: 'juegos/catalogo', component: GamesPageComponent },
+            { path: 'juegos/unidades', component: UnitsPageComponent },
+            { path: 'juegos/elementos', component: ElementsPageComponent },
+            { path: 'juegos/expansiones', component: ExpansionsPageComponent },
+            { path: 'juegos/categorias', component: CategoriesPageComponent },
+
+            { path: 'mesas', component: TablesPageComponent },
             { path: 'empleados', component: EmployeesPageComponent },
-            { path: 'socios', component: SociosPageComponent },
-            { path: 'membresias', component: MembershipsPageComponent },
-            { path: 'relaciones/beneficios', component: RelationshipAdminPageComponent, data: { kind: 'beneficios' } },
-            { path: 'relaciones/clientes-frecuentes', component: RelationshipAdminPageComponent, data: { kind: 'frecuentes' } },
-            { path: 'relaciones/telefonos', component: RelationshipAdminPageComponent, data: { kind: 'telefonos' } },
-            { path: 'inventario/juegos', component: GamesPageComponent },
-            { path: 'inventario/categorias', component: CategoriesPageComponent },
-            { path: 'inventario/expansiones', component: ExpansionsPageComponent },
-            { path: 'inventario/elementos', component: ElementsPageComponent },
-            { path: 'inventario/unidades', component: UnitsPageComponent },
-            { path: 'operacion/mesas', component: TablesPageComponent }
+
+            // Direcciones antiguas (por si alguien las tiene guardadas)
+            { path: 'personas/clientes', redirectTo: 'clientes/listado', pathMatch: 'full' },
+            { path: 'personas/clientes-frecuentes', redirectTo: 'clientes/frecuentes', pathMatch: 'full' },
+            { path: 'personas/telefonos', redirectTo: 'clientes/telefonos', pathMatch: 'full' },
+            { path: 'personas/empleados', redirectTo: 'empleados', pathMatch: 'full' },
+            { path: 'socios/listado', redirectTo: 'clientes/socios', pathMatch: 'full' },
+            { path: 'socios/membresias', redirectTo: 'membresias/listado', pathMatch: 'full' },
+            { path: 'socios/beneficios', redirectTo: 'membresias/beneficios', pathMatch: 'full' },
+            { path: 'inventario/juegos', redirectTo: 'juegos/catalogo', pathMatch: 'full' },
+            { path: 'inventario/unidades', redirectTo: 'juegos/unidades', pathMatch: 'full' },
+            { path: 'inventario/categorias', redirectTo: 'juegos/categorias', pathMatch: 'full' },
+            { path: 'inventario/expansiones', redirectTo: 'juegos/expansiones', pathMatch: 'full' },
+            { path: 'inventario/elementos', redirectTo: 'juegos/elementos', pathMatch: 'full' },
+            { path: 'operacion/mesas', redirectTo: 'mesas', pathMatch: 'full' },
+            { path: 'relaciones/beneficios', redirectTo: 'membresias/beneficios', pathMatch: 'full' },
+            { path: 'relaciones/clientes-frecuentes', redirectTo: 'clientes/frecuentes', pathMatch: 'full' },
+            { path: 'relaciones/telefonos', redirectTo: 'clientes/telefonos', pathMatch: 'full' }
         ]
     },
 

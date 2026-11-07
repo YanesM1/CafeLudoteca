@@ -50,16 +50,18 @@ public boolean saveExpansion(Expansion expansion) {
     public List<Expansion> findByNombre(String nombre) {
         List<Expansion> expansiones = new ArrayList<>();
 
-        String sql = """
-                SELECT *
-                FROM EXPANSION
-                WHERE nombre=?
-                """;
+        // Búsqueda parcial sin distinguir mayúsculas; sin texto lista todas.
+        boolean filtrar = nombre != null && !nombre.isBlank();
+        String sql = "SELECT * FROM EXPANSION"
+                + (filtrar ? " WHERE LOWER(nombre) LIKE LOWER(?)" : "")
+                + " ORDER BY nombre";
 
         try (Connection conexion = ConnectionBD.obtenerConexion();
                 PreparedStatement ps = conexion.prepareStatement(sql)) {
 
-            ps.setString(1, nombre);
+            if (filtrar) {
+                ps.setString(1, "%" + nombre.trim() + "%");
+            }
 
             try (ResultSet rs = ps.executeQuery()) {
 

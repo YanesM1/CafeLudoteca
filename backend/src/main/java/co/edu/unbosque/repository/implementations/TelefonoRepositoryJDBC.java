@@ -1,5 +1,7 @@
 package co.edu.unbosque.repository.implementations;
 
+import co.edu.unbosque.exceptions.PersistenceException;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -33,8 +35,7 @@ public class TelefonoRepositoryJDBC implements ITelefonoRepository {
             return statement.executeUpdate() == 1;
 
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new PersistenceException("Error al acceder a la base de datos", e);
         }
     }
 
@@ -42,17 +43,18 @@ public class TelefonoRepositoryJDBC implements ITelefonoRepository {
     public List<Telefono> findByDocumento(String documento) {
         List<Telefono> telefonos = new ArrayList<>();
 
-        String sql = "SELECT documento_cliente, telefono "
-                + "FROM TELEFONO WHERE documento_cliente = ?";
-
-        if (documento == null || documento.isBlank()) {
-            return telefonos;
-        }
+        // Sin documento se listan todos los teléfonos
+        boolean todos = documento == null || documento.isBlank();
+        String sql = "SELECT documento_cliente, telefono FROM TELEFONO"
+                + (todos ? " ORDER BY documento_cliente, telefono"
+                         : " WHERE documento_cliente = ?");
 
         try (Connection conexion = ConnectionBD.obtenerConexion();
              PreparedStatement statement = conexion.prepareStatement(sql)) {
 
-            statement.setString(1, documento);
+            if (!todos) {
+                statement.setString(1, documento.trim());
+            }
 
             try (ResultSet resultado = statement.executeQuery()) {
                 while (resultado.next()) {
@@ -61,7 +63,7 @@ public class TelefonoRepositoryJDBC implements ITelefonoRepository {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new PersistenceException("Error al acceder a la base de datos", e);
         }
 
         return telefonos;
@@ -90,7 +92,7 @@ public class TelefonoRepositoryJDBC implements ITelefonoRepository {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new PersistenceException("Error al acceder a la base de datos", e);
         }
 
         return Optional.empty();
@@ -116,8 +118,7 @@ public class TelefonoRepositoryJDBC implements ITelefonoRepository {
             return statement.executeUpdate() == 1;
 
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new PersistenceException("Error al acceder a la base de datos", e);
         }
     }
 
@@ -139,8 +140,7 @@ public class TelefonoRepositoryJDBC implements ITelefonoRepository {
             return statement.executeUpdate() == 1;
 
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new PersistenceException("Error al acceder a la base de datos", e);
         }
     }
 

@@ -1,5 +1,7 @@
 package co.edu.unbosque.controller.implementations;
 
+import co.edu.unbosque.config.ErrorResponses;
+
 import java.util.List;
 
 import co.edu.unbosque.controller.interfaces.IExpansionController;
@@ -15,6 +17,7 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -31,15 +34,19 @@ public class ExpansionController implements  IExpansionController{
 public Response guardarExpansion(ExpansionRequestDTO request) {
      ExpansionResponseDTO expansionJ=expansionService.addExpansion(request);
         if(expansionJ==null){
-            return Response.status(Response.Status.BAD_REQUEST)
-            .entity("No se pudo registrar el juego de mesa")
-            .build();
+            return ErrorResponses.of(Response.Status.BAD_REQUEST, "No se pudo registrar el juego de mesa");
         }
         return Response.status(Response.Status.CREATED)
         .entity(expansionJ)
         .build();
 }
 
+
+// LISTAR TODAS LAS EXPANSIONES (o filtrar con ?nombre=)
+@GET
+public Response listarExpansiones(@QueryParam("nombre") String nombre) {
+    return Response.ok(expansionService.getExpansion(nombre)).build();
+}
 
 @GET
 @Path("/buscar/{nombre}")
@@ -55,9 +62,7 @@ public Response buscarPorNombre(@PathParam("nombre") String nombre) {
 public Response buscarPorIdExpansion(@PathParam("id_expansion") Integer idExpansion) {
     ExpansionResponseDTO expansionJ=expansionService.getExpansionPorIdExpansion(idExpansion);
      if(expansionJ==null){
-        return Response.status(Response.Status.NOT_FOUND)
-        .entity("No se ha encontrado el juego")
-        .build();
+        return ErrorResponses.of(Response.Status.NOT_FOUND, "No se ha encontrado el juego");
      }
       return Response.ok(expansionJ).build();
 }
@@ -69,9 +74,7 @@ public Response actualizarExpansion(@PathParam("id_expansion") Integer idExpansi
 ExpansionRequestDTO request) {
     ExpansionResponseDTO expansionJ=expansionService.updateExpansion(idExpansion, request);
       if(expansionJ==null){
-        return Response.status(Response.Status.NOT_FOUND)
-        .entity("No se ha encontrado el juego que desea actualizar")
-        .build();
+        return ErrorResponses.of(Response.Status.NOT_FOUND, "No se ha encontrado el juego que desea actualizar");
       }
       return Response.ok(expansionJ).build();
 }
@@ -83,9 +86,7 @@ ExpansionRequestDTO request) {
 public Response borrarJuegoMesa(@PathParam("id_expansion") Integer idExpansion) {
      ExpansionResponseDTO expansionJ=expansionService.deleteExpansion(idExpansion);
     if(expansionJ==null){
-        return Response.status(Response.Status.NOT_FOUND)
-        .entity("No se a encontrado el juego")
-        .build();
+        return ErrorResponses.of(Response.Status.NOT_FOUND, "No se a encontrado el juego");
     }
       return Response.ok(expansionJ).build();
 }

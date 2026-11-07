@@ -2,15 +2,13 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 import { InputComponent } from '../../atoms/input/input.component';
 import { ButtonComponent } from '../../atoms/button/button.component';
-import { IconComponent } from '../../atoms/icon/icon.component';
 
 @Component({
     selector: 'app-search-bar',
     standalone: true,
     imports: [
         InputComponent,
-        ButtonComponent,
-        IconComponent
+        ButtonComponent
     ],
     templateUrl: './search-bar.component.html',
     styleUrl: './search-bar.component.css'

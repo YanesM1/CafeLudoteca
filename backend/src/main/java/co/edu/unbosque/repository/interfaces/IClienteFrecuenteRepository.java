@@ -9,6 +9,7 @@ public interface IClienteFrecuenteRepository {
 
     boolean saveClienteFrecuente(ClienteFrecuente clienteFrecuente);
     List<ClienteFrecuente> findByNivelFidelidad(String nivelFidelidad);
+    List<ClienteFrecuente> findAll();
     Optional<ClienteFrecuente> findByDocumento(String documento);
     boolean updateClienteFrecuente(String documento, ClienteFrecuente clienteFrecuente);
     boolean deleteClienteFrecuente(String documento);

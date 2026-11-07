@@ -13,6 +13,10 @@ export class SocioService {
 
   constructor(private http: HttpClient) {}
 
+  listar(): Observable<Socio[]> {
+    return this.http.get<Socio[]>(this.endpoint);
+  }
+
   listarPorFecha(fecha: string): Observable<Socio[]> {
     const params = new HttpParams().set('fechaAfiliacion', fecha);
     return this.http.get<Socio[]>(`${this.endpoint}/buscar`, { params });

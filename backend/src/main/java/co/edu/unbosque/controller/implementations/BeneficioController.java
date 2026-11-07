@@ -1,5 +1,7 @@
 package co.edu.unbosque.controller.implementations;
 
+import co.edu.unbosque.config.ErrorResponses;
+
 import java.util.List;
 
 import co.edu.unbosque.controller.interfaces.IBeneficioController;
@@ -22,7 +24,7 @@ public class BeneficioController implements IBeneficioController {
     public Response guardarBeneficio(BeneficioRequestDTO request) {
         BeneficioResponseDTO r = service.addBeneficio(request);
         return r == null
-            ? Response.status(Response.Status.BAD_REQUEST).entity("{\"mensaje\":\"Datos inválidos\"}").build()
+            ? ErrorResponses.of(Response.Status.BAD_REQUEST, "Datos inválidos")
             : Response.status(Response.Status.CREATED).entity(r).build();
     }
 

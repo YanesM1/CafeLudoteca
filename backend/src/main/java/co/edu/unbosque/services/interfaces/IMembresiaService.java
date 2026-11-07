@@ -1,10 +1,13 @@
 package co.edu.unbosque.services.interfaces;
 
 import java.util.List;
+import java.util.Map;
 import co.edu.unbosque.model.dto.MembresiaRequestDTO;
 import co.edu.unbosque.model.dto.MembresiaResponseDTO;
 
 public interface IMembresiaService {
+    /** Planes con su tarifa mensual. */
+    List<Map<String, Object>> getPlanes();
     MembresiaResponseDTO addMembresia(MembresiaRequestDTO request);
     List<MembresiaResponseDTO> getTodas();
     MembresiaResponseDTO getMembresiaPorId(int id, String documento);

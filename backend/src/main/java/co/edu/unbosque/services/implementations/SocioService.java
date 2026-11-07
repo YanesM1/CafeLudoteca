@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import co.edu.unbosque.exceptions.BusinessException;
+import co.edu.unbosque.repository.implementations.ClienteRepositoryJDBC;
+import co.edu.unbosque.repository.interfaces.IClienteRepository;
 import co.edu.unbosque.mapper.SocioMapper;
 import co.edu.unbosque.model.dto.SocioRequestDTO;
 import co.edu.unbosque.model.dto.SocioResponseDTO;
@@ -20,16 +23,31 @@ public class SocioService implements ISocioService {
 
     private final SocioMapper socioMapper = new SocioMapper();
 
+    private final IClienteRepository clientes = new ClienteRepositoryJDBC();
+
     @Override
     public SocioResponseDTO addSocio(SocioRequestDTO request) {
-        if (request == null) {
-            return null;
+        co.edu.unbosque.services.Validaciones.requerido(request, "Debes enviar los datos del socio.");
+        co.edu.unbosque.services.Validaciones.texto(request.getDocumento(), "documento");
+        co.edu.unbosque.services.Validaciones.requerido(
+                request.getFechaAfiliacion(), "La fecha de afiliación es obligatoria.");
+
+        String documento = request.getDocumento().trim();
+        request.setDocumento(documento);
+        if (clientes.findByDocumento(documento).isEmpty()) {
+            throw BusinessException.notFound("Primero registra al cliente con documento " + documento + ".");
+        }
+        if (socioRepository.findByDocumento(documento).isPresent()) {
+            throw BusinessException.conflict("Ese cliente ya es socio.");
+        }
+        if (request.getFechaAfiliacion().isAfter(LocalDate.now())) {
+            throw BusinessException.badRequest("La fecha de afiliación no puede ser futura.");
         }
 
         Socio socio = socioMapper.socioRequestDTOToSocio(request);
 
         if (!socioRepository.saveSocio(socio)) {
-            return null;
+            throw BusinessException.badRequest("No fue posible registrar el socio.");
         }
 
         return socioMapper.socioToResponseDTO(socio);
@@ -91,5 +109,12 @@ public class SocioService implements ISocioService {
         }
 
         return socioMapper.socioToResponseDTO(socio.get());
+    }
+
+    @Override
+    public List<SocioResponseDTO> getTodos() {
+        return socioRepository.findAll().stream()
+                .map(socioMapper::socioToResponseDTO)
+                .collect(Collectors.toList());
     }
 }

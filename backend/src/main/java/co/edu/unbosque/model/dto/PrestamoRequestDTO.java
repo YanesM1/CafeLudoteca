@@ -16,4 +16,6 @@ public class PrestamoRequestDTO {
     private String documentoEmp;
     private String codigoUnidad;
     private String numSerieUnidad;
+    /** Todas las unidades del préstamo (supuesto 3: uno o varios juegos físicos). */
+    private java.util.List<UnidadPrestadaDTO> unidades = new java.util.ArrayList<>();
 }

@@ -16,4 +16,5 @@ public interface IUnidadJuegoService {
 
     List<DisponibilidadUnidadJuegoDTO> consultarDisponibilidad();
     List<UnidadJuegoResponseDTO> listarDisponibles();
+    List<UnidadJuegoResponseDTO> listar(String numSerie);
 }

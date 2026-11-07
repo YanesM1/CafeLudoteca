@@ -12,11 +12,21 @@ export interface Membresia {
   tarifa: number;
 }
 
+/** Plan de membresía con su tarifa mensual (la define el backend). */
+export interface PlanMembresia {
+  plan: string;
+  tarifa: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class MembresiaService {
   private readonly endpoint = '/api/membresia';
 
   constructor(private http: HttpClient) {}
+
+  planes(): Observable<PlanMembresia[]> {
+    return this.http.get<PlanMembresia[]>(`${this.endpoint}/planes`);
+  }
 
   listar(): Observable<Membresia[]> {
     return this.http.get<Membresia[]>(`${this.endpoint}/buscar`);

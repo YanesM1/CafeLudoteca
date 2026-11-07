@@ -14,4 +14,6 @@ public interface IPrestamoRepository {
     boolean updatePrestamo(Integer idPrestamo, Prestamo prestamo);
     boolean registrarDevolucion(Integer idPrestamo, DevolucionPrestamoRequestDTO request);
     boolean deletePrestamo(Integer idPrestamo);
+    /** true si la unidad pertenece a un préstamo que aún no se ha devuelto. */
+    boolean unidadEnPrestamoActivo(String codigo, String numSerie);
 }

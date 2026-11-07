@@ -1,5 +1,7 @@
 package co.edu.unbosque.repository.implementations;
 
+import co.edu.unbosque.exceptions.PersistenceException;
+
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -42,8 +44,7 @@ public class ClienteRepositoryJDBC implements IClienteRepository {
             return statement.executeUpdate() == 1;
 
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new PersistenceException("Error al acceder a la base de datos", e);
         }
     }
 
@@ -70,7 +71,7 @@ public class ClienteRepositoryJDBC implements IClienteRepository {
                 }
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error al consultar clientes", e);
+            throw new PersistenceException("Error al consultar clientes", e);
         }
 
         return clientes;
@@ -100,7 +101,7 @@ public class ClienteRepositoryJDBC implements IClienteRepository {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new PersistenceException("Error al acceder a la base de datos", e);
         }
 
         return Optional.empty();
@@ -136,8 +137,7 @@ public class ClienteRepositoryJDBC implements IClienteRepository {
             return statement.executeUpdate() == 1;
 
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new PersistenceException("Error al acceder a la base de datos", e);
         }
     }
 
@@ -158,8 +158,7 @@ public class ClienteRepositoryJDBC implements IClienteRepository {
             return statement.executeUpdate() == 1;
 
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new PersistenceException("Error al acceder a la base de datos", e);
         }
     }
 

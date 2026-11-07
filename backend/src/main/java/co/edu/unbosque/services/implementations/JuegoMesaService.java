@@ -2,7 +2,9 @@ package co.edu.unbosque.services.implementations;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import co.edu.unbosque.exceptions.BusinessException;
 import co.edu.unbosque.mapper.JuegoMesaMapper;
+import co.edu.unbosque.services.Validaciones;
 import co.edu.unbosque.model.dto.JuegoMesaRequestDTO;
 import co.edu.unbosque.model.dto.JuegoMesaResponseDTO;
 import co.edu.unbosque.model.entity.JuegoMesa;
@@ -18,32 +20,18 @@ public class JuegoMesaService implements IJuegoMesaService {
 
     private boolean validarJuegoMesa(JuegoMesaRequestDTO request){
 
-        if(request==null){
-            return false;
+        Validaciones.requerido(request, "Debes enviar los datos del juego.");
+        Validaciones.texto(request.getNumSerie(), "número de serie");
+        Validaciones.texto(request.getNombre(), "nombre");
+        Validaciones.texto(request.getReglamento(), "reglamento");
+        Validaciones.positivo(request.getCantidadMinimaJugadores(), "cantidad mínima de jugadores");
+        Validaciones.positivo(request.getCantidadMaximaJugadores(), "cantidad máxima de jugadores");
+        if (request.getCantidadMaximaJugadores() < request.getCantidadMinimaJugadores()) {
+            throw BusinessException.badRequest(
+                    "La cantidad máxima de jugadores no puede ser menor que la mínima.");
         }
-
-        if(request.getNumSerie()==null|| request.getNumSerie().isBlank()){
-            return false;
-        }
-        if(request.getReglamento()==null|| request.getReglamento().isBlank()){
-            return false;
-        }
-        if(request.getCantidadMinimaJugadores()<=0){
-            return false;
-        }
-        if(request.getCantidadMaximaJugadores()<request.getCantidadMinimaJugadores()){
-            return false;
-        }
-        if(request.getEdadMinima()<=0){
-            return false;
-        }
-        if(request.getNombre()==null||request.getNombre().isBlank()){
-            return false;
-        }
-        if(request.getDuracionPartida()<=0){
-            return false;
-        }
-
+        Validaciones.positivo(request.getEdadMinima(), "edad mínima");
+        Validaciones.positivo(request.getDuracionPartida(), "duración de la partida");
         return true;
     }
 

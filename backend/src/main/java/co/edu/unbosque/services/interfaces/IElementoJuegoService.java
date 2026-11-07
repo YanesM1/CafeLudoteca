@@ -12,4 +12,6 @@ public interface IElementoJuegoService {
 
     ElementoJuegoResponseDTO deleteElementoJuego(Integer idElementoJuego);
 
+    java.util.List<ElementoJuegoResponseDTO> listar(String numSerie);
+
 }

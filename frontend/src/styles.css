@@ -68,6 +68,9 @@
     --cl-transition: 0.2s ease;
 
     --cl-container-width: 1440px;
+
+    /* Ancho común del contenido (igual al de la barra de navegación) */
+    --cl-page-width: 1280px;
 }
 
 
@@ -551,5 +554,363 @@ app-root {
 
     .reservation-form__table-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+
+/* =====================================================================
+   12. SISTEMA COMÚN DE PÁGINAS
+   Todas las vistas de administración y empleado usan estas clases para
+   verse iguales: encabezado, tarjetas, formularios, barras de búsqueda,
+   tablas, botones y mensajes.
+   ===================================================================== */
+
+/* Contenedor de los layouts (cliente, empleado y administrador) */
+.cl-layout-main {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+}
+
+.cl-layout-content {
+    width: min(100% - 48px, var(--cl-page-width));
+    min-width: 0;
+    margin: 0 auto;
+    padding: var(--cl-space-6) 0 var(--cl-space-7);
+}
+
+/* Página */
+.cl-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cl-space-5);
+    width: 100%;
+    min-width: 0;
+}
+
+.cl-page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--cl-space-4);
+    flex-wrap: wrap;
+}
+
+.cl-eyebrow {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--cl-cyan);
+    font-size: var(--cl-text-xs);
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.cl-title {
+    color: var(--cl-text);
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.cl-subtitle {
+    margin-top: 6px;
+    color: var(--cl-text-secondary);
+    font-size: var(--cl-text-sm);
+}
+
+.cl-page-header__aside {
+    display: flex;
+    align-items: center;
+    gap: var(--cl-space-3);
+    flex-wrap: wrap;
+}
+
+.cl-count {
+    color: var(--cl-text-muted);
+    font-size: var(--cl-text-sm);
+    white-space: nowrap;
+}
+
+.cl-count strong {
+    color: var(--cl-cyan);
+    font-size: var(--cl-text-lg);
+    margin-right: 4px;
+}
+
+/* Tarjeta / sección */
+.cl-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cl-space-4);
+    min-width: 0;
+    padding: var(--cl-space-5);
+    background: var(--cl-surface);
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius-lg);
+}
+
+.cl-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--cl-space-3);
+    flex-wrap: wrap;
+}
+
+.cl-card__title {
+    color: var(--cl-text);
+    font-size: var(--cl-text-lg);
+    font-weight: 700;
+}
+
+.cl-card__header-aside {
+    display: flex;
+    align-items: center;
+    gap: var(--cl-space-3);
+    flex-wrap: wrap;
+}
+
+.cl-card__hint {
+    color: var(--cl-text-muted);
+    font-size: var(--cl-text-sm);
+}
+
+/* Formularios */
+.cl-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--cl-space-4);
+}
+
+.cl-form-grid--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.cl-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    color: var(--cl-text-secondary);
+    font-size: var(--cl-text-sm);
+    font-weight: 600;
+}
+
+.cl-field--narrow {
+    max-width: 420px;
+}
+
+.cl-section-title {
+    margin-top: var(--cl-space-3);
+    color: var(--cl-text);
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.cl-field__hint {
+    color: var(--cl-text-muted);
+    font-size: var(--cl-text-xs);
+    font-weight: 400;
+}
+
+/* Casilla de verificación con texto */
+.cl-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--cl-text);
+    font-size: var(--cl-text-sm);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.cl-check input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--cl-gold);
+}
+
+/* Valor calculado que no se edita (tarifa, fecha de fin, código sugerido) */
+.cl-readonly {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 14px;
+    color: var(--cl-gold);
+    background: rgba(214, 182, 94, 0.08);
+    border: 1px dashed var(--cl-gold-dark);
+    border-radius: var(--cl-radius-md);
+    font-weight: 700;
+}
+
+.cl-field--full {
+    grid-column: 1 / -1;
+}
+
+.cl-form-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--cl-space-2);
+    flex-wrap: wrap;
+}
+
+/* Las clases .form-control ya existentes aplican a input/select/textarea */
+.cl-field .form-control,
+.cl-toolbar .form-control {
+    font-weight: 400;
+}
+
+/* Barra de búsqueda y filtros */
+.cl-toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--cl-space-2);
+    flex-wrap: wrap;
+}
+
+.cl-toolbar .form-control {
+    flex: 1 1 240px;
+    width: auto;
+}
+
+.cl-toolbar select.form-control,
+.cl-toolbar input[type="date"].form-control {
+    flex: 0 1 220px;
+}
+
+/* Botones: tamaño pequeño para acciones de tabla */
+.btn--sm {
+    padding: 6px 12px;
+    font-size: var(--cl-text-xs);
+}
+
+/* Tablas */
+.cl-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius-md);
+}
+
+.cl-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--cl-text-sm);
+}
+
+.cl-table th {
+    padding: 12px 14px;
+    background: var(--cl-surface-secondary);
+    color: var(--cl-cyan);
+    font-size: var(--cl-text-xs);
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.cl-table td {
+    padding: 12px 14px;
+    border-top: 1px solid var(--cl-border);
+    color: var(--cl-text);
+    vertical-align: middle;
+}
+
+.cl-table tbody tr:hover td {
+    background: rgba(37, 213, 229, 0.04);
+}
+
+.cl-table__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--cl-space-2);
+    white-space: nowrap;
+}
+
+.cl-table th.cl-table__actions-head {
+    text-align: right;
+}
+
+.cl-muted {
+    color: var(--cl-text-muted);
+}
+
+/* Mensajes */
+.cl-alert {
+    padding: 12px 16px;
+    border: 1px solid;
+    border-radius: var(--cl-radius-md);
+    font-size: var(--cl-text-sm);
+}
+
+.cl-alert--error {
+    color: #ffb3c4;
+    background: rgba(163, 33, 84, 0.15);
+    border-color: var(--cl-danger);
+}
+
+.cl-alert--success {
+    color: #a7f0cf;
+    background: rgba(57, 201, 138, 0.12);
+    border-color: var(--cl-success);
+}
+
+.cl-empty {
+    padding: var(--cl-space-6) var(--cl-space-4);
+    color: var(--cl-text-muted);
+    font-size: var(--cl-text-sm);
+    text-align: center;
+}
+
+/* Ventana modal */
+.cl-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: grid;
+    place-items: center;
+    padding: var(--cl-space-4);
+    background: rgba(5, 8, 18, 0.75);
+}
+
+.cl-modal {
+    width: min(560px, 100%);
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+    .cl-layout-content {
+        width: calc(100% - 24px);
+        padding-top: var(--cl-space-5);
+    }
+
+    .cl-title {
+        font-size: 24px;
+    }
+
+    .cl-card {
+        padding: var(--cl-space-4);
+    }
+
+    .cl-form-grid,
+    .cl-form-grid--3 {
+        grid-template-columns: 1fr;
+    }
+
+    .cl-form-actions {
+        justify-content: stretch;
+    }
+
+    .cl-form-actions .btn {
+        flex: 1;
+    }
+
+    /* En celular la tabla se desplaza de lado en vez de partir códigos y fechas */
+    .cl-table td {
+        white-space: nowrap;
     }
 }

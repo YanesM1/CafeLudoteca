@@ -18,7 +18,7 @@ public class ClienteFrecuenteRepositoryJDBC implements IClienteFrecuenteReposito
     @Override
     public boolean saveClienteFrecuente(ClienteFrecuente clienteFrecuente) {
         String sql = "INSERT INTO CLIENTE_FRECUENTE "
-                + "(CLIENTE_documento, puntos_acumulados, nivel_fidelidad) "
+                + "(documento_cliente, puntos_acumulados, nivel_fidelidad) "
                 + "VALUES (?, ?, ?)";
 
         if (clienteFrecuente == null) {
@@ -35,8 +35,7 @@ public class ClienteFrecuenteRepositoryJDBC implements IClienteFrecuenteReposito
             return statement.executeUpdate() == 1;
 
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new PersistenceException("Error al acceder a la base de datos", e);
         }
     }
 
@@ -44,7 +43,7 @@ public class ClienteFrecuenteRepositoryJDBC implements IClienteFrecuenteReposito
     public List<ClienteFrecuente> findByNivelFidelidad(String nivelFidelidad) {
         List<ClienteFrecuente> clientesFrecuentes = new ArrayList<>();
 
-        String sql = "SELECT CLIENTE_documento, puntos_acumulados, nivel_fidelidad "
+        String sql = "SELECT documento_cliente, puntos_acumulados, nivel_fidelidad "
                 + "FROM CLIENTE_FRECUENTE WHERE nivel_fidelidad = ?";
 
         if (nivelFidelidad == null || nivelFidelidad.isBlank()) {
@@ -71,8 +70,8 @@ public class ClienteFrecuenteRepositoryJDBC implements IClienteFrecuenteReposito
 
     @Override
     public Optional<ClienteFrecuente> findByDocumento(String documento) {
-        String sql = "SELECT CLIENTE_documento, puntos_acumulados, nivel_fidelidad "
-                + "FROM CLIENTE_FRECUENTE WHERE CLIENTE_documento = ?";
+        String sql = "SELECT documento_cliente, puntos_acumulados, nivel_fidelidad "
+                + "FROM CLIENTE_FRECUENTE WHERE documento_cliente = ?";
 
         if (documento == null || documento.isBlank()) {
             return Optional.empty();
@@ -99,7 +98,7 @@ public class ClienteFrecuenteRepositoryJDBC implements IClienteFrecuenteReposito
     @Override
     public boolean updateClienteFrecuente(String documento, ClienteFrecuente clienteFrecuente) {
         String sql = "UPDATE CLIENTE_FRECUENTE SET puntos_acumulados = ?, "
-                + "nivel_fidelidad = ? WHERE CLIENTE_documento = ?";
+                + "nivel_fidelidad = ? WHERE documento_cliente = ?";
 
         if (documento == null || clienteFrecuente == null) {
             return false;
@@ -121,7 +120,7 @@ public class ClienteFrecuenteRepositoryJDBC implements IClienteFrecuenteReposito
 
     @Override
     public boolean deleteClienteFrecuente(String documento) {
-        String sql = "DELETE FROM CLIENTE_FRECUENTE WHERE CLIENTE_documento = ?";
+        String sql = "DELETE FROM CLIENTE_FRECUENTE WHERE documento_cliente = ?";
 
         if (documento == null || documento.isBlank()) {
             return false;
@@ -145,10 +144,28 @@ public class ClienteFrecuenteRepositoryJDBC implements IClienteFrecuenteReposito
 
         ClienteFrecuente clienteFrecuente = new ClienteFrecuente();
 
-        clienteFrecuente.setDocumentoCliente(resultado.getString("CLIENTE_documento"));
+        clienteFrecuente.setDocumentoCliente(resultado.getString("documento_cliente"));
         clienteFrecuente.setPuntosAcumulados(resultado.getInt("puntos_acumulados"));
         clienteFrecuente.setNivelFidelidad(resultado.getString("nivel_fidelidad"));
 
         return clienteFrecuente;
+    }
+
+    // LISTAR TODOS LOS CLIENTES FRECUENTES
+    @Override
+    public List<ClienteFrecuente> findAll() {
+        List<ClienteFrecuente> lista = new ArrayList<>();
+        String sql = "SELECT documento_cliente, puntos_acumulados, nivel_fidelidad "
+                + "FROM CLIENTE_FRECUENTE ORDER BY puntos_acumulados DESC";
+        try (Connection conexion = ConnectionBD.obtenerConexion();
+             PreparedStatement statement = conexion.prepareStatement(sql);
+             ResultSet resultado = statement.executeQuery()) {
+            while (resultado.next()) {
+                lista.add(mapearClienteFrecuente(resultado));
+            }
+        } catch (SQLException e) {
+            throw new PersistenceException("Error al listar clientes frecuentes", e);
+        }
+        return lista;
     }
 }

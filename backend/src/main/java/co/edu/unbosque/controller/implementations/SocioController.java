@@ -1,5 +1,7 @@
 package co.edu.unbosque.controller.implementations;
 
+import co.edu.unbosque.config.ErrorResponses;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -33,9 +35,7 @@ public class SocioController implements ISocioController {
     public Response guardarSocio(SocioRequestDTO request) {
         SocioResponseDTO socio = socioService.addSocio(request);
         if (socio == null) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("No se pudo registrar el socio")
-                    .build();
+            return ErrorResponses.of(Response.Status.BAD_REQUEST, "No se pudo registrar el socio");
         }
         return Response.status(Response.Status.CREATED)
                 .entity(socio)
@@ -53,9 +53,7 @@ public class SocioController implements ISocioController {
                     socioService.getSociosPorFechaAfiliacion(fecha);
             return Response.ok(socios).build();
         } catch (DateTimeParseException | NullPointerException e) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("La fecha debe tener el formato yyyy-MM-dd")
-                    .build();
+            return ErrorResponses.of(Response.Status.BAD_REQUEST, "La fecha debe tener el formato yyyy-MM-dd");
         }
     }
 
@@ -65,9 +63,7 @@ public class SocioController implements ISocioController {
     public Response buscarPorDocumento(@PathParam("documento") String documento) {
         SocioResponseDTO socio = socioService.getSocioPorDocumento(documento);
         if (socio == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("No se ha encontrado el socio")
-                    .build();
+            return ErrorResponses.of(Response.Status.NOT_FOUND, "No se ha encontrado el socio");
         }
         return Response.ok(socio).build();
     }
@@ -79,9 +75,7 @@ public class SocioController implements ISocioController {
             SocioRequestDTO request) {
         SocioResponseDTO socio = socioService.updateSocio(documento, request);
         if (socio == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("No se ha encontrado el socio que desea actualizar")
-                    .build();
+            return ErrorResponses.of(Response.Status.NOT_FOUND, "No se ha encontrado el socio que desea actualizar");
         }
         return Response.ok(socio).build();
     }
@@ -92,11 +86,15 @@ public class SocioController implements ISocioController {
     public Response borrarSocio(@PathParam("documento") String documento) {
         SocioResponseDTO socio = socioService.deleteSocio(documento);
         if (socio == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("No se ha encontrado el socio")
-                    .build();
+            return ErrorResponses.of(Response.Status.NOT_FOUND, "No se ha encontrado el socio");
         }
         return Response.ok(socio).build();
     }
 
+
+    // LISTAR TODOS LOS SOCIOS
+    @GET
+    public Response listarSocios() {
+        return Response.ok(socioService.getTodos()).build();
+    }
 }

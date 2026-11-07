@@ -12,6 +12,12 @@ export interface ElementoJuego {
 export class ElementoJuegoService {
   private url='/api/elementoJuego';
   constructor(private http:HttpClient){}
+  /** Todos los elementos, o solo los del juego indicado. */
+  listar(numSerie=''):Observable<ElementoJuego[]>{
+    const params = numSerie.trim() ? { numSerie: numSerie.trim() } : undefined;
+    return this.http.get<ElementoJuego[]>(this.url, { params });
+  }
+
   buscarId(id:number):Observable<ElementoJuego>{
     return this.http.get<ElementoJuego>(`${this.url}/${id}`);
   }

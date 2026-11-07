@@ -45,30 +45,7 @@ export class ClientLayoutComponent {
             route: '/reservas',
             icon: 'calendar',
             exact: true
-        },
-
-        {
-            label: 'Negociaciones',
-            route: '/negociaciones',
-            icon: 'handshake',
-            exact: true
-        },
-
-        {
-            label: 'Contacto',
-            route: '/contacto',
-            icon: 'phone',
-            exact: true
-        },
-
-        {
-            label: 'Carta',
-            route: '/carta',
-            icon: 'coffee',
-            exact: true
-        },
-
-        { label: 'Cambiar rol', route: '/', icon: 'repeat', exact: true },
+        }
     ];
 
     onNavbarAction(action: NavbarAction): void {

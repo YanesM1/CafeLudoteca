@@ -7,7 +7,6 @@ import {
 
 import { LabelComponent } from '../../atoms/label/label.component';
 import { ButtonComponent } from '../../atoms/button/button.component';
-import { IconComponent } from '../../atoms/icon/icon.component';
 
 export interface FilterDefinition {
     name: string;
@@ -23,8 +22,7 @@ export interface FilterDefinition {
     imports: [
         SelectComponent,
         LabelComponent,
-        ButtonComponent,
-        IconComponent
+        ButtonComponent
     ],
     templateUrl: './filter-group.component.html',
     styleUrl: './filter-group.component.css'

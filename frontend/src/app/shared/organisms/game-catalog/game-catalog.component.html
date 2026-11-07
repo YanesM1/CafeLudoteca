@@ -1,43 +1,31 @@
 <section class="game-catalog">
 
-    <header class="game-catalog__header">
-
+    <header class="cl-page-header">
         <div>
-            <h2 class="page-title">
-                BÚSQUEDA DE JUEGOS
-            </h2>
-
-            <p class="game-catalog__description">
-                Explora nuestro catálogo y selecciona tus juegos favoritos.
-            </p>
+            <span class="cl-eyebrow">{{ eyebrow }}</span>
+            <h1 class="cl-title">Catálogo de juegos</h1>
+            <p class="cl-subtitle">Explora el catálogo, revisa la disponibilidad y {{ eyebrow.startsWith('Empleado') ? 'marca los juegos para la reserva del cliente.' : 'marca los juegos para tu reserva.' }}</p>
         </div>
-
-        <div class="game-catalog__results">
-            <strong>{{ filteredGames.length }}</strong>
-            <span>juegos encontrados</span>
+        <div class="cl-page-header__aside">
+            <span class="cl-count"><strong>{{ filteredGames.length }}</strong>juegos</span>
         </div>
-
     </header>
 
-    <div class="game-catalog__search">
+    <section class="cl-card game-catalog__toolbar">
 
         <app-search-bar
-            placeholder="Búsqueda de juegos"
+            placeholder="Buscar por nombre del juego"
             buttonText="Buscar"
             [(value)]="searchTerm"
             (search)="onSearch($event)"
         />
-
-    </div>
-
-    <div class="game-catalog__filters">
 
         <app-filter-group
             [filters]="filters"
             [(values)]="filterValues"
         />
 
-    </div>
+    </section>
 
     <div class="game-catalog__content" aria-live="polite">
 

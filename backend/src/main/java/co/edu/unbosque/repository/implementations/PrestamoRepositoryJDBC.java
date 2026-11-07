@@ -7,9 +7,44 @@ import co.edu.unbosque.config.ConnectionBD;
 import co.edu.unbosque.exceptions.PersistenceException;
 import co.edu.unbosque.model.entity.Prestamo;
 import co.edu.unbosque.model.dto.DevolucionPrestamoRequestDTO;
+import co.edu.unbosque.model.dto.UnidadPrestadaDTO;
 import co.edu.unbosque.repository.interfaces.IPrestamoRepository;
 
 public class PrestamoRepositoryJDBC implements IPrestamoRepository {
+
+    /** Estados de una unidad mientras está en un préstamo (supuesto 4 de la propuesta). */
+    private static final String EN_PRESTAMO = "('PRESTADO','EN_MESA')";
+
+    /**
+     * Un préstamo está activo si no se ha registrado su devolución y al menos una de sus
+     * unidades sigue en préstamo con este préstamo como el más reciente de esa unidad.
+     * (Así un préstamo viejo no "revive" cuando la misma unidad se presta otra vez.)
+     */
+    private static final String ACTIVO =
+        "COALESCE(p.estado_componentes,'') NOT LIKE 'DEVUELTO%' AND EXISTS (" +
+        " SELECT 1 FROM PRESTAMO_UNIDAD_JUEGO x JOIN UNIDAD_JUEGO u" +
+        " ON u.codigo=x.codigo AND u.num_serie=x.num_serie" +
+        " WHERE x.id_prestamo=p.id_prestamo AND UPPER(TRIM(u.estado)) IN " + EN_PRESTAMO +
+        " AND x.id_prestamo=(SELECT MAX(y.id_prestamo) FROM PRESTAMO_UNIDAD_JUEGO y" +
+        " WHERE y.codigo=x.codigo AND y.num_serie=x.num_serie))";
+
+    /** Longitud de PRESTAMO.estado_componentes leída de la base (se calcula una vez). */
+    private static volatile int largoEstadoComponentes = 0;
+
+    private static int largoEstadoComponentes(Connection c) {
+        if (largoEstadoComponentes > 0) return largoEstadoComponentes;
+        int largo = 200;
+        try (PreparedStatement ps = c.prepareStatement(
+                "SELECT CHARACTER_MAXIMUM_LENGTH FROM information_schema.COLUMNS " +
+                "WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='PRESTAMO' AND COLUMN_NAME='estado_componentes'");
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next() && rs.getInt(1) > 0) largo = rs.getInt(1);
+        } catch (SQLException e) {
+            // Si no se puede leer, se usa el valor por defecto
+        }
+        largoEstadoComponentes = largo;
+        return largo;
+    }
 
     private static final String SELECT =
         "SELECT p.id_prestamo,p.fecha_salida,p.estado_componentes," +
@@ -27,26 +62,31 @@ public class PrestamoRepositoryJDBC implements IPrestamoRepository {
             VALUES(?,?,?,?,?,?)
             """;
 
+        List<UnidadPrestadaDTO> unidades = p.getUnidades();
+
         try (Connection c = ConnectionBD.obtenerConexion()) {
             c.setAutoCommit(false);
             try {
-                String estado;
+                // Se bloquean y verifican todas las unidades antes de registrar (RN-01, RN-06)
                 try (PreparedStatement lock = c.prepareStatement(
                     "SELECT estado FROM UNIDAD_JUEGO WHERE codigo=? AND num_serie=? FOR UPDATE")) {
-                    lock.setString(1,p.getCodigoUnidad());
-                    lock.setString(2,p.getNumSerieUnidad());
-                    try (ResultSet rs=lock.executeQuery()) {
-                        if (!rs.next()) {
-                            c.rollback();
-                            return false;
+                    for (UnidadPrestadaDTO u : unidades) {
+                        lock.setString(1,u.getCodigo());
+                        lock.setString(2,u.getNumSerie());
+                        try (ResultSet rs=lock.executeQuery()) {
+                            if (!rs.next()) {
+                                c.rollback();
+                                throw co.edu.unbosque.exceptions.BusinessException.badRequest(
+                                    "La unidad "+u.getCodigo()+" no existe.");
+                            }
+                            String estado=rs.getString("estado");
+                            if (estado == null || !"DISPONIBLE".equalsIgnoreCase(estado.trim())) {
+                                c.rollback();
+                                throw co.edu.unbosque.exceptions.BusinessException.conflict(
+                                    "La unidad "+u.getCodigo()+" ya no está disponible para préstamo (RN-01).");
+                            }
                         }
-                        estado=rs.getString("estado");
                     }
-                }
-
-                if (!"DISPONIBLE".equalsIgnoreCase(estado.trim())) {
-                    c.rollback();
-                    return false;
                 }
 
                 try (PreparedStatement ps=c.prepareStatement(
@@ -69,19 +109,23 @@ public class PrestamoRepositoryJDBC implements IPrestamoRepository {
                     }
                 }
 
-                try (PreparedStatement ps=c.prepareStatement(
-                    "INSERT INTO PRESTAMO_UNIDAD_JUEGO(id_prestamo,codigo,num_serie) VALUES(?,?,?)")) {
-                    ps.setInt(1,p.getIdPrestamo());
-                    ps.setString(2,p.getCodigoUnidad());
-                    ps.setString(3,p.getNumSerieUnidad());
-                    ps.executeUpdate();
-                }
+                try (PreparedStatement link=c.prepareStatement(
+                         "INSERT INTO PRESTAMO_UNIDAD_JUEGO(id_prestamo,codigo,num_serie) VALUES(?,?,?)");
+                     PreparedStatement marcar=c.prepareStatement(
+                         "UPDATE UNIDAD_JUEGO SET estado=? WHERE codigo=? AND num_serie=? AND UPPER(TRIM(estado))='DISPONIBLE'")) {
+                    // Interno: la unidad queda "En uso en mesa"; externo: "Prestado" (a domicilio)
+                    String estadoNuevo = "externo".equalsIgnoreCase(p.getTipoPrestamo()) ? "PRESTADO" : "EN_MESA";
+                    for (UnidadPrestadaDTO u : unidades) {
+                        link.setInt(1,p.getIdPrestamo());
+                        link.setString(2,u.getCodigo());
+                        link.setString(3,u.getNumSerie());
+                        link.executeUpdate();
 
-                try (PreparedStatement ps=c.prepareStatement(
-                    "UPDATE UNIDAD_JUEGO SET estado='PRESTADO' WHERE codigo=? AND num_serie=? AND UPPER(TRIM(estado))='DISPONIBLE'")) {
-                    ps.setString(1,p.getCodigoUnidad());
-                    ps.setString(2,p.getNumSerieUnidad());
-                    if (ps.executeUpdate()!=1) throw new SQLException("La unidad dejó de estar disponible.");
+                        marcar.setString(1,estadoNuevo);
+                        marcar.setString(2,u.getCodigo());
+                        marcar.setString(3,u.getNumSerie());
+                        if (marcar.executeUpdate()!=1) throw new SQLException("Una unidad dejó de estar disponible.");
+                    }
                 }
 
                 c.commit();
@@ -99,13 +143,21 @@ public class PrestamoRepositoryJDBC implements IPrestamoRepository {
 
     private List<Prestamo> consultar(String condicion, String parametro) {
         List<Prestamo> lista=new ArrayList<>();
-        String sql=SELECT+condicion+" ORDER BY p.id_prestamo DESC";
+        String sql=SELECT+condicion+" ORDER BY p.id_prestamo DESC, pu.codigo";
         try (Connection c=ConnectionBD.obtenerConexion();
              PreparedStatement ps=c.prepareStatement(sql)) {
             if (parametro!=null) ps.setString(1,parametro);
+            // Un préstamo con varias unidades llega en varias filas: se agrupan
+            Map<Integer,Prestamo> porId=new LinkedHashMap<>();
             try (ResultSet rs=ps.executeQuery()) {
-                while(rs.next()) lista.add(mapear(rs));
+                while(rs.next()) {
+                    Prestamo fila=mapear(rs);
+                    Prestamo p=porId.computeIfAbsent(fila.getIdPrestamo(),k->fila);
+                    if (fila.getCodigoUnidad()!=null)
+                        p.getUnidades().add(new UnidadPrestadaDTO(fila.getCodigoUnidad(),fila.getNumSerieUnidad()));
+                }
             }
+            lista.addAll(porId.values());
             return lista;
         } catch(SQLException e) {
             throw new PersistenceException("Error al consultar préstamos",e);
@@ -119,9 +171,7 @@ public class PrestamoRepositoryJDBC implements IPrestamoRepository {
 
     @Override
     public List<Prestamo> findActivos() {
-        return consultar(
-            "JOIN UNIDAD_JUEGO u ON u.codigo=pu.codigo AND u.num_serie=pu.num_serie " +
-            "WHERE UPPER(TRIM(u.estado))='PRESTADO'",null);
+        return consultar("WHERE "+ACTIVO,null);
     }
 
     @Override
@@ -157,31 +207,49 @@ public class PrestamoRepositoryJDBC implements IPrestamoRepository {
         }
     }
 
+    /** Indica si el préstamo sigue activo (ver ACTIVO). */
+    private boolean esActivo(Connection c, int id) throws SQLException {
+        try (PreparedStatement ps = c.prepareStatement(
+                "SELECT 1 FROM PRESTAMO p WHERE p.id_prestamo=? AND " + ACTIVO)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
     @Override
     public boolean registrarDevolucion(
             Integer id,DevolucionPrestamoRequestDTO request) {
         try(Connection c=ConnectionBD.obtenerConexion()) {
             c.setAutoCommit(false);
             try {
-                List<String[]> unidades=new ArrayList<>();
                 try(PreparedStatement ps=c.prepareStatement(
-                    "SELECT codigo,num_serie FROM PRESTAMO_UNIDAD_JUEGO WHERE id_prestamo=?")) {
+                    "SELECT 1 FROM PRESTAMO WHERE id_prestamo=? FOR UPDATE")) {
                     ps.setInt(1,id);
                     try(ResultSet rs=ps.executeQuery()) {
-                        while(rs.next()) unidades.add(new String[]{
-                            rs.getString("codigo"),rs.getString("num_serie")});
+                        if(!rs.next()) { c.rollback(); return false; }
                     }
                 }
-
-                if(unidades.isEmpty()) {
+                if(!esActivo(c,id)) {
                     c.rollback();
-                    return false;
+                    throw co.edu.unbosque.exceptions.BusinessException.conflict(
+                        "Este préstamo ya fue devuelto.");
                 }
 
+                // Estado en que queda la unidad según cómo se devolvió (RF-06, supuesto 4)
+                String estadoUnidad=switch(request.getEstadoComponentes()) {
+                    case "INCOMPLETO" -> "FALTANTES";
+                    case "DANADO" -> "MANTENIMIENTO";
+                    default -> "DISPONIBLE";
+                };
+
+                // Observaciones de la devolución (RF-06), ajustadas al tamaño real de la columna
+                String obs=request.getObservaciones()==null?"":request.getObservaciones().trim();
                 String detalle="DEVUELTO "+request.getFechaDevolucionReal()+
-                    " | Estado: "+request.getEstadoComponentes()+
-                    " | "+(request.getObservaciones()==null?"":request.getObservaciones());
-                if(detalle.length()>200) detalle=detalle.substring(0,200);
+                    " | Estado: "+request.getEstadoComponentes()+(obs.isEmpty()?"":" | "+obs);
+                int largo=largoEstadoComponentes(c);
+                if(detalle.length()>largo) detalle=detalle.substring(0,largo);
 
                 try(PreparedStatement ps=c.prepareStatement(
                     "UPDATE PRESTAMO SET estado_componentes=? WHERE id_prestamo=?")) {
@@ -190,12 +258,27 @@ public class PrestamoRepositoryJDBC implements IPrestamoRepository {
                     if(ps.executeUpdate()!=1) throw new SQLException("Préstamo no encontrado.");
                 }
 
+                // Solo se liberan las unidades cuyo préstamo más reciente es este
+                List<String[]> unidades=new ArrayList<>();
                 try(PreparedStatement ps=c.prepareStatement(
-                    "UPDATE UNIDAD_JUEGO SET estado='DISPONIBLE' WHERE codigo=? AND num_serie=? AND UPPER(TRIM(estado))='PRESTADO'")) {
+                    "SELECT x.codigo,x.num_serie FROM PRESTAMO_UNIDAD_JUEGO x JOIN UNIDAD_JUEGO u " +
+                    "ON u.codigo=x.codigo AND u.num_serie=x.num_serie " +
+                    "WHERE x.id_prestamo=? AND UPPER(TRIM(u.estado)) IN " + EN_PRESTAMO + " " +
+                    "AND x.id_prestamo=(SELECT MAX(y.id_prestamo) FROM PRESTAMO_UNIDAD_JUEGO y " +
+                    "WHERE y.codigo=x.codigo AND y.num_serie=x.num_serie) FOR UPDATE")) {
+                    ps.setInt(1,id);
+                    try(ResultSet rs=ps.executeQuery()) {
+                        while(rs.next()) unidades.add(new String[]{rs.getString(1),rs.getString(2)});
+                    }
+                }
+                if(unidades.isEmpty()) throw new SQLException("No se pudo liberar ninguna unidad.");
+                try(PreparedStatement ps=c.prepareStatement(
+                    "UPDATE UNIDAD_JUEGO SET estado=? WHERE codigo=? AND num_serie=?")) {
                     for(String[] unidad:unidades) {
-                        ps.setString(1,unidad[0]);
-                        ps.setString(2,unidad[1]);
-                        if(ps.executeUpdate()!=1) throw new SQLException("No se pudo liberar una unidad.");
+                        ps.setString(1,estadoUnidad);
+                        ps.setString(2,unidad[0]);
+                        ps.setString(3,unidad[1]);
+                        ps.executeUpdate();
                     }
                 }
 
@@ -213,21 +296,30 @@ public class PrestamoRepositoryJDBC implements IPrestamoRepository {
     }
 
     @Override
+    public boolean unidadEnPrestamoActivo(String codigo, String numSerie) {
+        String sql = "SELECT 1 FROM PRESTAMO p JOIN PRESTAMO_UNIDAD_JUEGO pu ON p.id_prestamo=pu.id_prestamo " +
+            "WHERE pu.codigo=? AND pu.num_serie=? AND " + ACTIVO + " LIMIT 1";
+        try (Connection c = ConnectionBD.obtenerConexion();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, codigo);
+            ps.setString(2, numSerie);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            throw new PersistenceException("Error al consultar préstamos de la unidad", e);
+        }
+    }
+
+    @Override
     public boolean deletePrestamo(Integer id) {
         try(Connection c=ConnectionBD.obtenerConexion()) {
             c.setAutoCommit(false);
             try {
-                try(PreparedStatement ps=c.prepareStatement(
-                    "SELECT COUNT(*) FROM UNIDAD_JUEGO u JOIN PRESTAMO_UNIDAD_JUEGO pu " +
-                    "ON u.codigo=pu.codigo AND u.num_serie=pu.num_serie " +
-                    "WHERE pu.id_prestamo=? AND UPPER(TRIM(u.estado))='PRESTADO'")) {
-                    ps.setInt(1,id);
-                    try(ResultSet rs=ps.executeQuery()) {
-                        if(rs.next()&&rs.getInt(1)>0) {
-                            c.rollback();
-                            return false;
-                        }
-                    }
+                // Un préstamo activo no se elimina: primero se registra la devolución
+                if(esActivo(c,id)) {
+                    c.rollback();
+                    return false;
                 }
                 try(PreparedStatement ps=c.prepareStatement(
                     "DELETE FROM PRESTAMO_UNIDAD_JUEGO WHERE id_prestamo=?")) {

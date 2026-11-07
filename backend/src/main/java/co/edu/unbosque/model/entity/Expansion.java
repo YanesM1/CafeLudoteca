@@ -25,7 +25,7 @@ public boolean equals(Object o) {
 
     Expansion expansion = (Expansion) o;
 
-    return idExpansion == expansion.idExpansion;
+    return Objects.equals(idExpansion, expansion.idExpansion);
 }
 
 @Override

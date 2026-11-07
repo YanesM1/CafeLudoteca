@@ -1,4 +1,6 @@
 package co.edu.unbosque.controller.implementations;
+
+import co.edu.unbosque.config.ErrorResponses;
 import co.edu.unbosque.controller.interfaces.IUnidadJuegoController;
 import co.edu.unbosque.model.dto.UnidadJuegoRequestDTO;
 import co.edu.unbosque.model.dto.UnidadJuegoResponseDTO;
@@ -12,6 +14,7 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -28,9 +31,7 @@ public class UnidadJuegoController implements IUnidadJuegoController{
     public Response guardarUnidad(UnidadJuegoRequestDTO request) {
        UnidadJuegoResponseDTO unidadJ=unidadJuegoService.addUnidadJuego(request);
         if(unidadJ==null){
-            return Response.status(Response.Status.BAD_REQUEST)
-            .entity("No se pudo registrar la unidad del juego")
-            .build();
+            return ErrorResponses.of(Response.Status.BAD_REQUEST, "No se pudo registrar la unidad del juego");
         }
         return Response.status(Response.Status.CREATED)
         .entity(unidadJ)
@@ -45,9 +46,7 @@ public class UnidadJuegoController implements IUnidadJuegoController{
         @PathParam ("num_serie") String numSerie) {
         UnidadJuegoResponseDTO unidadJ=unidadJuegoService.findByCodigo(codigo, numSerie);
      if(unidadJ==null){
-        return Response.status(Response.Status.NOT_FOUND)
-        .entity("No se ha encontrado el juego")
-        .build();
+        return ErrorResponses.of(Response.Status.NOT_FOUND, "No se ha encontrado el juego");
      }
       return Response.ok(unidadJ).build();
   }
@@ -63,9 +62,7 @@ public class UnidadJuegoController implements IUnidadJuegoController{
         UnidadJuegoRequestDTO request) {
         UnidadJuegoResponseDTO unidadJ=unidadJuegoService.updateUnidadJuego(codigo, numSerie, request);
       if(unidadJ==null){
-        return Response.status(Response.Status.NOT_FOUND)
-        .entity("No se pudo actualizar la unidad de juego")
-        .build();
+        return ErrorResponses.of(Response.Status.NOT_FOUND, "No se pudo actualizar la unidad de juego");
       }
       return Response.ok(unidadJ).build();
     }
@@ -78,9 +75,7 @@ public class UnidadJuegoController implements IUnidadJuegoController{
         @PathParam ("num_serie") String numSerie) {
        UnidadJuegoResponseDTO unidadJ=unidadJuegoService.deleteUnidadJuego(codigo, numSerie);
     if(unidadJ==null){
-        return Response.status(Response.Status.NOT_FOUND)
-        .entity("No se pudo eliminar la unidad de la base de datos")
-        .build();
+        return ErrorResponses.of(Response.Status.NOT_FOUND, "No se pudo eliminar la unidad de la base de datos");
     }
       return Response.ok(unidadJ).build();
     }
@@ -88,6 +83,12 @@ public class UnidadJuegoController implements IUnidadJuegoController{
 
 
 
+
+    // LISTAR TODAS LAS UNIDADES (opcionalmente filtradas por juego)
+    @GET
+    public Response listarUnidades(@QueryParam("numSerie") String numSerie) {
+        return Response.ok(unidadJuegoService.listar(numSerie)).build();
+    }
 
     @GET
     @Path("/disponibles")

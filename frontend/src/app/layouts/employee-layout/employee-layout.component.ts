@@ -19,8 +19,6 @@ export class EmployeeLayoutComponent {
   navigationLinks: NavbarLink[] = [
     { label: 'Catálogo', route: '/empleado/catalogo', icon: 'dice', exact: true },
     { label: 'Reservas', route: '/empleado/reservas', icon: 'calendar', exact: true },
-    { label: 'Préstamos', route: '/empleado/prestamos', icon: 'clipboard-check', exact: true },
-    { label: 'Auditoría', route: '/empleado/auditoria', icon: 'clipboard-list', exact: true },
-    { label: 'Cambiar rol', route: '/', icon: 'repeat', exact: true }
+    { label: 'Préstamos', route: '/empleado/prestamos', icon: 'clipboard-check', exact: true }
   ];
 }

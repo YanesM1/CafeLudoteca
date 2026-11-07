@@ -52,17 +52,8 @@
     font-size: var(--cl-text-xs);
 }
 
-.game-catalog__search {
-    width: 100%;
-    max-width: 760px;
-}
-
-.game-catalog__filters {
-    padding: var(--cl-space-4);
-
-    background: var(--cl-surface);
-    border: 1px solid var(--cl-border);
-    border-radius: var(--cl-radius-md);
+.game-catalog__toolbar {
+    gap: var(--cl-space-4);
 }
 
 .game-catalog__grid {

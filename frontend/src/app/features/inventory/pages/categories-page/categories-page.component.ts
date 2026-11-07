@@ -1,58 +1,52 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Categoria, CategoriaService } from '../../../../core/services/categoria.service';
+import { Opcion, OpcionesService } from '../../../../core/services/opciones.service';
+import { mensajeError } from '../../../../core/utils/http-error';
 
 @Component({
   selector: 'app-categories-page',
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-  <main class="page">
-    <h1>Categorías de juegos</h1>
-    <p>Administra las categorías asociadas a los juegos de mesa.</p>
-
-    <section class="panel">
-      <h2>{{ editando ? 'Editar categoría' : 'Registrar categoría' }}</h2>
-      <form (ngSubmit)="guardar()">
-        <label>Número de categoría
-          <input type="number" name="numero" [(ngModel)]="form.numCategoria" required [disabled]="editando">
-        </label>
-        <label>Nombre de categoría
-          <input name="categoria" [(ngModel)]="form.categoria" required>
-        </label>
-        <label>Número de serie del juego
-          <input name="serie" [(ngModel)]="form.numSerie" required [disabled]="editando">
-        </label>
-        <div class="actions">
-          <button class="primary" type="submit" [disabled]="guardando">
-            {{ guardando ? 'Guardando...' : editando ? 'Actualizar' : 'Registrar' }}
-          </button>
-          <button type="button" *ngIf="editando" (click)="cancelar()">Cancelar</button>
-        </div>
-      </form>
-    </section>
-
-    <section class="panel">
-      <h2>Consultar categorías</h2>
-      <div class="search">
-        <input name="buscar" [(ngModel)]="busqueda" placeholder="Nombre exacto de categoría">
-        <button class="primary" (click)="cargar()">Buscar</button>
+  <section class="cl-page">
+    <header class="cl-page-header">
+      <div>
+        <span class="cl-eyebrow">Administración · Juegos</span>
+        <h1 class="cl-title">Categorías</h1>
+        <p class="cl-subtitle">Categorías asignadas a cada juego (un juego puede tener varias).</p>
       </div>
-      <p class="error" *ngIf="error">{{ error }}</p>
-      <p class="message" *ngIf="mensaje">{{ mensaje }}</p>
-      <p *ngIf="cargando">Consultando...</p>
-      <p *ngIf="!cargando && consultado && categorias.length===0">No se encontraron categorías.</p>
-      <div class="table-wrap" *ngIf="categorias.length">
-        <table>
-          <thead><tr><th>Número</th><th>Categoría</th><th>Juego</th><th>Acciones</th></tr></thead>
+      <div class="cl-page-header__aside">
+        <span class="cl-count"><strong>{{ categorias.length }}</strong>registros</span>
+        <button class="btn btn--gold" type="button" (click)="nuevo()">+ Nueva categoría</button>
+      </div>
+    </header>
+
+    <p class="cl-alert cl-alert--success" *ngIf="mensaje">{{ mensaje }}</p>
+    <p class="cl-alert cl-alert--error" *ngIf="error && !formAbierto">{{ error }}</p>
+
+    <section class="cl-card">
+      <form class="cl-toolbar" (ngSubmit)="cargar()">
+        <input class="form-control" name="buscar" [(ngModel)]="busqueda" placeholder="Nombre o parte del nombre (vacío = todas)">
+        <button class="btn btn--gold" type="submit">Buscar</button>
+        <button class="btn btn--ghost" type="button" (click)="busqueda='';cargar()">Ver todas</button>
+      </form>
+
+      <p class="cl-empty" *ngIf="cargando">Consultando categorías...</p>
+      <p class="cl-empty" *ngIf="!cargando && categorias.length === 0">No hay categorías para mostrar.</p>
+      <div class="cl-table-wrap" *ngIf="!cargando && categorias.length">
+        <table class="cl-table">
+          <thead><tr><th>Número</th><th>Categoría</th><th>Juego</th><th class="cl-table__actions-head">Acciones</th></tr></thead>
           <tbody>
             @for (c of categorias; track c.numCategoria + '-' + c.numSerie) {
               <tr>
-                <td>{{ c.numCategoria }}</td><td>{{ c.categoria }}</td><td>{{ c.numSerie }}</td>
-                <td class="actions">
-                  <button (click)="editar(c)">Editar</button>
-                  <button class="danger" (click)="eliminar(c)">Eliminar</button>
+                <td>{{ c.numCategoria }}</td><td>{{ c.categoria }}</td><td>{{ nombreJuego(c.numSerie) }} <span class="cl-muted">· {{ c.numSerie }}</span></td>
+                <td>
+                  <div class="cl-table__actions">
+                    <button class="btn btn--ghost btn--sm" type="button" (click)="editar(c)">Editar</button>
+                    <button class="btn btn--danger btn--sm" type="button" (click)="eliminar(c)">Eliminar</button>
+                  </div>
                 </td>
               </tr>
             }
@@ -60,86 +54,126 @@ import { Categoria, CategoriaService } from '../../../../core/services/categoria
         </table>
       </div>
     </section>
-  </main>
+
+    <div class="cl-modal-overlay" *ngIf="formAbierto" (click)="cancelar()">
+      <section class="cl-card cl-modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+        <h2 class="cl-card__title">{{ editando ? 'Editar categoría' : 'Nueva categoría' }}</h2>
+        <p class="cl-alert cl-alert--error" *ngIf="error">{{ error }}</p>
+        <form class="cl-form-grid" (ngSubmit)="guardar()">
+          <label class="cl-field cl-field--full">Juego *
+            <select class="form-control" name="serie" [(ngModel)]="form.numSerie" required [disabled]="editando">
+              <option value="" disabled>Selecciona un juego</option>
+              @for (j of juegos; track j.value) { <option [value]="j.value">{{ j.label }}</option> }
+            </select>
+          </label>
+          <label class="cl-field cl-field--full">Categoría *
+            <input class="form-control" name="categoria" maxlength="50" [(ngModel)]="form.categoria" required
+              list="categorias-existentes" placeholder="Elige una existente o escribe una nueva">
+            <datalist id="categorias-existentes">
+              @for (n of nombresCategoria; track n) { <option [value]="n"></option> }
+            </datalist>
+            <span class="cl-field__hint" *ngIf="!editando">El número de categoría se asigna automáticamente.</span>
+          </label>
+          <div class="cl-form-actions">
+            <button class="btn btn--ghost" type="button" (click)="cancelar()">Cancelar</button>
+            <button class="btn btn--gold" type="submit" [disabled]="guardando">{{ guardando ? 'Guardando...' : 'Guardar categoría' }}</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </section>
+
   `,
-  styles: [`
-    .page{padding:30px 24px;background:#0b1020;color:#f5f5fa;min-height:80vh}
-    h1{font-size:30px}p{color:#aeb5c5}.panel{background:#1b2030;border:1px solid #465267;border-radius:14px;padding:24px;margin:22px 0}
-    form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-    label{display:grid;gap:8px;color:#c6ccd7}input{box-sizing:border-box;width:100%;padding:13px;background:#101827;color:white;border:1px solid #526078;border-radius:8px}
-    button{padding:11px 16px;border-radius:8px;border:1px solid #22d3ee;background:transparent;color:#22d3ee;cursor:pointer}
-    .primary{background:#d3b354;color:#171827;border-color:#d3b354}.danger{background:#a32154;color:white;border-color:#a32154}
-    .actions,.search{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.actions{grid-column:1/-1}
-    table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px;border-bottom:1px solid #465267}th{color:#22d3ee}
-    .table-wrap{overflow-x:auto}.error{color:#ff7892}.message{color:#22d3ee}
-    @media(max-width:750px){form{grid-template-columns:1fr}}
-  `]
+  styles: [':host { display: block; }']
 })
-export class CategoriesPageComponent {
+export class CategoriesPageComponent implements OnInit {
+  /** Juegos para la lista desplegable (en vez de escribir el número de serie). */
+  private readonly opciones = inject(OpcionesService);
+  juegos: Opcion[] = [];
+  private cargarJuegos(): void {
+    this.opciones.juegos().subscribe(j => this.juegos = j);
+  }
+  /** Nombres de categoría ya usados, para elegir sin escribir de nuevo. */
+  get nombresCategoria(): string[] {
+    return [...new Set(this.categorias.map(c => c.categoria))].sort();
+  }
+  nombreJuego(serie: string): string {
+    const j = this.juegos.find(o => o.value === serie);
+    return j ? j.label.split(' · ')[0] : serie;
+  }
+
   categorias: Categoria[] = [];
   busqueda = '';
   cargando = false;
   guardando = false;
-  consultado = false;
   editando = false;
+  formAbierto = false;
   error = '';
   mensaje = '';
   form: Categoria = { numCategoria: 0, categoria: '', numSerie: '' };
 
   constructor(private service: CategoriaService) {}
 
+  ngOnInit(): void {this.cargarJuegos(); this.cargar(); }
+
   cargar(): void {
-    if (!this.busqueda.trim()) {
-      this.error = 'Escribe el nombre de la categoría que deseas consultar.';
-      return;
-    }
     this.cargando = true;
     this.error = '';
-    this.consultado = true;
-    this.service.buscar(this.busqueda.trim()).subscribe({
+    this.service.listar(this.busqueda).subscribe({
       next: data => { this.categorias = data; this.cargando = false; },
-      error: e => { this.error = e.error?.mensaje || 'Error al consultar categorías.'; this.cargando = false; }
+      error: e => { this.error = mensajeError(e, 'Error al consultar categorías.'); this.cargando = false; }
     });
   }
 
   guardar(): void {
-    if (!this.form.numCategoria || !this.form.categoria.trim() || !this.form.numSerie.trim()) {
-      this.error = 'Completa todos los campos.';
+    if (!this.form.categoria.trim() || !this.form.numSerie.trim()) {
+      this.error = 'Selecciona el juego y escribe la categoría.';
       return;
     }
     this.guardando = true;
     this.error = '';
+    this.mensaje = '';
+    const editando = this.editando;
     const data = { ...this.form, categoria: this.form.categoria.trim(), numSerie: this.form.numSerie.trim() };
-    const req = this.editando
+    const req = editando
       ? this.service.actualizar(data.numCategoria, data.numSerie, data)
       : this.service.crear(data);
     req.subscribe({
       next: () => {
         this.guardando = false;
-        this.mensaje = this.editando ? 'Categoría actualizada.' : 'Categoría registrada.';
+        this.mensaje = editando ? 'Categoría actualizada.' : 'Categoría registrada.';
         this.cancelar();
-        if (this.busqueda.trim()) this.cargar();
+        this.cargar();
       },
-      error: e => { this.guardando = false; this.error = e.error?.mensaje || 'No se pudo guardar la categoría.'; }
+      error: e => { this.guardando = false; this.error = mensajeError(e, 'No se pudo guardar la categoría.'); }
     });
+  }
+
+  nuevo(): void {
+    this.cancelar();
+    this.formAbierto = true;
+    this.mensaje = '';
+    this.error = '';
   }
 
   editar(c: Categoria): void {
     this.form = { ...c };
     this.editando = true;
+    this.formAbierto = true;
     this.error = '';
   }
 
   cancelar(): void {
     this.form = { numCategoria: 0, categoria: '', numSerie: '' };
     this.editando = false;
+    this.formAbierto = false;
   }
 
   eliminar(c: Categoria): void {
     if (!confirm(`¿Eliminar la categoría ${c.categoria} del juego ${c.numSerie}?`)) return;
     this.service.eliminar(c.numCategoria, c.numSerie).subscribe({
       next: () => { this.mensaje = 'Categoría eliminada.'; this.cargar(); },
-      error: e => { this.error = e.error?.mensaje || 'No se pudo eliminar.'; }
+      error: e => { this.error = mensajeError(e, 'No se pudo eliminar.'); }
     });
   }
 }

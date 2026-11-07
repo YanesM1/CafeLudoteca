@@ -9,5 +9,7 @@ public interface IBeneficioRepository {
     List<Beneficio> findAll();
     Optional<Beneficio> findByIdBeneficio(Integer idBeneficio, Integer idMembresia, String documentoSocio);
     boolean updateBeneficio(Integer idBeneficio, Integer idMembresia, String documentoSocio, Beneficio beneficio);
+    /** Siguiente número de beneficio (no depende de AUTO_INCREMENT). */
+    int siguienteId();
     boolean deleteBeneficio(Integer idBeneficio, Integer idMembresia, String documentoSocio);
 }

@@ -1,11 +1,5 @@
 <section class="loan-form">
 
-    <header class="loan-form__header">
-        <span class="loan-form__eyebrow">GESTIÓN OPERATIVA</span>
-        <h2>PRÉSTAMOS Y AUDITORÍA</h2>
-        <p>Registro de préstamos y control de devolución de juegos.</p>
-    </header>
-
     @if (loading) {
 
         <app-loading-state
@@ -32,7 +26,7 @@
 
                 <div class="loan-panel__heading">
                     <div>
-                        <h3>REGISTRAR PRÉSTAMO</h3>
+                        <h3>Registrar préstamo</h3>
                         <p>Información del préstamo y responsable.</p>
                     </div>
 
@@ -52,7 +46,7 @@
                             name="tipoPrestamo"
                             value="interno"
                             [checked]="loanData.tipoPrestamo === 'interno'"
-                            (change)="loanData.tipoPrestamo = 'interno'"
+                            (change)="onTipoChange('interno')"
                         />
                         Interno
                     </label>
@@ -66,7 +60,7 @@
                             name="tipoPrestamo"
                             value="externo"
                             [checked]="loanData.tipoPrestamo === 'externo'"
-                            (change)="loanData.tipoPrestamo = 'externo'"
+                            (change)="onTipoChange('externo')"
                         />
                         Externo
                     </label>
@@ -75,45 +69,49 @@
 
                 <div class="loan-panel__fields">
 
-                    <div class="loan-field">
+                    <div class="loan-field loan-field--full">
                         <app-label text="Cliente" forId="loan-client" [required]="true"/>
-
                         <app-select
                             inputId="loan-client"
                             name="cliente"
                             placeholder="Seleccionar cliente"
                             [options]="clienteOptions"
-                            [(value)]="loanData.documentoCliente"
+                            [value]="loanData.documentoCliente"
+                            (valueChange)="onClienteChange($event)"
                         />
+                        @if (clienteInfo) {
+                            <p class="loan-field__note" [class.loan-field__note--warning]="clienteAviso">
+                                {{ clienteInfo }}
+                            </p>
+                        }
                     </div>
 
-                    <div class="loan-field">
-                        <app-label text="Membresía" forId="loan-membership" [required]="true"/>
-
-                        <app-select
-                            inputId="loan-membership"
-                            name="membresia"
-                            placeholder="Seleccionar membresía"
-                            [options]="membershipOptions"
-                            [(value)]="loanData.idMembresia"
-                        />
+                    <div class="loan-field loan-field--full">
+                        <app-label text="Juegos (unidades físicas)" forId="loan-unit" [required]="true"/>
+                        <!-- Al elegir una unidad se agrega a la lista y el selector vuelve a quedar vacío -->
+                        <select class="form-control" id="loan-unit" #selectorUnidad
+                            (change)="agregarUnidad(selectorUnidad.value); selectorUnidad.value = ''">
+                            <option value="" selected disabled>
+                                {{ unidadesLibres.length ? 'Agregar una unidad disponible' : 'No hay más unidades disponibles' }}
+                            </option>
+                            @for (o of unidadesLibres; track o.value) {
+                                <option [value]="o.value">{{ o.label }}</option>
+                            }
+                        </select>
+                        @if (loanData.unidades.length) {
+                            <ul class="loan-units">
+                                @for (u of loanData.unidades; track u) {
+                                    <li>
+                                        <span>{{ etiquetaUnidad(u) }}</span>
+                                        <button type="button" (click)="quitarUnidad(u)" [attr.aria-label]="'Quitar ' + etiquetaUnidad(u)">✕</button>
+                                    </li>
+                                }
+                            </ul>
+                        }
                     </div>
 
-                    <div class="loan-field">
-                        <app-label text="Unidad física" forId="loan-unit" [required]="true"/>
-
-                        <app-select
-                            inputId="loan-unit"
-                            name="unidad"
-                            placeholder="Seleccionar unidad"
-                            [options]="unitOptions"
-                            [(value)]="loanData.idUnidad"
-                        />
-                    </div>
-
-                    <div class="loan-field">
+                    <div class="loan-field loan-field--full">
                         <app-label text="Empleado responsable" forId="loan-employee" [required]="true"/>
-
                         <app-select
                             inputId="loan-employee"
                             name="empleado"
@@ -123,25 +121,29 @@
                         />
                     </div>
 
-                    <div class="loan-field loan-field--full">
+                    <div class="loan-field">
                         <app-label text="Fecha de salida" forId="loan-date" [required]="true"/>
-
                         <app-input
                             inputId="loan-date"
                             name="fechaSalida"
                             type="date"
-                            [(value)]="loanData.fechaSalida"
+                            [value]="loanData.fechaSalida"
+                            (valueChange)="onFechaSalida($event)"
                         />
                     </div>
 
-                    <div class="loan-field loan-field--full">
+                    <div class="loan-field">
                         <app-label text="Fecha prevista de devolución" forId="loan-return-date" [required]="true"/>
-                        <app-input
-                            inputId="loan-return-date"
-                            name="fechaDevolucion"
-                            type="date"
-                            [(value)]="loanData.fechaDevolucion"
-                        />
+                        @if (loanData.tipoPrestamo === 'interno') {
+                            <span class="cl-readonly">Mismo día (préstamo en el local)</span>
+                        } @else {
+                            <app-input
+                                inputId="loan-return-date"
+                                name="fechaDevolucion"
+                                type="date"
+                                [(value)]="loanData.fechaDevolucion"
+                            />
+                        }
                     </div>
 
                 </div>
@@ -160,7 +162,7 @@
 
                 <div class="loan-panel__heading">
                     <div>
-                        <h3>CONTROL DE DEVOLUCIÓN</h3>
+                        <h3>Registrar devolución</h3>
                         <p>Selecciona un préstamo para realizar su auditoría.</p>
                     </div>
 
@@ -191,6 +193,10 @@
                 @if (activeLoanId) {
 
                     <div class="loan-panel__audit-content">
+
+                        @if (activeLoanDetail) {
+                            <p class="loan-field__note">{{ activeLoanDetail }}</p>
+                        }
 
                         <div class="loan-field">
                             <app-label

@@ -1,181 +1,83 @@
-<section class="membership-table">
+<section class="cl-page">
 
-    <header class="membership-table__header">
-
+    <header class="cl-page-header">
         <div>
-            <span class="membership-table__eyebrow">
-                ADMINISTRACIÓN
-            </span>
-
-            <h2 class="page-title">
-                SOCIOS Y MEMBRESÍAS
-            </h2>
-
-            <p>
-                Consulta y administra los socios y sus planes.
-            </p>
+            <span class="cl-eyebrow">Administración · Membresías</span>
+            <h1 class="cl-title">Membresías</h1>
+            <p class="cl-subtitle">Plan, tarifa, vigencia y estado de la membresía de cada socio.</p>
         </div>
-
-        <div class="membership-table__header-actions">
-
-            <div class="membership-table__counter">
-                <strong>{{ filteredMembers.length }}</strong>
-                <span>Registros encontrados</span>
-            </div>
-
-            <app-button
-                variant="gold"
-                (click)="onCreate()"
-            >
-                <app-icon name="plus" [size]="17"/>
-                Nuevo socio
-            </app-button>
-
+        <div class="cl-page-header__aside">
+            <span class="cl-count"><strong>{{ filteredMembers.length }}</strong>registros</span>
+            <button class="btn btn--gold" type="button" (click)="onCreate()">+ Nueva membresía</button>
         </div>
-
     </header>
 
-    <div class="membership-table__search">
+    @if (errorMessage) {
+        <p class="cl-alert cl-alert--error">{{ errorMessage }}</p>
+    }
 
-        <app-search-bar
-            placeholder="Buscar por nombre, documento o membresía..."
-            buttonText="Buscar"
-            [(value)]="searchTerm"
-            (search)="onSearch($event)"
-        />
-
-    </div>
-
-    <div class="membership-table__filters">
-
-        <app-filter-group
-            [filters]="filters"
-            [(values)]="filterValues"
-        />
-
-    </div>
-
-    <div class="membership-table__container">
+    <section class="cl-card">
+        <div class="cl-toolbar">
+            <input class="form-control" name="busqueda" [(ngModel)]="searchTerm"
+                placeholder="Buscar por nombre, documento, ID o plan">
+            <select class="form-control" name="plan" [(ngModel)]="filterValues['plan']" aria-label="Plan">
+                <option value="">Todos los planes</option>
+                @for (plan of planes; track plan) {
+                    <option [value]="plan">{{ plan }}</option>
+                }
+            </select>
+            <select class="form-control" name="estado" [(ngModel)]="filterValues['estado']" aria-label="Estado">
+                <option value="">Todos los estados</option>
+                @for (estado of estados; track estado) {
+                    <option [value]="estado">{{ estado }}</option>
+                }
+            </select>
+            <button class="btn btn--ghost" type="button" (click)="limpiarFiltros()">Limpiar filtros</button>
+        </div>
 
         @if (loading) {
-
-            <app-loading-state
-                state="loading"
-                title="Cargando socios"
-                message="Consultando las membresías registradas."
-            />
-
-        } @else if (errorMessage) {
-
-            <app-loading-state
-                state="error"
-                title="Error al consultar socios"
-                [message]="errorMessage"
-                [showRetry]="true"
-                (retry)="onRetry()"
-            />
-
-        } @else if (filteredMembers.length > 0) {
-
-            <div class="membership-table__scroll">
-
-                <table>
-
+            <p class="cl-empty">Consultando membresías...</p>
+        } @else if (!filteredMembers.length) {
+            <p class="cl-empty">No hay membresías para mostrar.</p>
+        } @else {
+            <div class="cl-table-wrap">
+                <table class="cl-table">
                     <thead>
                         <tr>
-                            <th>ID Membresía</th>
+                            <th>ID</th>
                             <th>Socio</th>
                             <th>Documento</th>
                             <th>Plan</th>
-                            <th>Tarifa</th>
-                            <th>Fecha inicio</th>
-                            <th>Fecha fin</th>
+                            <th>Tarifa mensual</th>
+                            <th>Inicio</th>
+                            <th>Fin</th>
                             <th>Estado</th>
-                            <th>Acciones</th>
+                            <th class="cl-table__actions-head">Acciones</th>
                         </tr>
                     </thead>
-
                     <tbody>
-
-                        @for (member of filteredMembers; track member.identificador) {
-
+                        @for (member of filteredMembers; track member.identificador + '-' + member.documento) {
                             <tr>
-
-                                <td class="membership-table__id">
-                                    {{ member.identificador }}
-                                </td>
-
-                                <td class="membership-table__name">
-                                    {{ member.nombre }}
-                                </td>
-
+                                <td>{{ member.identificador }}</td>
+                                <td>{{ member.nombre }}</td>
                                 <td>{{ member.documento }}</td>
-
                                 <td>{{ member.plan }}</td>
-
-                                <td class="membership-table__price">
-                                    {{ formatCurrency(member.tarifa) }}
-                                </td>
-
+                                <td>{{ formatCurrency(member.tarifa) }}</td>
                                 <td>{{ formatDate(member.fechaInicio) }}</td>
-
-                                <td>{{ formatDate(member.fechaFin) }}</td>
-
+                                <td>{{ formatDate(member.fechaFin) || '—' }}</td>
+                                <td><span class="badge" [class]="'badge badge--' + statusVariant(member.estado)">{{ member.estado }}</span></td>
                                 <td>
-                                    <app-badge
-                                        [variant]="statusVariant(member.estado)"
-                                    >
-                                        {{ member.estado }}
-                                    </app-badge>
-                                </td>
-
-                                <td>
-                                    <div class="membership-table__actions">
-
-                                        <app-button
-                                            variant="ghost"
-                                            (click)="onEdit(member)"
-                                        >
-                                            <app-icon name="edit" [size]="16"/>
-                                            Editar
-                                        </app-button>
-
-                                        <app-button
-                                            variant="danger"
-                                            (click)="onDelete(member)"
-                                        >
-                                            <app-icon name="trash" [size]="16"/>
-                                            Eliminar
-                                        </app-button>
-
+                                    <div class="cl-table__actions">
+                                        <button class="btn btn--ghost btn--sm" type="button" (click)="onEdit(member)">Editar</button>
+                                        <button class="btn btn--danger btn--sm" type="button" (click)="onDelete(member)">Eliminar</button>
                                     </div>
                                 </td>
-
                             </tr>
-
                         }
-
                     </tbody>
-
                 </table>
-
             </div>
-
-        } @else {
-
-            <app-loading-state
-                state="empty"
-                title="No encontramos socios"
-                message="No hay registros que coincidan con tu búsqueda o filtros."
-            />
-
         }
-
-    </div>
-
-    <footer class="membership-table__footer">
-        Mostrando {{ filteredMembers.length }}
-        de {{ members.length }} registros
-    </footer>
+    </section>
 
 </section>

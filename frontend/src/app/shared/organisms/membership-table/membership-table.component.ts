@@ -1,17 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-
-import { BadgeComponent } from '../../atoms/badge/badge.component';
-import { ButtonComponent } from '../../atoms/button/button.component';
-import { IconComponent } from '../../atoms/icon/icon.component';
-
-import { SearchBarComponent } from '../../molecules/search-bar/search-bar.component';
-
-import {
-    FilterGroupComponent,
-    FilterDefinition
-} from '../../molecules/filter-group/filter-group.component';
-
-import { LoadingStateComponent } from '../../molecules/loading-state/loading-state.component';
+import { FormsModule } from '@angular/forms';
 
 export interface MembershipTableRow {
     identificador: string;
@@ -27,14 +15,7 @@ export interface MembershipTableRow {
 @Component({
     selector: 'app-membership-table',
     standalone: true,
-    imports: [
-        BadgeComponent,
-        ButtonComponent,
-        IconComponent,
-        SearchBarComponent,
-        FilterGroupComponent,
-        LoadingStateComponent
-    ],
+    imports: [FormsModule],
     templateUrl: './membership-table.component.html',
     styleUrl: './membership-table.component.css'
 })
@@ -51,36 +32,23 @@ export class MembershipTableComponent {
 
     searchTerm = '';
 
-    filterValues: Record<string, string> = {};
+    filterValues: Record<string, string> = { plan: '', estado: '' };
 
-    get filters(): FilterDefinition[] {
+    get planes(): string[] {
+        return [...new Set(this.members.map(member => member.plan).filter(Boolean))].sort();
+    }
 
-        const plans = [
-            ...new Set(this.members.map(member => member.plan))
-        ].sort();
+    /** Estados de la propuesta más cualquier otro valor ya guardado. */
+    get estados(): string[] {
+        const base = ['Activa', 'Suspendida', 'Vencida'];
+        const extra = this.members.map(member => member.estado)
+            .filter(estado => estado && !base.includes(estado));
+        return [...base, ...new Set(extra)];
+    }
 
-        return [
-            {
-                name: 'plan',
-                label: 'Plan',
-                placeholder: 'Todos los planes',
-                options: plans.map(plan => ({
-                    value: plan,
-                    label: plan
-                }))
-            },
-            {
-                name: 'estado',
-                label: 'Estado',
-                placeholder: 'Todos los estados',
-                options: [
-                    { value: 'Activa', label: 'Activa' },
-                    { value: 'Pendiente', label: 'Pendiente' },
-                    { value: 'Inactiva', label: 'Inactiva' },
-                    { value: 'Vencida', label: 'Vencida' }
-                ]
-            }
-        ];
+    limpiarFiltros(): void {
+        this.searchTerm = '';
+        this.filterValues = { plan: '', estado: '' };
     }
 
     get filteredMembers(): MembershipTableRow[] {
@@ -152,7 +120,7 @@ export class MembershipTableComponent {
             return 'success';
         }
 
-        if (['pendiente', 'por vencer'].includes(status)) {
+        if (['pendiente', 'por vencer', 'suspendida', 'suspendido'].includes(status)) {
             return 'warning';
         }
 

@@ -11,6 +11,7 @@ public interface ISocioRepository {
     boolean saveSocio(Socio socio);
 
     List<Socio> findByFechaAfiliacion(LocalDate fechaAfiliacion);
+    List<Socio> findAll();
 
     Optional<Socio> findByDocumento(String documento);
 

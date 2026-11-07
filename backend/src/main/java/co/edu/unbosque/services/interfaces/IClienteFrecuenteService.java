@@ -11,6 +11,8 @@ public interface IClienteFrecuenteService {
 
     List<ClienteFrecuenteResponseDTO> getClientesFrecuentesPorNivel(String nivelFidelidad);
 
+    List<ClienteFrecuenteResponseDTO> getTodos();
+
     ClienteFrecuenteResponseDTO getClienteFrecuentePorDocumento(String documento);
 
     ClienteFrecuenteResponseDTO updateClienteFrecuente(

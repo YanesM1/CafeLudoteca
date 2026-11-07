@@ -1,100 +1,91 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, OnDestroy } from '@angular/core';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Subscription, filter } from 'rxjs';
 import {
   NavbarComponent,
   NavbarLink
 } from '../../shared/organisms/navbar/navbar.component';
 
+interface AdminSection {
+  label: string;
+  route: string;
+  pages: { label: string; route: string }[];
+}
+
+/**
+ * Menú de administración por tema: cada opción de la barra superior agrupa
+ * sus páginas relacionadas, que aparecen como pestañas debajo.
+ */
+export const ADMIN_SECTIONS: AdminSection[] = [
+  {
+    label: 'Clientes',
+    route: '/admin/clientes',
+    pages: [
+      { label: 'Clientes', route: '/admin/clientes/listado' },
+      { label: 'Clientes frecuentes', route: '/admin/clientes/frecuentes' },
+      { label: 'Socios', route: '/admin/clientes/socios' },
+      { label: 'Teléfonos', route: '/admin/clientes/telefonos' }
+    ]
+  },
+  {
+    label: 'Membresías',
+    route: '/admin/membresias',
+    pages: [
+      { label: 'Membresías', route: '/admin/membresias/listado' },
+      { label: 'Beneficios', route: '/admin/membresias/beneficios' }
+    ]
+  },
+  {
+    label: 'Juegos',
+    route: '/admin/juegos',
+    pages: [
+      { label: 'Juegos', route: '/admin/juegos/catalogo' },
+      { label: 'Unidades', route: '/admin/juegos/unidades' },
+      { label: 'Elementos', route: '/admin/juegos/elementos' },
+      { label: 'Expansiones', route: '/admin/juegos/expansiones' },
+      { label: 'Categorías', route: '/admin/juegos/categorias' }
+    ]
+  },
+  { label: 'Mesas', route: '/admin/mesas', pages: [] },
+  { label: 'Empleados', route: '/admin/empleados', pages: [] }
+];
+
 @Component({
   selector: 'app-admin-layout',
   standalone: true,
-  imports: [RouterOutlet, NavbarComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, NavbarComponent],
   templateUrl: './admin-layout.component.html',
   styleUrl: './admin-layout.component.css'
 })
-export class AdminLayoutComponent {
+export class AdminLayoutComponent implements OnDestroy {
   brand = 'Café & Ludoteca';
   userLabel = 'Administrador';
 
-  navigationLinks: NavbarLink[] = [
-    {
-      label: 'Clientes',
-      route: '/admin/clientes',
-      icon: 'users',
-      exact: true
-    },
-    {
-      label: 'Empleados',
-      route: '/admin/empleados',
-      icon: 'users',
-      exact: true
-    },
-    {
-      label: 'Socios',
-      route: '/admin/socios',
-      icon: 'user-round',
-      exact: true
-    },
-    {
-      label: 'Membresías',
-      route: '/admin/membresias',
-      icon: 'credit-card',
-      exact: true
-    },
-    {
-      label: 'Juegos e inventario',
-      route: '/admin/inventario/juegos',
-      icon: 'dice',
-      exact: true
-    },
-    {
-      label: 'Categorías',
-      route: '/admin/inventario/categorias',
-      icon: 'tags',
-      exact: true
-    },
-    {
-      label: 'Expansiones',
-      route: '/admin/inventario/expansiones',
-      icon: 'package',
-      exact: true
-    },
-    {
-      label: 'Elementos de juego',
-      route: '/admin/inventario/elementos',
-      icon: 'puzzle',
-      exact: true
-    },
-    {
-      label: 'Unidades físicas',
-      route: '/admin/inventario/unidades',
-      icon: 'boxes',
-      exact: true
-    },
-    {
-      label: 'Mesas',
-      route: '/admin/operacion/mesas',
-      icon: 'table',
-      exact: true
-    },
-    {
-      label: 'Beneficios',
-      route: '/admin/relaciones/beneficios',
-      icon: 'gift',
-      exact: true
-    },
-    {
-      label: 'Clientes frecuentes',
-      route: '/admin/relaciones/clientes-frecuentes',
-      icon: 'star',
-      exact: true
-    },
-    {
-      label: 'Teléfonos',
-      route: '/admin/relaciones/telefonos',
-      icon: 'phone',
-      exact: true
-    },
-    { label: 'Cambiar rol', route: '/', icon: 'repeat', exact: true },
-  ];
+  readonly navigationLinks: NavbarLink[] = ADMIN_SECTIONS.map(s => ({
+    label: s.label,
+    route: s.route,
+    exact: false
+  }));
+
+  activeSection: AdminSection | null = null;
+
+  private readonly sub: Subscription;
+
+  constructor(private router: Router) {
+    this.updateSection(this.router.url);
+    this.sub = this.router.events
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe(e => this.updateSection(e.urlAfterRedirects));
+  }
+
+  private updateSection(url: string): void {
+    this.activeSection = ADMIN_SECTIONS.find(s => url.startsWith(s.route)) ?? null;
+    // En pantallas angostas las pestañas se desplazan: se deja visible la activa
+    setTimeout(() => document.querySelector('.admin-tabs__tab--active')
+      ?.scrollIntoView({ block: 'nearest', inline: 'center' }));
+  }
+
+  ngOnDestroy(): void {
+    this.sub.unsubscribe();
+  }
 }

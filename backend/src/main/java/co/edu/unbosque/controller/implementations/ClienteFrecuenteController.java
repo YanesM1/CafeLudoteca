@@ -1,5 +1,7 @@
 package co.edu.unbosque.controller.implementations;
 
+import co.edu.unbosque.config.ErrorResponses;
+
 import java.util.List;
 
 import co.edu.unbosque.controller.interfaces.IClienteFrecuenteController;
@@ -33,9 +35,7 @@ public class ClienteFrecuenteController implements IClienteFrecuenteController {
         ClienteFrecuenteResponseDTO clienteFrecuente =
                 clienteFrecuenteService.addClienteFrecuente(request);
         if (clienteFrecuente == null) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("No se pudo registrar el cliente frecuente")
-                    .build();
+            return ErrorResponses.of(Response.Status.BAD_REQUEST, "No se pudo registrar el cliente frecuente");
         }
         return Response.status(Response.Status.CREATED)
                 .entity(clienteFrecuente)
@@ -59,9 +59,7 @@ public class ClienteFrecuenteController implements IClienteFrecuenteController {
         ClienteFrecuenteResponseDTO clienteFrecuente =
                 clienteFrecuenteService.getClienteFrecuentePorDocumento(documento);
         if (clienteFrecuente == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("No se ha encontrado el cliente frecuente")
-                    .build();
+            return ErrorResponses.of(Response.Status.NOT_FOUND, "No se ha encontrado el cliente frecuente");
         }
         return Response.ok(clienteFrecuente).build();
     }
@@ -74,9 +72,7 @@ public class ClienteFrecuenteController implements IClienteFrecuenteController {
         ClienteFrecuenteResponseDTO clienteFrecuente =
                 clienteFrecuenteService.updateClienteFrecuente(documento, request);
         if (clienteFrecuente == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("No se ha encontrado el cliente frecuente que desea actualizar")
-                    .build();
+            return ErrorResponses.of(Response.Status.NOT_FOUND, "No se ha encontrado el cliente frecuente que desea actualizar");
         }
         return Response.ok(clienteFrecuente).build();
     }
@@ -88,11 +84,15 @@ public class ClienteFrecuenteController implements IClienteFrecuenteController {
         ClienteFrecuenteResponseDTO clienteFrecuente =
                 clienteFrecuenteService.deleteClienteFrecuente(documento);
         if (clienteFrecuente == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("No se ha encontrado el cliente frecuente")
-                    .build();
+            return ErrorResponses.of(Response.Status.NOT_FOUND, "No se ha encontrado el cliente frecuente");
         }
         return Response.ok(clienteFrecuente).build();
     }
 
+
+    // LISTAR TODOS LOS CLIENTES FRECUENTES
+    @GET
+    public Response listarClientesFrecuentes() {
+        return Response.ok(clienteFrecuenteService.getTodos()).build();
+    }
 }

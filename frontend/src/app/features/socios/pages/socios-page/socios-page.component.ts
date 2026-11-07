@@ -1,69 +1,83 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpErrorResponse } from '@angular/common/http';
-import { Socio, SocioService } from '../../../../core/services/socio.service';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
+import { Socio, SocioService } from '../../../../core/services/socio.service';
+import { ClienteService } from '../../../../core/services/cliente.service';
+import { ClienteResponse } from '../../../../core/models/cliente.model';
+import { Membresia, MembresiaService, PlanMembresia } from '../../../../core/services/membresia.service';
+import { mensajeError } from '../../../../core/utils/http-error';
+import { fechaCorta, fechaISO, hoyISO, pesos, sumarMeses } from '../../../../core/utils/fecha';
+
+interface FormSocio {
+  documento: string;
+  fechaAfiliacion: string;
+  /** Al crear: registrar también la primera membresía. */
+  conMembresia: boolean;
+  plan: string;
+  duracion: number;
+}
+
+/**
+ * Socios: se elige un cliente ya registrado y, en el mismo paso,
+ * se le puede crear su primera membresía (plan, tarifa y vigencia).
+ */
 @Component({
   selector: 'app-socios-page',
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-  <main class="page">
-    <header class="heading">
+  <section class="cl-page">
+    <header class="cl-page-header">
       <div>
-        <span class="eyebrow">GESTIÓN ADMINISTRATIVA</span>
-        <h1>Socios</h1>
-        <p>Registra y administra los socios de Café & Ludoteca.</p>
+        <span class="cl-eyebrow">Administración · Clientes</span>
+        <h1 class="cl-title">Socios</h1>
+        <p class="cl-subtitle">Clientes afiliados. Con una membresía activa pueden pedir préstamos externos.</p>
       </div>
-      <strong class="count">{{ socios.length }} <small>registros</small></strong>
+      <div class="cl-page-header__aside">
+        <span class="cl-count"><strong>{{ socios.length }}</strong>registros</span>
+        <button class="btn btn--gold" type="button" (click)="nuevo()">+ Nuevo socio</button>
+      </div>
     </header>
 
-    <section class="panel">
-      <h2>{{ editando ? 'Editar socio' : 'Registrar nuevo socio' }}</h2>
-      <form (ngSubmit)="guardar()">
-        <label>Documento del cliente
-          <input name="documento" [(ngModel)]="form.documento"
-            [disabled]="editando" required placeholder="Número de documento">
-        </label>
-        <label>Fecha de afiliación
-          <input type="date" name="fecha" [(ngModel)]="form.fechaAfiliacion" required>
-        </label>
-        <div class="actions">
-          <button class="primary" type="submit" [disabled]="guardando">
-            {{ guardando ? 'Guardando...' : editando ? 'Guardar cambios' : 'Registrar socio' }}
-          </button>
-          <button type="button" class="secondary" *ngIf="editando" (click)="cancelarEdicion()">Cancelar</button>
-        </div>
-      </form>
-    </section>
+    <p class="cl-alert cl-alert--success" *ngIf="mensaje">{{ mensaje }}</p>
+    <p class="cl-alert cl-alert--error" *ngIf="error && !formAbierto">{{ error }}</p>
 
-    <section class="panel">
-      <h2>Consultar socios por fecha de afiliación</h2>
-      <div class="search">
-        <input type="date" [(ngModel)]="fechaConsulta">
-        <button class="primary" (click)="cargar()">Buscar</button>
+    <section class="cl-card">
+      <div class="cl-toolbar">
+        <input class="form-control" type="date" [(ngModel)]="fechaConsulta" aria-label="Fecha de afiliación">
+        <button class="btn btn--gold" type="button" (click)="cargar()">Buscar</button>
+        <button class="btn btn--ghost" type="button" (click)="fechaConsulta='';cargar()">Ver todos</button>
       </div>
-    </section>
 
-    <p class="message" *ngIf="mensaje">{{ mensaje }}</p>
-    <p class="error" *ngIf="error">{{ error }}</p>
-
-    <section class="panel">
-      <h2>Resultados</h2>
-      <p *ngIf="cargando">Consultando socios...</p>
-      <p *ngIf="!cargando && socios.length === 0">No hay socios para la fecha seleccionada.</p>
-      <div class="table-wrap" *ngIf="socios.length">
-        <table>
-          <thead><tr><th>Documento</th><th>Fecha de afiliación</th><th>Acciones</th></tr></thead>
+      <p class="cl-empty" *ngIf="cargando">Consultando socios...</p>
+      <p class="cl-empty" *ngIf="!cargando && socios.length === 0">No hay socios para mostrar.</p>
+      <div class="cl-table-wrap" *ngIf="!cargando && socios.length">
+        <table class="cl-table">
+          <thead><tr><th>Documento</th><th>Nombre</th><th>Afiliación</th><th>Membresía</th><th class="cl-table__actions-head">Acciones</th></tr></thead>
           <tbody>
             @for (s of socios; track s.documento) {
               <tr>
                 <td>{{ s.documento }}</td>
+                <td>{{ nombres[s.documento] || '—' }}</td>
                 <td>{{ formatearFecha(s.fechaAfiliacion) }}</td>
-                <td class="row-actions">
-                  <button class="secondary" (click)="editar(s)">Editar</button>
-                  <button class="danger" (click)="borrar(s)">Eliminar</button>
+                <td>
+                  @if (membresiaDe(s.documento); as m) {
+                    <span class="badge" [ngClass]="m.estado === 'Activa' ? 'badge--success' : 'badge--danger'">
+                      {{ m.plan }} · {{ m.estado }}
+                    </span>
+                    <span class="cl-muted"> hasta {{ formatearFecha(m.fechaFin) }}</span>
+                  } @else {
+                    <span class="cl-muted">Sin membresía</span>
+                  }
+                </td>
+                <td>
+                  <div class="cl-table__actions">
+                    <button class="btn btn--ghost btn--sm" type="button" (click)="editar(s)">Editar</button>
+                    <button class="btn btn--danger btn--sm" type="button" (click)="borrar(s)">Eliminar</button>
+                  </div>
                 </td>
               </tr>
             }
@@ -71,125 +85,246 @@ import { Socio, SocioService } from '../../../../core/services/socio.service';
         </table>
       </div>
     </section>
-  </main>
+
+    <div class="cl-modal-overlay" *ngIf="formAbierto" (click)="cancelarEdicion()">
+      <section class="cl-card cl-modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+        <h2 class="cl-card__title">{{ editando ? 'Editar socio' : 'Nuevo socio' }}</h2>
+        <p class="cl-alert cl-alert--error" *ngIf="error">{{ error }}</p>
+        <form class="cl-form-grid" (ngSubmit)="guardar()">
+          <label class="cl-field cl-field--full">Cliente *
+            <select class="form-control" name="documento" [(ngModel)]="form.documento" [disabled]="editando" required>
+              <option value="" disabled>Selecciona un cliente</option>
+              @for (c of opcionesCliente; track c.value) {
+                <option [value]="c.value">{{ c.label }}</option>
+              }
+            </select>
+            <span class="cl-field__hint" *ngIf="!editando">Solo aparecen los clientes que aún no son socios.</span>
+          </label>
+          <label class="cl-field cl-field--full">Fecha de afiliación *
+            <input class="form-control" type="date" name="fecha" [(ngModel)]="form.fechaAfiliacion" [max]="hoy" required>
+          </label>
+
+          @if (!editando) {
+            <label class="cl-check cl-field--full">
+              <input type="checkbox" name="conMembresia" [(ngModel)]="form.conMembresia">
+              Crear también su membresía
+            </label>
+            @if (form.conMembresia) {
+              <label class="cl-field">Plan *
+                <select class="form-control" name="plan" [(ngModel)]="form.plan" required>
+                  <option value="" disabled>Selecciona un plan</option>
+                  @for (p of planes; track p.plan) { <option [value]="p.plan">{{ p.plan }}</option> }
+                </select>
+              </label>
+              <label class="cl-field">Duración *
+                <select class="form-control" name="duracion" [(ngModel)]="form.duracion">
+                  @for (d of duraciones; track d) {
+                    <option [ngValue]="d">{{ d }} {{ d === 1 ? 'mes' : 'meses' }}</option>
+                  }
+                </select>
+              </label>
+              <div class="cl-field">Tarifa mensual
+                <span class="cl-readonly">{{ tarifaTexto }}</span>
+              </div>
+              <div class="cl-field">Vence el
+                <span class="cl-readonly">{{ venceTexto }}</span>
+              </div>
+            }
+          }
+
+          <div class="cl-form-actions">
+            <button class="btn btn--ghost" type="button" (click)="cancelarEdicion()">Cancelar</button>
+            <button class="btn btn--gold" type="submit" [disabled]="guardando">
+              {{ guardando ? 'Guardando...' : 'Guardar socio' }}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </section>
   `,
-  styles: [`
-    .page{padding:32px 24px;color:#f5f5fa;background:#0b1020;min-height:calc(100vh - 100px)}
-    .heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}
-    .eyebrow{color:#22d3ee;font-weight:800;letter-spacing:2px;font-size:13px}
-    h1{font-size:32px;margin:10px 0} h2{font-size:19px;margin:0 0 22px}
-    p{color:#aab2c2}.count{font-size:30px;color:#22d3ee}.count small{font-size:13px;color:#aab2c2}
-    .panel{background:#1b2030;border:1px solid #465267;border-radius:14px;padding:24px;margin-bottom:22px}
-    form{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-    label{display:grid;gap:9px;color:#c6ccd7;font-weight:700}
-    input{box-sizing:border-box;width:100%;background:#101827;border:1px solid #526078;color:white;border-radius:9px;padding:15px;font-size:16px}
-    button{border:1px solid #22d3ee;border-radius:9px;padding:12px 18px;font-weight:700;cursor:pointer}
-    button:disabled{opacity:.5;cursor:not-allowed}
-    .primary{background:#d3b354;color:#171827;border-color:#d3b354}
-    .secondary{background:transparent;color:#22d3ee}
-    .danger{background:#a32154;color:white;border-color:#d12e70}
-    .actions,.search,.row-actions{display:flex;gap:12px;align-items:center}
-    .actions{grid-column:1/-1}.search input{max-width:260px}
-    .message{color:#22d3ee}.error{color:#ff7090}
-    .table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse}
-    th,td{text-align:left;padding:15px;border-bottom:1px solid #465267}
-    th{color:#22d3ee}
-    @media(max-width:650px){form{grid-template-columns:1fr}.search,.row-actions{flex-wrap:wrap}.heading{align-items:flex-start}}
-  `]
+  styles: [':host { display: block; }']
 })
 export class SociosPageComponent implements OnInit {
   socios: Socio[] = [];
-  fechaConsulta = this.fechaLocal();
-  form: Socio = { documento: '', fechaAfiliacion: this.fechaLocal() };
+  /** Vacío = todos los socios. */
+  fechaConsulta = '';
+  readonly hoy = hoyISO();
+  readonly duraciones = [1, 3, 6, 12];
+  form: FormSocio = this.vacio();
+  /** Documento -> nombre del cliente, para mostrar quién es cada socio. */
+  nombres: Record<string, string> = {};
+  private clientesLista: ClienteResponse[] = [];
+  private membresias: Membresia[] = [];
+  planes: PlanMembresia[] = [];
   editando = false;
+  formAbierto = false;
   guardando = false;
   cargando = false;
   mensaje = '';
   error = '';
 
-  constructor(private service: SocioService) {}
+  constructor(
+    private service: SocioService,
+    private clientes: ClienteService,
+    private membresiaService: MembresiaService
+  ) {}
 
-  ngOnInit(): void { this.cargar(); }
-
-  private fechaLocal(): string {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  ngOnInit(): void {
+    this.cargar();
+    forkJoin({
+      clientes: this.clientes.listar().pipe(catchError(() => of([] as ClienteResponse[]))),
+      planes: this.membresiaService.planes().pipe(catchError(() => of([] as PlanMembresia[])))
+    }).subscribe(({ clientes, planes }) => {
+      this.clientesLista = clientes;
+      clientes.forEach(c => this.nombres[c.documentoCliente] =
+        [c.primerNombre, c.primerApellido].filter(Boolean).join(' '));
+      this.planes = planes;
+    });
   }
 
-  private normalizarFecha(value: string | number[]): string {
-    if (Array.isArray(value)) {
-      const [year, month, day] = value;
-      return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  private vacio(): FormSocio {
+    return { documento: '', fechaAfiliacion: hoyISO(), conMembresia: true, plan: '', duracion: 1 };
+  }
+
+  /** Clientes que todavía no son socios (al editar, el socio actual). */
+  get opcionesCliente(): { value: string; label: string }[] {
+    if (this.editando) {
+      return [{ value: this.form.documento, label: `${this.nombres[this.form.documento] || 'Socio'} · ${this.form.documento}` }];
     }
-    return value.substring(0, 10);
+    const socios = new Set(this.socios.map(s => s.documento));
+    return this.clientesLista
+      .filter(c => !socios.has(c.documentoCliente))
+      .map(c => ({ value: c.documentoCliente, label: `${this.nombres[c.documentoCliente]} · ${c.documentoCliente}` }))
+      .sort((a, b) => a.label.localeCompare(b.label));
   }
 
-  formatearFecha(value: string | number[]): string {
-    const fecha = this.normalizarFecha(value);
-    const [year, month, day] = fecha.split('-');
-    return `${day}/${month}/${year}`;
+  /** Membresía más reciente del socio (la activa si tiene una). */
+  membresiaDe(documento: string): Membresia | null {
+    const suyas = this.membresias.filter(m => m.documento === documento);
+    return suyas.find(m => m.estado === 'Activa')
+      ?? suyas.sort((a, b) => b.idMembresia - a.idMembresia)[0]
+      ?? null;
+  }
+
+  get tarifaTexto(): string {
+    const plan = this.planes.find(p => p.plan === this.form.plan);
+    return plan ? pesos(plan.tarifa) + ' al mes' : 'Elige un plan';
+  }
+
+  get venceTexto(): string {
+    return fechaCorta(sumarMeses(this.form.fechaAfiliacion, this.form.duracion));
+  }
+
+  formatearFecha(value: unknown): string {
+    return fechaCorta(value);
   }
 
   cargar(): void {
-    if (!this.fechaConsulta) { this.error = 'Selecciona una fecha.'; return; }
-    this.cargando = true; this.error = ''; this.mensaje = '';
-    this.service.listarPorFecha(this.fechaConsulta).subscribe({
+    this.cargando = true;
+    this.error = '';
+    const peticion = this.fechaConsulta
+      ? this.service.listarPorFecha(this.fechaConsulta)
+      : this.service.listar();
+    peticion.subscribe({
       next: data => {
-        this.socios = data.map(s => ({
-          ...s,
-          fechaAfiliacion: this.normalizarFecha(s.fechaAfiliacion)
-        }));
+        this.socios = data.map(s => ({ ...s, fechaAfiliacion: fechaISO(s.fechaAfiliacion) }));
         this.cargando = false;
       },
       error: e => this.fallar(e, 'No fue posible consultar los socios.')
     });
+    this.membresiaService.listar().subscribe({
+      next: m => this.membresias = m,
+      error: () => this.membresias = []
+    });
   }
 
   guardar(): void {
-    if (!this.form.documento.trim() || !this.form.fechaAfiliacion) {
-      this.error = 'Completa el documento y la fecha.'; return;
+    if (!this.form.documento || !this.form.fechaAfiliacion) {
+      this.error = 'Selecciona el cliente y la fecha de afiliación.'; return;
+    }
+    const crearMembresia = !this.editando && this.form.conMembresia;
+    if (crearMembresia && !this.form.plan) {
+      this.error = 'Selecciona el plan de la membresía.'; return;
     }
     this.guardando = true; this.error = ''; this.mensaje = '';
-    const request = {
-      documento: this.form.documento.trim(),
-      fechaAfiliacion: this.form.fechaAfiliacion
-    };
-    const peticion = this.editando
+    const editando = this.editando;
+    const datos = { ...this.form };
+    const request = { documento: datos.documento, fechaAfiliacion: fechaISO(datos.fechaAfiliacion) };
+    const peticion = editando
       ? this.service.actualizar(request.documento, request)
       : this.service.crear(request);
 
     peticion.subscribe({
       next: () => {
-        this.guardando = false;
-        this.mensaje = this.editando ? 'Socio actualizado.' : 'Socio registrado.';
-        this.form = { documento: '', fechaAfiliacion: this.fechaLocal() };
-        this.editando = false;
-        this.cargar();
+        if (!crearMembresia) {
+          this.terminar(editando ? 'Socio actualizado.' : 'Socio registrado.');
+          return;
+        }
+        const plan = this.planes.find(p => p.plan === datos.plan);
+        this.membresiaService.crear({
+          idMembresia: 0,
+          documento: datos.documento,
+          plan: datos.plan,
+          estado: 'Activa',
+          fechaInicio: request.fechaAfiliacion,
+          fechaFin: sumarMeses(request.fechaAfiliacion, datos.duracion),
+          tarifa: plan?.tarifa ?? 0
+        }).subscribe({
+          next: () => this.terminar('Socio registrado con su membresía ' + datos.plan + '.'),
+          error: e => {
+            this.terminar('Socio registrado.');
+            this.error = 'La membresía no se pudo crear: ' + mensajeError(e, 'error desconocido')
+              + ' Puedes crearla en Membresías.';
+          }
+        });
       },
-      error: e => { this.guardando = false; this.fallar(e, 'No fue posible guardar el socio.'); }
+      error: e => this.fallar(e, 'No fue posible guardar el socio.')
     });
   }
 
+  private terminar(mensaje: string): void {
+    this.guardando = false;
+    this.mensaje = mensaje;
+    this.form = this.vacio();
+    this.editando = false;
+    this.formAbierto = false;
+    this.cargar();
+  }
+
+  nuevo(): void {
+    this.form = this.vacio();
+    this.editando = false;
+    this.formAbierto = true;
+    this.error = ''; this.mensaje = '';
+  }
+
   editar(s: Socio): void {
-    this.form = { ...s }; this.editando = true;
+    this.form = { ...this.vacio(), documento: s.documento, fechaAfiliacion: fechaISO(s.fechaAfiliacion), conMembresia: false };
+    this.editando = true;
+    this.formAbierto = true;
     this.error = ''; this.mensaje = '';
   }
 
   cancelarEdicion(): void {
-    this.form = { documento: '', fechaAfiliacion: this.fechaLocal() };
+    this.form = this.vacio();
     this.editando = false;
+    this.formAbierto = false;
+    this.error = '';
   }
 
   borrar(s: Socio): void {
-    if (!confirm(`¿Eliminar el socio ${s.documento}?`)) return;
+    if (!confirm(`¿Eliminar el socio ${this.nombres[s.documento] || s.documento}?`)) return;
+    this.error = ''; this.mensaje = '';
     this.service.eliminar(s.documento).subscribe({
       next: () => { this.mensaje = 'Socio eliminado.'; this.cargar(); },
-      error: e => this.fallar(e, 'No fue posible eliminar el socio.')
+      error: e => this.fallar(e, 'No fue posible eliminar el socio. Si tiene membresías, elimínalas primero.')
     });
   }
-private fallar(e: HttpErrorResponse, texto: string): void {
+
+  private fallar(e: unknown, texto: string): void {
     this.cargando = false;
     this.guardando = false;
-    this.error = e.error?.mensaje || e.error || texto;
+    this.error = mensajeError(e, texto);
   }
 }

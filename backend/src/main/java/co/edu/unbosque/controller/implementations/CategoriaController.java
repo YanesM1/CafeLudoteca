@@ -1,5 +1,7 @@
 package co.edu.unbosque.controller.implementations;
 
+import co.edu.unbosque.config.ErrorResponses;
+
 import java.util.List;
 
 import co.edu.unbosque.controller.interfaces.ICategoriaController;
@@ -15,6 +17,7 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -30,18 +33,22 @@ public class CategoriaController implements  ICategoriaController{
     public Response guardarCategoria(CategoriaRequestDTO request) {
        CategoriaResponseDTO categoriaJ=categoriaService.addCategoria(request);
         if(categoriaJ==null){
-            return Response.status(Response.Status.BAD_REQUEST)
-            .entity("No se pudo registrar la categoria en la base de datos")
-            .build();
+            return ErrorResponses.of(Response.Status.BAD_REQUEST, "No se pudo registrar la categoria en la base de datos");
         }
         return Response.status(Response.Status.CREATED)
         .entity(categoriaJ)
         .build();
     }
 
+// LISTAR TODAS LAS CATEGORÍAS (o filtrar con ?categoria=)
+@GET
+public Response listarCategorias(@QueryParam("categoria") String categoria) {
+    return Response.ok(categoriaService.getCategoria(categoria)).build();
+}
+
 @Override
-@GET 
-@Path("/{categoria}") 
+@GET
+@Path("/{categoria}")
 public Response buscarPorCategoria(@PathParam ("categoria") String categoria) {
          List<CategoriaResponseDTO>categorias=categoriaService.getCategoria(categoria);
         return Response.ok(categorias).build();
@@ -55,9 +62,7 @@ public Response buscarPorNumCategoria(@PathParam ("num_categoria") Integer numCa
 @PathParam ("num_serie") String numSerie) {
      CategoriaResponseDTO categoriaJ=categoriaService.getCategoriaNumSerie(numCategoria, numSerie);
      if(categoriaJ==null){
-        return Response.status(Response.Status.NOT_FOUND)
-        .entity("No se ha encontrado la categoría en la base de datos")
-        .build();
+        return ErrorResponses.of(Response.Status.NOT_FOUND, "No se ha encontrado la categoría en la base de datos");
      }
       return Response.ok(categoriaJ).build();
 }
@@ -68,9 +73,7 @@ public Response buscarPorNumCategoria(@PathParam ("num_categoria") Integer numCa
 public Response actualizarCategoria(@PathParam ("num_categoria") Integer numCategoria, @PathParam("num_serie") String numSerie, CategoriaRequestDTO request) {
     CategoriaResponseDTO categoriaJ=categoriaService.updateCategoria(numCategoria, numSerie, request);
       if(categoriaJ==null){
-        return Response.status(Response.Status.NOT_FOUND)
-        .entity("Error, no se ha podido actualizar la categoria")
-        .build();
+        return ErrorResponses.of(Response.Status.NOT_FOUND, "Error, no se ha podido actualizar la categoria");
       }
       return Response.ok(categoriaJ).build();
 }
@@ -81,9 +84,7 @@ public Response actualizarCategoria(@PathParam ("num_categoria") Integer numCate
 public Response borrarCategoria(@PathParam ("num_categoria") Integer numCategoria, @PathParam ("num_serie") String numSerie) {
      CategoriaResponseDTO categoriaJ=categoriaService.deleteCategoria(numCategoria, numSerie);
     if(categoriaJ==null){
-        return Response.status(Response.Status.NOT_FOUND)
-        .entity("No se a encontrado el juego")
-        .build();
+        return ErrorResponses.of(Response.Status.NOT_FOUND, "No se a encontrado el juego");
     }
       return Response.ok(categoriaJ).build();
 }

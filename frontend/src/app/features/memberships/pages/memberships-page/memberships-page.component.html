@@ -1,4 +1,4 @@
-<section class="memberships-page">
+<section>
 
     <div class="memberships-page__notification">
 
@@ -24,60 +24,25 @@
         [visible]="showModal"
         [mode]="modalMode"
         [member]="selectedMember"
-        [membershipOptions]="membershipOptions"
+        [socioOptions]="socioOptions"
+        [planes]="planes"
         [saving]="saving"
         (save)="saveMember($event)"
         (close)="closeModal()"
     />
 
     @if (memberToDelete) {
-
-        <div
-            class="memberships-page__backdrop"
-            (click)="cancelDelete()"
-        >
-
-            <section
-                class="memberships-page__confirm"
-                role="alertdialog"
-                aria-modal="true"
-                aria-labelledby="delete-membership-title"
-                (click)="$event.stopPropagation()"
-            >
-
-                <h3 id="delete-membership-title">
-                    Eliminar membresía
-                </h3>
-
-                <p>
-                    ¿Estás seguro de eliminar la membresía de
-                    <strong>{{ memberToDelete.nombre }}</strong>?
-                </p>
-
-                <div class="memberships-page__confirm-actions">
-
-                    <button
-                        type="button"
-                        class="memberships-page__cancel"
-                        (click)="cancelDelete()"
-                    >
-                        Cancelar
-                    </button>
-
-                    <button
-                        type="button"
-                        class="memberships-page__delete"
-                        (click)="confirmDelete()"
-                    >
-                        Eliminar
-                    </button>
-
+        <div class="cl-modal-overlay" (click)="cancelDelete()">
+            <section class="cl-card cl-modal" role="alertdialog" aria-modal="true" (click)="$event.stopPropagation()">
+                <h2 class="cl-card__title">Eliminar membresía</h2>
+                <p>¿Deseas eliminar la membresía #{{ memberToDelete.identificador }} de
+                    <strong>{{ memberToDelete.nombre }}</strong>?</p>
+                <div class="cl-form-actions">
+                    <button class="btn btn--ghost" type="button" (click)="cancelDelete()">Cancelar</button>
+                    <button class="btn btn--danger" type="button" (click)="confirmDelete()">Eliminar</button>
                 </div>
-
             </section>
-
         </div>
-
     }
 
 </section>

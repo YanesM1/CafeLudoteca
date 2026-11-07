@@ -43,7 +43,7 @@
     padding: 22px;
 
     background: var(--cl-surface);
-    border: 1px solid var(--cl-border-cyan);
+    border: 1px solid var(--cl-border);
     border-radius: var(--cl-radius-lg);
 }
 
@@ -396,4 +396,72 @@
     .reservation-form__summary {
         justify-content: flex-start;
     }
+}
+
+.reservation-form__error {
+    margin: 0 0 16px;
+    padding: 12px 16px;
+    border: 1px solid #a32154;
+    border-radius: 10px;
+    background: rgba(163, 33, 84, 0.15);
+    color: #ff9fb6;
+}
+
+.reservation-game__select {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.reservation-game__select input {
+    width: 18px;
+    height: 18px;
+    accent-color: #d3b354;
+}
+
+/* Juegos elegidos para la reserva */
+.reservation-picked {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.reservation-picked__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--cl-surface-secondary);
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius-md);
+}
+
+.reservation-picked__item strong {
+    display: block;
+    color: var(--cl-text);
+}
+
+.reservation-picked__item span {
+    color: var(--cl-text-muted);
+    font-size: var(--cl-text-xs);
+}
+
+.reservation-picked__empty {
+    padding: 16px;
+    color: var(--cl-text-muted);
+    font-size: var(--cl-text-sm);
+    text-align: center;
+    border: 1px dashed var(--cl-border);
+    border-radius: var(--cl-radius-md);
+}
+
+.reservation-picked__label {
+    color: var(--cl-text-secondary);
+    font-size: var(--cl-text-sm);
+    font-weight: 600;
 }

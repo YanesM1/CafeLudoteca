@@ -41,6 +41,51 @@ public class ReservaRepositoryJDBC implements IReservaRepository {
         }
     }
 
+    // ¿La mesa ya tiene una reserva en esa fecha y hora? (supuesto 5)
+    private boolean mesaOcupada(Connection c, int idMesa, java.time.LocalDate fecha,
+                                String horario, Integer excluirId) throws SQLException {
+        String sql = "SELECT 1 FROM RESERVA WHERE id_mesa=? AND fecha=? "
+                + "AND TIME(horario)=TIME(?)"
+                + (excluirId != null ? " AND id_reserva<>?" : "")
+                + " LIMIT 1";
+        try (PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, idMesa);
+            ps.setDate(2, java.sql.Date.valueOf(fecha));
+            ps.setString(3, horario);
+            if (excluirId != null) ps.setInt(4, excluirId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    private void validarMesaLibre(Connection c, Reserva r, Integer excluirId) throws SQLException {
+        if (mesaOcupada(c, Integer.parseInt(r.getIdMesa()), r.getFecha(), r.getHorario(), excluirId)) {
+            throw co.edu.unbosque.exceptions.BusinessException.conflict(
+                    "La mesa ya está reservada en esa fecha y hora.");
+        }
+    }
+
+    // Juegos preseleccionados de una reserva (RESERVA_JUEGO)
+    private List<String> juegosDe(Connection c, int idReserva) throws SQLException {
+        List<String> juegos = new ArrayList<>();
+        try (PreparedStatement ps = c.prepareStatement(
+                "SELECT num_serie FROM RESERVA_JUEGO WHERE id_reserva=?")) {
+            ps.setInt(1, idReserva);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) juegos.add(rs.getString(1));
+            }
+        }
+        return juegos;
+    }
+
+    private List<Reserva> conJuegos(Connection c, List<Reserva> reservas) throws SQLException {
+        for (Reserva r : reservas) {
+            r.setJuegos(juegosDe(c, Integer.parseInt(r.getIdReserva())));
+        }
+        return reservas;
+    }
+
     private void guardarJuegos(
             Connection c, int id, String documento,
             List<String> juegos) throws SQLException {
@@ -50,7 +95,7 @@ public class ReservaRepositoryJDBC implements IReservaRepository {
 
         String sql = """
             INSERT INTO RESERVA_JUEGO
-            (JUEGO_MESA_num_serie, RESERVA_id_reserva, RESERVA_documento)
+            (num_serie, id_reserva, documento_cliente)
             VALUES (?, ?, ?)
             """;
 
@@ -75,8 +120,8 @@ public class ReservaRepositoryJDBC implements IReservaRepository {
 
         String sql = """
             DELETE FROM RESERVA_JUEGO
-            WHERE RESERVA_id_reserva=?
-            AND RESERVA_documento=?
+            WHERE id_reserva=?
+            AND documento_cliente=?
             """;
 
         try (PreparedStatement ps = c.prepareStatement(sql)) {
@@ -90,7 +135,7 @@ public class ReservaRepositoryJDBC implements IReservaRepository {
             throws SQLException {
 
         try (PreparedStatement ps = c.prepareStatement(
-                "SELECT CLIENTE_documento FROM RESERVA " +
+                "SELECT documento_cliente FROM RESERVA " +
                 "WHERE id_reserva=? LIMIT 1 FOR UPDATE")) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
@@ -116,12 +161,13 @@ public class ReservaRepositoryJDBC implements IReservaRepository {
                 c.setAutoCommit(false);
 
                 try {
+                    validarMesaLibre(c, r, null);
                     int id = siguienteId(c);
 
                     String sql = """
                         INSERT INTO RESERVA
-                        (id_reserva, fecha, horario, MESA_id_mesa,
-                         CLIENTE_documento)
+                        (id_reserva, fecha, horario, id_mesa,
+                         documento_cliente)
                         VALUES (?, ?, ?, ?, ?)
                         """;
 
@@ -163,9 +209,9 @@ public class ReservaRepositoryJDBC implements IReservaRepository {
 
         String sql = """
             SELECT id_reserva, fecha, horario,
-                   CLIENTE_documento, MESA_id_mesa
+                   documento_cliente, id_mesa
             FROM RESERVA
-            WHERE CLIENTE_documento=?
+            WHERE documento_cliente=?
             ORDER BY fecha DESC, id_reserva DESC
             """;
 
@@ -176,10 +222,30 @@ public class ReservaRepositoryJDBC implements IReservaRepository {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) lista.add(mapear(rs));
             }
-            return lista;
+            return conJuegos(c, lista);
 
         } catch (SQLException e) {
             throw new PersistenceException("Error al consultar reservas.", e);
+        }
+    }
+
+    // LISTAR TODAS LAS RESERVAS (opcionalmente de una fecha)
+    @Override
+    public List<Reserva> findAll(java.time.LocalDate fecha) {
+        List<Reserva> lista = new ArrayList<>();
+        String sql = "SELECT id_reserva, fecha, horario, documento_cliente, id_mesa "
+                + "FROM RESERVA"
+                + (fecha != null ? " WHERE fecha=?" : "")
+                + " ORDER BY fecha DESC, horario, id_reserva DESC";
+        try (Connection c = ConnectionBD.obtenerConexion();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            if (fecha != null) ps.setDate(1, java.sql.Date.valueOf(fecha));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) lista.add(mapear(rs));
+            }
+            return conJuegos(c, lista);
+        } catch (SQLException e) {
+            throw new PersistenceException("Error al listar reservas.", e);
         }
     }
 
@@ -190,10 +256,10 @@ public class ReservaRepositoryJDBC implements IReservaRepository {
 
             String sql = """
                 SELECT id_reserva, fecha, horario,
-                       CLIENTE_documento, MESA_id_mesa
+                       documento_cliente, id_mesa
                 FROM RESERVA
                 WHERE id_reserva=?
-                ORDER BY CLIENTE_documento
+                ORDER BY documento_cliente
                 LIMIT 1
                 """;
 
@@ -201,11 +267,13 @@ public class ReservaRepositoryJDBC implements IReservaRepository {
                  PreparedStatement ps = c.prepareStatement(sql)) {
                 ps.setInt(1, numero);
 
+                Reserva reserva = null;
                 try (ResultSet rs = ps.executeQuery()) {
-                    return rs.next()
-                        ? Optional.of(mapear(rs))
-                        : Optional.empty();
+                    if (rs.next()) reserva = mapear(rs);
                 }
+                if (reserva == null) return Optional.empty();
+                reserva.setJuegos(juegosDe(c, numero));
+                return Optional.of(reserva);
             }
         } catch (NumberFormatException e) {
             return Optional.empty();
@@ -230,10 +298,11 @@ public class ReservaRepositoryJDBC implements IReservaRepository {
                     return false;
                 }
 
+                validarMesaLibre(c, r, numero);
                 String sql = """
                     UPDATE RESERVA
-                    SET fecha=?, horario=?, MESA_id_mesa=?
-                    WHERE id_reserva=? AND CLIENTE_documento=?
+                    SET fecha=?, horario=?, id_mesa=?
+                    WHERE id_reserva=? AND documento_cliente=?
                     """;
 
                 try (PreparedStatement ps = c.prepareStatement(sql)) {
@@ -281,7 +350,7 @@ public class ReservaRepositoryJDBC implements IReservaRepository {
 
                 try (PreparedStatement ps = c.prepareStatement(
                     "DELETE FROM RESERVA WHERE id_reserva=? " +
-                    "AND CLIENTE_documento=?")) {
+                    "AND documento_cliente=?")) {
                     ps.setInt(1, numero);
                     ps.setString(2, documento);
 
@@ -312,8 +381,8 @@ public class ReservaRepositoryJDBC implements IReservaRepository {
         r.setFecha(fecha == null ? null : fecha.toLocalDate());
 
         r.setHorario(rs.getString("horario"));
-        r.setDocumento(rs.getString("CLIENTE_documento"));
-        r.setIdMesa(String.valueOf(rs.getInt("MESA_id_mesa")));
+        r.setDocumento(rs.getString("documento_cliente"));
+        r.setIdMesa(String.valueOf(rs.getInt("id_mesa")));
         return r;
     }
 }

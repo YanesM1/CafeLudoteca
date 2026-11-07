@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import co.edu.unbosque.exceptions.BusinessException;
+import co.edu.unbosque.repository.implementations.ClienteRepositoryJDBC;
+import co.edu.unbosque.repository.interfaces.IClienteRepository;
 import co.edu.unbosque.mapper.TelefonoMapper;
 import co.edu.unbosque.model.dto.TelefonoRequestDTO;
 import co.edu.unbosque.model.dto.TelefonoResponseDTO;
@@ -19,16 +22,36 @@ public class TelefonoService implements ITelefonoService {
 
     private final TelefonoMapper telefonoMapper = new TelefonoMapper();
 
+    private final IClienteRepository clientes = new ClienteRepositoryJDBC();
+
+    /** Solo dígitos, entre 7 y 15 (la columna admite 15 caracteres). */
+    private String numeroValido(String telefono) {
+        String limpio = telefono == null ? "" : telefono.replaceAll("[\\s-]", "");
+        if (!limpio.matches("\\d{7,15}")) {
+            throw BusinessException.badRequest("El teléfono debe tener entre 7 y 15 dígitos.");
+        }
+        return limpio;
+    }
+
     @Override
     public TelefonoResponseDTO addTelefono(TelefonoRequestDTO request) {
-        if (request == null) {
-            return null;
+        if (request == null || request.getDocumento() == null || request.getDocumento().isBlank()) {
+            throw BusinessException.badRequest("Selecciona el cliente.");
+        }
+        String documento = request.getDocumento().trim();
+        request.setDocumento(documento);
+        request.setTelefono(numeroValido(request.getTelefono()));
+        if (clientes.findByDocumento(documento).isEmpty()) {
+            throw BusinessException.notFound("El cliente " + documento + " no está registrado.");
+        }
+        if (telefonoRepository.findByDocumentoAndNumero(documento, request.getTelefono()).isPresent()) {
+            throw BusinessException.conflict("Ese teléfono ya está registrado para el cliente.");
         }
 
         Telefono telefono = telefonoMapper.telefonoRequestDTOToTelefono(request);
 
         if (!telefonoRepository.saveTelefono(telefono)) {
-            return null;
+            throw BusinessException.badRequest("No fue posible registrar el teléfono.");
         }
 
         return telefonoMapper.telefonoToResponseDTO(telefono);
@@ -66,6 +89,8 @@ public class TelefonoService implements ITelefonoService {
         if (documento == null || numeroActual == null || request == null) {
             return null;
         }
+        request.setDocumento(documento);
+        request.setTelefono(numeroValido(request.getTelefono()));
 
         Telefono telefono = telefonoMapper.telefonoRequestDTOToTelefono(request);
 
