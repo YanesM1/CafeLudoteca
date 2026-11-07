@@ -12,6 +12,8 @@ public interface IReservaRepository {
 
     List<Reserva> findByDocumento(String documento);
 
+    List<Reserva> findAll(java.time.LocalDate fecha);
+
     Optional<Reserva> findByIdReserva(String idReserva);
 
     boolean updateReserva(String idReserva, Reserva reserva, List<String> juegos);

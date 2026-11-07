@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { forkJoin } from 'rxjs';
 
 import {
   MembershipTableComponent,
@@ -16,9 +15,15 @@ import {
   NotificationType
 } from '../../../../shared/molecules/notification-toast/notification-toast.component';
 
-import { SelectOption } from '../../../../shared/atoms/select/select.component';
-import { Membresia, MembresiaService } from '../../../../core/services/membresia.service';
+import { Membresia, MembresiaService, PlanMembresia } from '../../../../core/services/membresia.service';
+import { SocioService, Socio } from '../../../../core/services/socio.service';
+import { Opcion } from '../../../../core/services/opciones.service';
 
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { ClienteService } from '../../../../core/services/cliente.service';
+import { ClienteResponse } from '../../../../core/models/cliente.model';
+import { mensajeError } from '../../../../core/utils/http-error';
 @Component({
   selector: 'app-memberships-page',
   standalone: true,
@@ -33,7 +38,8 @@ import { Membresia, MembresiaService } from '../../../../core/services/membresia
 export class MembershipsPageComponent implements OnInit {
 
   members: MembershipTableRow[] = [];
-  membershipOptions: SelectOption[] = [];
+  socioOptions: Opcion[] = [];
+  planes: PlanMembresia[] = [];
 
   loading = false;
   saving = false;
@@ -50,7 +56,14 @@ export class MembershipsPageComponent implements OnInit {
   notificationTitle = '';
   notificationMessage = '';
 
-  constructor(private readonly service: MembresiaService) {}
+  /** Documento -> nombre del cliente. */
+  private nombres: Record<string, string> = {};
+
+  constructor(
+    private readonly service: MembresiaService,
+    private readonly clientes: ClienteService,
+    private readonly socios: SocioService
+  ) {}
 
   ngOnInit(): void {
     this.loadMembers();
@@ -69,7 +82,7 @@ export class MembershipsPageComponent implements OnInit {
     return {
       identificador: String(m.idMembresia),
       documento: m.documento,
-      nombre: `Socio ${m.documento}`,
+      nombre: this.nombres[m.documento] || `Socio ${m.documento}`,
       plan: m.plan,
       tarifa: String(m.tarifa),
       fechaInicio: this.normalizeDate(m.fechaInicio),
@@ -82,15 +95,25 @@ export class MembershipsPageComponent implements OnInit {
     this.loading = true;
     this.errorMessage = '';
 
-    this.service.listar().subscribe({
-      next: data => {
+    forkJoin({
+      // Si falla la lectura de membresías, igual se cargan socios y planes para el formulario
+      membresias: this.service.listar().pipe(catchError(error => {
+        this.showNotification('error', 'No se pudieron cargar las membresías',
+          this.errorText(error, 'Error al consultar las membresías.'));
+        return of([] as Membresia[]);
+      })),
+      clientes: this.clientes.listar().pipe(catchError(() => of([] as ClienteResponse[]))),
+      socios: this.socios.listar().pipe(catchError(() => of([] as Socio[]))),
+      planes: this.service.planes().pipe(catchError(() => of([] as PlanMembresia[])))
+    }).subscribe({
+      next: ({ membresias: data, clientes, socios, planes }) => {
+        clientes.forEach(c => this.nombres[c.documentoCliente] =
+          [c.primerNombre, c.primerApellido].filter(Boolean).join(' '));
         this.members = data.map(m => this.toRow(m));
-
-        const plans = [...new Set(data.map(m => m.plan).filter(Boolean))];
-        this.membershipOptions = plans.map(plan => ({
-          value: plan,
-          label: plan
-        }));
+        this.planes = planes;
+        this.socioOptions = socios
+          .map(s => ({ value: s.documento, label: `${this.nombres[s.documento] || 'Socio'} · ${s.documento}` }))
+          .sort((a, b) => a.label.localeCompare(b.label));
 
         this.loading = false;
       },
@@ -118,7 +141,8 @@ export class MembershipsPageComponent implements OnInit {
 
   saveMember(member: MembershipTableRow): void {
     const request: Membresia = {
-      idMembresia: Number(member.identificador),
+      // Al crear, el backend asigna el número de membresía
+      idMembresia: Number(member.identificador) || 0,
       documento: member.documento.trim(),
       plan: member.plan,
       estado: member.estado,
@@ -126,12 +150,6 @@ export class MembershipsPageComponent implements OnInit {
       fechaFin: member.fechaFin,
       tarifa: Number(member.tarifa)
     };
-
-    if (!Number.isInteger(request.idMembresia) || request.idMembresia <= 0) {
-      this.showNotification('error', 'Identificador inválido',
-        'El ID de membresía debe ser un número entero positivo.');
-      return;
-    }
 
     if (!request.documento || !request.plan ||
         !request.fechaInicio || !request.fechaFin ||
@@ -161,7 +179,8 @@ export class MembershipsPageComponent implements OnInit {
         this.showNotification(
           'success',
           editing ? 'Membresía actualizada' : 'Membresía registrada',
-          'La operación se guardó correctamente.'
+          editing ? 'Los cambios se guardaron correctamente.'
+                  : 'El número de membresía y la tarifa se asignaron automáticamente.'
         );
         this.loadMembers();
       },
@@ -221,7 +240,6 @@ export class MembershipsPageComponent implements OnInit {
   }
 
   private errorText(error: HttpErrorResponse, fallback: string): string {
-    if (typeof error.error === 'string') return error.error;
-    return error.error?.mensaje || error.message || fallback;
+    return mensajeError(error, fallback);
   }
 }

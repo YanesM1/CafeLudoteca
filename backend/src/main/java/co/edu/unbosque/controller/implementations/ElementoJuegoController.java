@@ -1,6 +1,8 @@
 
 package co.edu.unbosque.controller.implementations;
 
+import co.edu.unbosque.config.ErrorResponses;
+
 import co.edu.unbosque.controller.interfaces.IElementoJuegoController;
 import co.edu.unbosque.model.dto.ElementoJuegoRequestDTO;
 import co.edu.unbosque.model.dto.ElementoJuegoResponseDTO;
@@ -15,6 +17,7 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -33,9 +36,7 @@ public class ElementoJuegoController implements IElementoJuegoController {
                 elementoJuegoService.addElementoJuego(request);
 
         if (elementoJuego == null) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("No se pudo registrar el elemento de juego")
-                    .build();
+            return ErrorResponses.of(Response.Status.BAD_REQUEST, "No se pudo registrar el elemento de juego");
         }
 
         return Response.status(Response.Status.CREATED)
@@ -53,9 +54,7 @@ public class ElementoJuegoController implements IElementoJuegoController {
                 elementoJuegoService.getPorIdElementoJuego(idElementoJuego);
 
         if (elementoJuego == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("No se ha encontrado el elemento de juego")
-                    .build();
+            return ErrorResponses.of(Response.Status.NOT_FOUND, "No se ha encontrado el elemento de juego");
         }
 
         return Response.ok(elementoJuego).build();
@@ -72,9 +71,7 @@ public class ElementoJuegoController implements IElementoJuegoController {
                 elementoJuegoService.updateElementoJuego(idElementoJuego, request);
 
         if (elementoJuego == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("No se ha encontrado el elemento de juego que desea actualizar")
-                    .build();
+            return ErrorResponses.of(Response.Status.NOT_FOUND, "No se ha encontrado el elemento de juego que desea actualizar");
         }
 
         return Response.ok(elementoJuego).build();
@@ -90,11 +87,15 @@ public class ElementoJuegoController implements IElementoJuegoController {
                 elementoJuegoService.deleteElementoJuego(idElementoJuego);
 
         if (elementoJuego == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("No se ha encontrado el elemento de juego")
-                    .build();
+            return ErrorResponses.of(Response.Status.NOT_FOUND, "No se ha encontrado el elemento de juego");
         }
 
         return Response.ok(elementoJuego).build();
+    }
+
+    // LISTAR ELEMENTOS (opcionalmente los de un juego con ?numSerie=)
+    @GET
+    public Response listarElementos(@QueryParam("numSerie") String numSerie) {
+        return Response.ok(elementoJuegoService.listar(numSerie)).build();
     }
 }

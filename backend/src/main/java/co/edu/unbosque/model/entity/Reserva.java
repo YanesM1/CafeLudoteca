@@ -20,6 +20,7 @@ public class Reserva {
     private String horario;
     private String documento; // FK -> Cliente.documento
     private String idMesa; // FK -> Mesa.idMesa
+    private java.util.List<String> juegos = new java.util.ArrayList<>(); // RESERVA_JUEGO
 
     // La igualdad se basa en la llave primaria (idReserva)
     @Override

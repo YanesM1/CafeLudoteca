@@ -11,6 +11,8 @@ public interface ISocioService {
 
    List<SocioResponseDTO> getSociosPorFechaAfiliacion(LocalDate fechaAfiliacion);
 
+   List<SocioResponseDTO> getTodos();
+
    SocioResponseDTO getSocioPorDocumento(String documento);
 
    SocioResponseDTO updateSocio(String documento, SocioRequestDTO request);

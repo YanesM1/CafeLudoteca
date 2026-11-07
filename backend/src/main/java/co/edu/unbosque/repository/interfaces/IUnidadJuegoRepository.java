@@ -12,4 +12,5 @@ public interface IUnidadJuegoRepository{
 
     List<DisponibilidadUnidadJuegoDTO> consultarDisponibilidad();
     List<UnidadJuego> findDisponibles();
+    List<UnidadJuego> findAll(String numSerie);
 }

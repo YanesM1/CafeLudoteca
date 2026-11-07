@@ -11,7 +11,7 @@ import co.edu.unbosque.repository.interfaces.IMembresiaRepository;
 public class MembresiaRepositoryJDBC implements IMembresiaRepository {
 
     private static final String COLUMNS =
-        "id_membresia, plan, estado, fecha_inicio, fecha_fin, SOCIO_documento, tarifa";
+        "id_membresia, plan, estado, fecha_inicio, fecha_fin, documento_cliente, tarifa";
 
     @Override
     public boolean saveMembresia(Membresia m) {
@@ -34,7 +34,7 @@ public class MembresiaRepositoryJDBC implements IMembresiaRepository {
 
     @Override
     public List<Membresia> findAll() {
-        return consultar("SELECT " + COLUMNS + " FROM MEMBRESIA", null);
+        return consultar("SELECT " + COLUMNS + " FROM MEMBRESIA ORDER BY id_membresia DESC", null);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class MembresiaRepositoryJDBC implements IMembresiaRepository {
 
     @Override
     public List<Membresia> findByDocumento(String documento) {
-        return consultar("SELECT " + COLUMNS + " FROM MEMBRESIA WHERE SOCIO_documento = ?", documento);
+        return consultar("SELECT " + COLUMNS + " FROM MEMBRESIA WHERE documento_cliente = ?", documento);
     }
 
     private List<Membresia> consultar(String sql, String parametro) {
@@ -64,7 +64,7 @@ public class MembresiaRepositoryJDBC implements IMembresiaRepository {
     @Override
     public Optional<Membresia> findByIdMembresia(int id, String documento) {
         String sql = "SELECT " + COLUMNS +
-            " FROM MEMBRESIA WHERE id_membresia = ? AND SOCIO_documento = ?";
+            " FROM MEMBRESIA WHERE id_membresia = ? AND documento_cliente = ?";
         try (Connection c = ConnectionBD.obtenerConexion();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -80,7 +80,7 @@ public class MembresiaRepositoryJDBC implements IMembresiaRepository {
     @Override
     public boolean updateMembresia(int id, String documento, Membresia m) {
         String sql = "UPDATE MEMBRESIA SET plan=?, estado=?, fecha_inicio=?, " +
-            "fecha_fin=?, tarifa=? WHERE id_membresia=? AND SOCIO_documento=?";
+            "fecha_fin=?, tarifa=? WHERE id_membresia=? AND documento_cliente=?";
         try (Connection c = ConnectionBD.obtenerConexion();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, m.getPlan());
@@ -99,7 +99,7 @@ public class MembresiaRepositoryJDBC implements IMembresiaRepository {
 
     @Override
     public boolean deleteMembresia(int id, String documento) {
-        String sql = "DELETE FROM MEMBRESIA WHERE id_membresia=? AND SOCIO_documento=?";
+        String sql = "DELETE FROM MEMBRESIA WHERE id_membresia=? AND documento_cliente=?";
         try (Connection c = ConnectionBD.obtenerConexion();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -107,6 +107,47 @@ public class MembresiaRepositoryJDBC implements IMembresiaRepository {
             return ps.executeUpdate() == 1;
         } catch (SQLException e) {
             throw new PersistenceException("Error al eliminar membresía", e);
+        }
+    }
+
+    @Override
+    public int siguienteId() {
+        try (Connection c = ConnectionBD.obtenerConexion();
+             PreparedStatement ps = c.prepareStatement(
+                 "SELECT COALESCE(MAX(id_membresia), 0) + 1 FROM MEMBRESIA");
+             ResultSet rs = ps.executeQuery()) {
+            rs.next();
+            return rs.getInt(1);
+        } catch (SQLException e) {
+            throw new PersistenceException("Error al calcular el número de membresía", e);
+        }
+    }
+
+    @Override
+    public int vencerMembresias() {
+        String sql = "UPDATE MEMBRESIA SET estado = 'Vencida' "
+            + "WHERE estado = 'Activa' AND fecha_fin IS NOT NULL AND fecha_fin < CURDATE()";
+        try (Connection c = ConnectionBD.obtenerConexion();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            return ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new PersistenceException("Error al actualizar membresías vencidas", e);
+        }
+    }
+
+    @Override
+    public boolean tieneOtraActiva(String documento, int excluirId) {
+        String sql = "SELECT 1 FROM MEMBRESIA WHERE documento_cliente = ? AND estado = 'Activa' "
+            + "AND (fecha_fin IS NULL OR fecha_fin >= CURDATE()) AND id_membresia <> ? LIMIT 1";
+        try (Connection c = ConnectionBD.obtenerConexion();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, documento);
+            ps.setInt(2, excluirId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            throw new PersistenceException("Error al validar membresías activas", e);
         }
     }
 
@@ -119,7 +160,7 @@ public class MembresiaRepositoryJDBC implements IMembresiaRepository {
         java.sql.Date fin = rs.getDate("fecha_fin");
         m.setFechaInicio(inicio == null ? null : inicio.toLocalDate());
         m.setFechaFin(fin == null ? null : fin.toLocalDate());
-        m.setDocumento(rs.getString("SOCIO_documento"));
+        m.setDocumento(rs.getString("documento_cliente"));
         m.setTarifa(rs.getDouble("tarifa"));
         return m;
     }

@@ -68,13 +68,8 @@ public class ReservaController implements IReservaController {
 
     // MANEJAR ERRORES DE PERSISTENCIA
     private Response errorPersistencia(PersistenceException e) {
-
-        LOGGER.log(Level.SEVERE,
-                "Error de persistencia en el módulo de reservas", e);
-
-        return respuestaError(
-                Response.Status.INTERNAL_SERVER_ERROR,
-                "Ocurrió un error al acceder a la base de datos.");
+        // Delegar al manejador global: distingue duplicados (409) de fallos (500).
+        return new co.edu.unbosque.config.GlobalExceptionMapper().toResponse(e);
     }
 
     // REGISTRAR RESERVA
@@ -82,7 +77,7 @@ public class ReservaController implements IReservaController {
     @POST
     public Response crearReserva(ReservaRequestDTO request) {
 
-        if (!validarReserva(request, false)) {
+        if (request == null) {
             return respuestaError(
                     Response.Status.BAD_REQUEST,
                     "Los datos de la reserva son incompletos o inválidos.");
@@ -108,6 +103,21 @@ public class ReservaController implements IReservaController {
     }
 
     // CONSULTAR RESERVAS POR DOCUMENTO DEL CLIENTE
+    // LISTAR TODAS LAS RESERVAS (opcionalmente de una fecha: ?fecha=yyyy-MM-dd)
+    @GET
+    public Response listarReservas(@QueryParam("fecha") String fecha) {
+        java.time.LocalDate dia = null;
+        if (fecha != null && !fecha.isBlank()) {
+            try {
+                dia = java.time.LocalDate.parse(fecha.trim());
+            } catch (java.time.format.DateTimeParseException e) {
+                return respuestaError(Response.Status.BAD_REQUEST,
+                        "La fecha debe tener el formato yyyy-MM-dd.");
+            }
+        }
+        return Response.ok(reservaService.getTodas(dia)).build();
+    }
+
     @Override
     @GET
     @Path("/buscar")
@@ -169,8 +179,7 @@ public class ReservaController implements IReservaController {
             @PathParam("idReserva") String idReserva,
             ReservaRequestDTO request) {
 
-        if (idReserva == null || idReserva.isBlank()
-                || !validarReserva(request, false)) {
+        if (idReserva == null || idReserva.isBlank() || request == null) {
 
             return respuestaError(
                     Response.Status.BAD_REQUEST,

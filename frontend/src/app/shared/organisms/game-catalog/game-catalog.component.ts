@@ -38,6 +38,7 @@ export interface GameCatalogItem extends GameDetailsData {}
 })
 export class GameCatalogComponent {
 
+    @Input() eyebrow = 'Cliente · Catálogo';
     @Input() games: GameCatalogItem[] = [];
     @Input() loading = false;
     @Input() errorMessage = '';
@@ -62,7 +63,9 @@ export class GameCatalogComponent {
         const categories = [
             ...new Set(
                 this.games
-                    .map(game => game.categoria ?? '')
+                    // Un juego puede tener varias categorías: "Estrategia, Familiar"
+                    .flatMap(game => (game.categoria ?? '').split(','))
+                    .map(category => category.trim())
                     .filter(category => category.trim() !== '')
             )
         ].sort();
@@ -113,7 +116,8 @@ export class GameCatalogComponent {
 
             const matchesCategory =
                 !this.filterValues['categoria'] ||
-                category === this.filterValues['categoria'];
+                category.split(',').map(c => c.trim())
+                    .includes(this.filterValues['categoria']);
 
             const players = Number(this.filterValues['jugadores']);
 

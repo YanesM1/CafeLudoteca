@@ -37,9 +37,22 @@ public class BeneficioRepositoryJDBC implements IBeneficioRepository {
     }
 
     @Override
+    public int siguienteId() {
+        try (Connection c = ConnectionBD.obtenerConexion();
+             PreparedStatement ps = c.prepareStatement(
+                 "SELECT COALESCE(MAX(id_beneficio), 0) + 1 FROM BENEFICIO");
+             ResultSet rs = ps.executeQuery()) {
+            rs.next();
+            return rs.getInt(1);
+        } catch (SQLException e) {
+            throw new PersistenceException("Error al calcular el número de beneficio", e);
+        }
+    }
+
+    @Override
     public List<Beneficio> findAll() {
         List<Beneficio> lista = new ArrayList<>();
-        String sql = "SELECT " + COLUMNAS + " FROM BENEFICIO";
+        String sql = "SELECT " + COLUMNAS + " FROM BENEFICIO ORDER BY MEMBRESIA_id_membresia DESC, id_beneficio";
 
         try (Connection c = ConnectionBD.obtenerConexion();
              PreparedStatement ps = c.prepareStatement(sql);

@@ -12,16 +12,48 @@
     min-width: 0;
 }
 
-.admin-layout__main {
-    flex: 1;
-    width: 100%;
-    min-width: 0;
+/* Pestañas de la sección activa */
+.admin-tabs {
+    background: var(--cl-bg-secondary);
+    border-bottom: 1px solid var(--cl-border);
 }
 
-.admin-layout__content {
-    width: 100%;
-    max-width: 1600px;
-    min-width: 0;
+.admin-tabs__inner {
+    display: flex;
+    gap: 4px;
+    width: min(100% - 48px, var(--cl-page-width));
     margin: 0 auto;
-    padding: 24px 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.admin-tabs__inner::-webkit-scrollbar {
+    display: none;
+}
+
+.admin-tabs__tab {
+    flex-shrink: 0;
+    padding: 14px 16px 12px;
+    border-bottom: 2px solid transparent;
+    color: var(--cl-text-secondary);
+    font-size: var(--cl-text-sm);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.admin-tabs__tab:hover {
+    color: var(--cl-text);
+}
+
+.admin-tabs__tab--active {
+    color: var(--cl-cyan);
+    border-bottom-color: var(--cl-cyan);
+}
+
+@media (max-width: 768px) {
+    .admin-tabs__inner {
+        width: calc(100% - 24px);
+    }
 }

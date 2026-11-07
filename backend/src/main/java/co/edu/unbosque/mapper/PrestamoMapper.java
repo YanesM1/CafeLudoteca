@@ -14,15 +14,22 @@ public class PrestamoMapper {
         p.setDocumentoEmp(dto.getDocumentoEmp());
         p.setCodigoUnidad(dto.getCodigoUnidad());
         p.setNumSerieUnidad(dto.getNumSerieUnidad());
+        if (dto.getUnidades() != null) p.setUnidades(new java.util.ArrayList<>(dto.getUnidades()));
         return p;
     }
 
     public PrestamoResponseDTO prestamoToPrestamoResponseDTO(Prestamo p) {
-        return new PrestamoResponseDTO(
-            p.getIdPrestamo(), p.getFechaSalida(),
-            p.getEstadoComponentes(), p.getTipoPrestamo(),
-            p.getFechaDevolucion(), p.getDocumentoCliente(),
-            p.getDocumentoEmp(), p.getCodigoUnidad(), p.getNumSerieUnidad()
-        );
+        PrestamoResponseDTO dto = new PrestamoResponseDTO();
+        dto.setIdPrestamo(p.getIdPrestamo());
+        dto.setFechaSalida(p.getFechaSalida());
+        dto.setEstadoComponentes(p.getEstadoComponentes());
+        dto.setTipoPrestamo(p.getTipoPrestamo());
+        dto.setFechaDevolucion(p.getFechaDevolucion());
+        dto.setDocumentoCliente(p.getDocumentoCliente());
+        dto.setDocumentoEmp(p.getDocumentoEmp());
+        dto.setCodigoUnidad(p.getCodigoUnidad());
+        dto.setNumSerieUnidad(p.getNumSerieUnidad());
+        if (p.getUnidades() != null) dto.setUnidades(new java.util.ArrayList<>(p.getUnidades()));
+        return dto;
     }
 }

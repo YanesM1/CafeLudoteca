@@ -1,206 +1,70 @@
 @if (visible) {
+    <div class="cl-modal-overlay" (click)="onClose()">
+        <section class="cl-card cl-modal" role="dialog" aria-modal="true"
+            aria-labelledby="membership-modal-title" (click)="$event.stopPropagation()">
 
-    <div
-        class="membership-modal__backdrop"
-        (click)="onClose()"
-    >
+            <h2 class="cl-card__title" id="membership-modal-title">
+                {{ mode === 'create' ? 'Nueva membresía' : 'Editar membresía #' + form.identificador }}
+            </h2>
 
-        <section
-            class="membership-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="membership-modal-title"
-            (click)="$event.stopPropagation()"
-        >
+            <form class="cl-form-grid" (ngSubmit)="onSave()">
+                <label class="cl-field cl-field--full">Socio *
+                    <select class="form-control" name="documento" [(ngModel)]="form.documento"
+                        required [disabled]="mode === 'edit'">
+                        <option value="" disabled>Selecciona un socio</option>
+                        @for (s of opcionesSocio; track s.value) {
+                            <option [value]="s.value">{{ s.label }}</option>
+                        }
+                    </select>
+                    @if (mode === 'create' && !socioOptions.length) {
+                        <span class="cl-field__hint">No hay socios registrados. Créalos en Clientes → Socios.</span>
+                    }
+                </label>
 
-            <header class="membership-modal__header">
-
-                <div>
-                    <span>GESTIÓN ADMINISTRATIVA</span>
-
-                    <h2 id="membership-modal-title">
-                        {{ mode === 'create'
-                            ? 'Registrar nuevo socio'
-                            : 'Editar socio y membresía' }}
-                    </h2>
+                <label class="cl-field">Plan *
+                    <select class="form-control" name="plan" [(ngModel)]="form.plan" required>
+                        <option value="" disabled>Selecciona un plan</option>
+                        @for (p of opcionesPlan; track p.plan) {
+                            <option [value]="p.plan">{{ p.plan }}</option>
+                        }
+                    </select>
+                </label>
+                <div class="cl-field">Tarifa mensual
+                    <span class="cl-readonly">{{ tarifaTexto }}</span>
                 </div>
 
-                <button
-                    type="button"
-                    class="membership-modal__close"
-                    aria-label="Cerrar ventana"
-                    (click)="onClose()"
-                >
-                    ×
-                </button>
+                <label class="cl-field">Fecha de inicio *
+                    <input class="form-control" type="date" name="fechaInicio" [(ngModel)]="form.fechaInicio" required>
+                </label>
+                <label class="cl-field">Duración *
+                    <select class="form-control" name="duracion" [(ngModel)]="duracion" required>
+                        @if (mode === 'edit') {
+                            <option [ngValue]="0">Mantener fecha de fin</option>
+                        }
+                        @for (d of duraciones; track d) {
+                            <option [ngValue]="d">{{ d }} {{ d === 1 ? 'mes' : 'meses' }}</option>
+                        }
+                    </select>
+                </label>
 
-            </header>
-
-            <div class="membership-modal__body">
-                <div class="membership-modal__field">
-                    <app-label text="ID de membresía" forId="membership-id" [required]="true" />
-                    <app-input inputId="membership-id" name="identificador"
-                        type="number" placeholder="ID único de membresía"
-                        [(value)]="form.identificador" [required]="true"
-                        [disabled]="mode === 'edit'" />
+                <div class="cl-field">Vence el
+                    <span class="cl-readonly">{{ fechaFinTexto }}</span>
                 </div>
+                <label class="cl-field">Estado *
+                    <select class="form-control" name="estado" [(ngModel)]="form.estado" required>
+                        @for (option of statusOptions; track option.value) {
+                            <option [value]="option.value">{{ option.label }}</option>
+                        }
+                    </select>
+                </label>
 
-
-                <div class="membership-modal__field">
-
-                    <app-label
-                        text="Nombre del socio"
-                        forId="member-name"
-                        [required]="true"
-                    />
-
-                    <app-input
-                        inputId="member-name"
-                        name="nombre"
-                        placeholder="Nombre completo"
-                        [(value)]="form.nombre"
-                        [required]="true"
-                    />
-
+                <div class="cl-form-actions">
+                    <button class="btn btn--ghost" type="button" [disabled]="saving" (click)="onClose()">Cancelar</button>
+                    <button class="btn btn--gold" type="submit" [disabled]="!canSave || saving">
+                        {{ saving ? 'Guardando...' : 'Guardar membresía' }}
+                    </button>
                 </div>
-
-                <div class="membership-modal__field">
-
-                    <app-label
-                        text="Documento"
-                        forId="member-document"
-                        [required]="true"
-                    />
-
-                    <app-input
-                        inputId="member-document"
-                        name="documento"
-                        placeholder="Número de documento"
-                        [(value)]="form.documento"
-                        [required]="true"
-                    />
-
-                </div>
-
-                <div class="membership-modal__field">
-
-                    <app-label
-                        text="Categoría de membresía"
-                        forId="member-plan"
-                        [required]="true"
-                    />
-
-                    <app-input
-                        inputId="member-plan"
-                        name="plan"
-                        placeholder="Nombre del plan"
-                        [(value)]="form.plan"
-                        [required]="true"
-                    />
-
-                </div>
-
-                <div class="membership-modal__field">
-
-                    <app-label
-                        text="Tarifa (COP)"
-                        forId="member-tariff"
-                        [required]="true"
-                    />
-
-                    <app-input
-                        inputId="member-tariff"
-                        name="tarifa"
-                        type="number"
-                        placeholder="Valor de la tarifa"
-                        [(value)]="form.tarifa"
-                        [min]="'1'"
-                        [required]="true"
-                    />
-
-                </div>
-
-                <div class="membership-modal__field">
-
-                    <app-label
-                        text="Fecha de inicio"
-                        forId="member-start"
-                        [required]="true"
-                    />
-
-                    <app-input
-                        inputId="member-start"
-                        name="fechaInicio"
-                        type="date"
-                        [(value)]="form.fechaInicio"
-                        [required]="true"
-                    />
-
-                </div>
-
-                <div class="membership-modal__field">
-
-                    <app-label
-                        text="Fecha de finalización"
-                        forId="member-end"
-                        [required]="true"
-                    />
-
-                    <app-input
-                        inputId="member-end"
-                        name="fechaFin"
-                        type="date"
-                        [(value)]="form.fechaFin"
-                        [required]="true"
-                    />
-
-                </div>
-
-                <div class="membership-modal__field">
-
-                    <app-label
-                        text="Estado de la membresía"
-                        forId="member-status"
-                        [required]="true"
-                    />
-
-                    <app-select
-                        inputId="member-status"
-                        name="estado"
-                        [options]="statusOptions"
-                        [(value)]="form.estado"
-                    />
-
-                </div>
-
-            </div>
-
-            <footer class="membership-modal__footer">
-
-                <app-button
-                    variant="danger"
-                    [disabled]="saving"
-                    (click)="onClose()"
-                >
-                    Cancelar
-                </app-button>
-
-                <app-button
-                    variant="gold"
-                    [disabled]="!canSave || saving"
-                    (click)="onSave()"
-                >
-                    {{ saving
-                        ? 'Guardando...'
-                        : mode === 'create'
-                            ? 'Registrar socio'
-                            : 'Guardar cambios' }}
-                </app-button>
-
-            </footer>
-
+            </form>
         </section>
-
     </div>
-
 }

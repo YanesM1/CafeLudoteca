@@ -115,130 +115,65 @@
 
     </section>
 
-    <section class="home-services">
+    <section class="home-info" aria-labelledby="home-info-title">
 
-        <div class="home-section-heading">
-            <span class="home-eyebrow">
-                DESCUBRE TODO LO QUE TENEMOS
-            </span>
-
-            <h2>
-                Tu experiencia comienza aquí
-            </h2>
-
+        <div class="home-info__about">
+            <span class="home-eyebrow">Sobre nosotros</span>
+            <h2 id="home-info-title">Café &amp; Ludoteca</h2>
             <p>
-                Explora nuestras opciones y prepara tu próxima visita.
+                Un local dedicado a los juegos de mesa en el centro de Bogotá.
+                Aquí puedes jugar en nuestras mesas temáticas o, si eres socio,
+                llevarte un juego a casa.
             </p>
+
+            <ul class="home-info__list">
+                <li>
+                    <span class="home-info__icon" aria-hidden="true">♟</span>
+                    <div>
+                        <strong>Juegos de mesa y expansiones</strong>
+                        <span>Consulta en el catálogo qué juegos están disponibles.</span>
+                    </div>
+                </li>
+                <li>
+                    <span class="home-info__icon" aria-hidden="true">◷</span>
+                    <div>
+                        <strong>Mesas temáticas con reserva</strong>
+                        <span>Reserva por fecha y hora, y deja listos tus juegos.</span>
+                    </div>
+                </li>
+                <li>
+                    <span class="home-info__icon" aria-hidden="true">✦</span>
+                    <div>
+                        <strong>Membresía de socios</strong>
+                        <span>Los socios con membresía activa pueden pedir préstamos a domicilio.</span>
+                    </div>
+                </li>
+            </ul>
         </div>
 
-        <div class="home-services__grid">
-
-            <article class="home-service-card">
-
-                <div class="home-service-card__icon">
-                    ♟
+        <aside class="home-info__card" aria-label="Información de contacto">
+            <h3>Visítanos</h3>
+            <dl>
+                <div>
+                    <dt>Ubicación</dt>
+                    <dd>Centro de Bogotá</dd>
                 </div>
-
-                <span class="home-service-card__number">01</span>
-
-                <h3>Explora el catálogo</h3>
-
-                <p>
-                    Conoce los juegos disponibles, descubre sus características
-                    y encuentra el ideal para tu grupo.
-                </p>
-
-                <a routerLink="/catalogo">
-                    Ver juegos <span>→</span>
-                </a>
-
-            </article>
-
-            <article class="home-service-card home-service-card--featured">
-
-                <div class="home-service-card__icon">
-                    ◷
+                <div>
+                    <dt>Reservas</dt>
+                    <dd><a routerLink="/reservas">Desde la sección Reservas</a></dd>
                 </div>
-
-                <span class="home-service-card__number">02</span>
-
-                <h3>Reserva tu mesa</h3>
-
-                <p>
-                    Organiza tu visita, selecciona una mesa y prepara
-                    los juegos que quieres disfrutar.
-                </p>
-
-                <a routerLink="/reservas">
-                    Hacer una reserva <span>→</span>
-                </a>
-
-            </article>
-
-            <article class="home-service-card">
-
-                <div class="home-service-card__icon">
-                    ✧
+                <div>
+                    <dt>Préstamos</dt>
+                    <dd>En el local o a domicilio (solo socios)</dd>
                 </div>
-
-                <span class="home-service-card__number">03</span>
-
-                <h3>Comparte la experiencia</h3>
-
-                <p>
-                    Reúne a tus amigos, comparte una partida y crea
-                    nuevos recuerdos alrededor del juego.
-                </p>
-
-                <a routerLink="/catalogo">
-                    Comenzar ahora <span>→</span>
-                </a>
-
-            </article>
-
-        </div>
-
-    </section>
-
-    <section class="home-cta">
-
-        <div>
-            <span class="home-eyebrow">
-                TU PRÓXIMA PARTIDA TE ESPERA
-            </span>
-
-            <h2>
-                ¿Listo para jugar?
-            </h2>
-
-            <p>
-                Explora el catálogo y encuentra tu próxima experiencia
-                en Café & Ludoteca.
-            </p>
-        </div>
-
-        <a
-            routerLink="/catalogo"
-            class="home-button home-button--primary"
-        >
-            Comenzar experiencia
-            <span>→</span>
-        </a>
+            </dl>
+        </aside>
 
     </section>
 
     <footer class="home-footer">
-
-        <strong>Café & Ludoteca</strong>
-
-        <span>
-            Café · Juegos · Experiencias
-        </span>
-
-        <span>
-            Un espacio para compartir.
-        </span>
-
+        <strong>Café &amp; Ludoteca</strong>
+        <span>Café · Juegos · Experiencias</span>
     </footer>
 
 </main>

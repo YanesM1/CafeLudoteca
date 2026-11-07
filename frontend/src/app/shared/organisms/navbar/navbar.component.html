@@ -51,16 +51,8 @@
         </nav>
 
         <div class="navbar__actions">
-            @if (showRoleSwitch) {
-                <a class="navbar__role-switch"
-                   routerLink="/"
-                   (click)="closeMenu()">
-                    Cambiar de rol
-                </a>
-            }
 
             @if (showCartButton) {
-
                 <button
                     type="button"
                     class="navbar__action"
@@ -68,28 +60,26 @@
                 >
                     <span class="navbar__action-icon">🛒</span>
                     <span>Carrito</span>
-
                     @if (cartCount > 0) {
-                        <span class="navbar__cart-count">
-                            {{ cartCount }}
-                        </span>
+                        <span class="navbar__cart-count">{{ cartCount }}</span>
                     }
-
                 </button>
-
             }
 
-            @if (showUserButton) {
-
-                <button
-                    type="button"
-                    class="navbar__user"
-                    (click)="onUserClick()"
-                >
-                    <span class="navbar__user-icon">●</span>
-                    <span>{{ userLabel }}</span>
-                </button>
-
+            @if (showUserButton || showRoleSwitch) {
+                <div class="navbar__role">
+                    @if (showUserButton) {
+                        <span class="navbar__role-current" [attr.aria-label]="'Rol actual: ' + userLabel">
+                            <span class="navbar__role-dot" aria-hidden="true"></span>
+                            {{ userLabel }}
+                        </span>
+                    }
+                    @if (showRoleSwitch) {
+                        <a class="navbar__role-switch" routerLink="/" (click)="closeMenu()">
+                            Cambiar de rol
+                        </a>
+                    }
+                </div>
             }
 
         </div>

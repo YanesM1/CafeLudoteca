@@ -50,17 +50,15 @@ public class UnidadJuegoRepositoryJDBC implements IUnidadJuegoRepository {
                 PreparedStatement ps = conexion.prepareStatement(sql);) {
             ps.setString(1, codigo);
              ps.setString(2, numSerie);
-            ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-            UnidadJuego unidadJuego= new UnidadJuego();
-                unidadJuego.setCodigo(rs.getString("codigo"));
-                unidadJuego.setEstado(rs.getString("estado"));
-                unidadJuego.setObservaciones(rs.getString("observaciones"));
-                unidadJuego.setNumSerie(rs.getString("num_serie"));
-
-                return Optional.of(unidadJuego);
-
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    UnidadJuego unidadJuego = new UnidadJuego();
+                    unidadJuego.setCodigo(rs.getString("codigo"));
+                    unidadJuego.setEstado(rs.getString("estado"));
+                    unidadJuego.setObservaciones(rs.getString("observaciones"));
+                    unidadJuego.setNumSerie(rs.getString("num_serie"));
+                    return Optional.of(unidadJuego);
+                }
             }
 
         } catch (SQLException e) {
@@ -183,4 +181,31 @@ public class UnidadJuegoRepositoryJDBC implements IUnidadJuegoRepository {
         }
     }
 
+
+    // LISTAR UNIDADES (TODAS O LAS DE UN JUEGO)
+    @Override
+    public List<UnidadJuego> findAll(String numSerie) {
+        boolean filtrar = numSerie != null && !numSerie.isBlank();
+        String sql = "SELECT codigo,estado,observaciones,num_serie FROM UNIDAD_JUEGO"
+                + (filtrar ? " WHERE num_serie=?" : "")
+                + " ORDER BY num_serie,codigo";
+        List<UnidadJuego> lista = new ArrayList<>();
+        try (Connection c = ConnectionBD.obtenerConexion();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            if (filtrar) ps.setString(1, numSerie.trim());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    UnidadJuego u = new UnidadJuego();
+                    u.setCodigo(rs.getString("codigo"));
+                    u.setEstado(rs.getString("estado"));
+                    u.setObservaciones(rs.getString("observaciones"));
+                    u.setNumSerie(rs.getString("num_serie"));
+                    lista.add(u);
+                }
+            }
+            return lista;
+        } catch (SQLException e) {
+            throw new PersistenceException("Error al listar unidades", e);
+        }
+    }
 }

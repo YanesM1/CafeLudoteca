@@ -27,10 +27,10 @@ public class MesaService implements IMesaService {
             return false;
         }
 
-        if (validarId &&
-                (request.getIdMesa() == null ||
-                 request.getIdMesa().isBlank())) {
-            return false;
+        if (validarId) {
+            // Las reservas guardan el ID de la mesa como número.
+            co.edu.unbosque.services.Validaciones.numerico(
+                    request.getIdMesa(), "ID de mesa");
         }
 
         if (request.getCapacidad() <= 0) {

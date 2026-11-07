@@ -3,70 +3,45 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { JuegoMesaService } from '../../../../core/services/juego-mesa.service';
 import { JuegoMesaResponse } from '../../../../core/models/juego-mesa.model';
+import { UnidadJuegoService } from '../../../../core/services/unidad-juego.service';
+import { from } from 'rxjs';
+import { concatMap, toArray } from 'rxjs/operators';
 
+import { mensajeError } from '../../../../core/utils/http-error';
 @Component({
   selector: 'app-games-page',
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-  <main class="page">
-    <header>
+  <section class="cl-page">
+    <header class="cl-page-header">
       <div>
-        <span class="eyebrow">ADMINISTRACIÓN · INVENTARIO</span>
-        <h1>Juegos de mesa</h1>
-        <p>Registra y administra el catálogo de juegos.</p>
+        <span class="cl-eyebrow">Administración · Juegos</span>
+        <h1 class="cl-title">Juegos de mesa</h1>
+        <p class="cl-subtitle">Catálogo general de juegos. Cada copia física se registra en Unidades físicas.</p>
       </div>
-      <strong class="count">{{ juegos.length }} <small>juegos</small></strong>
+      <div class="cl-page-header__aside">
+        <span class="cl-count"><strong>{{ juegos.length }}</strong>registros</span>
+        <button class="btn btn--gold" type="button" (click)="nuevo()">+ Nuevo juego</button>
+      </div>
     </header>
 
-    <section class="panel">
-      <h2>{{ editando ? 'Editar juego' : 'Registrar juego' }}</h2>
-      <form (ngSubmit)="guardar()">
-        <label>Número de serie
-          <input name="serie" [(ngModel)]="form.numSerie" required
-            [disabled]="editando" placeholder="Número de serie">
-        </label>
-        <label>Nombre
-          <input name="nombre" [(ngModel)]="form.nombre" required>
-        </label>
-        <label>Reglamento
-          <input name="reglamento" [(ngModel)]="form.reglamento">
-        </label>
-        <label>Jugadores mínimos
-          <input type="number" name="min" [(ngModel)]="form.cantidadMinimaJugadores" min="1" required>
-        </label>
-        <label>Jugadores máximos
-          <input type="number" name="max" [(ngModel)]="form.cantidadMaximaJugadores" min="1" required>
-        </label>
-        <label>Edad mínima
-          <input type="number" name="edad" [(ngModel)]="form.edadMinima" min="0" required>
-        </label>
-        <label>Duración (minutos)
-          <input type="number" name="duracion" [(ngModel)]="form.duracionPartida" min="1" required>
-        </label>
-        <div class="actions">
-          <button class="primary" type="submit" [disabled]="guardando">
-            {{ guardando ? 'Guardando...' : editando ? 'Guardar cambios' : 'Registrar juego' }}
-          </button>
-          <button class="secondary" type="button" *ngIf="editando" (click)="cancelar()">Cancelar</button>
-        </div>
-      </form>
-    </section>
+    <p class="cl-alert cl-alert--success" *ngIf="mensaje">{{ mensaje }}</p>
+    <p class="cl-alert cl-alert--error" *ngIf="error && !formAbierto">{{ error }}</p>
 
-    <section class="panel">
-      <h2>Catálogo de inventario</h2>
-      <div class="search">
-        <input [(ngModel)]="busqueda" placeholder="Buscar por nombre">
-        <button class="primary" (click)="cargar()">Buscar</button>
-        <button class="secondary" (click)="busqueda=''; cargar()">Limpiar</button>
-      </div>
-      <p class="error" *ngIf="error">{{ error }}</p>
-      <p *ngIf="cargando">Consultando juegos...</p>
-      <p *ngIf="!cargando && juegos.length===0">No se encontraron juegos.</p>
-      <div class="table-wrap" *ngIf="juegos.length">
-        <table>
+    <section class="cl-card">
+      <form class="cl-toolbar" (ngSubmit)="cargar()">
+        <input class="form-control" name="busqueda" [(ngModel)]="busqueda" placeholder="Buscar por nombre (vacío = todos)">
+        <button class="btn btn--gold" type="submit">Buscar</button>
+        <button class="btn btn--ghost" type="button" (click)="busqueda='';cargar()">Ver todos</button>
+      </form>
+
+      <p class="cl-empty" *ngIf="cargando">Consultando juegos...</p>
+      <p class="cl-empty" *ngIf="!cargando && !juegos.length">No hay juegos para mostrar.</p>
+      <div class="cl-table-wrap" *ngIf="!cargando && juegos.length">
+        <table class="cl-table">
           <thead>
-            <tr><th>Serie</th><th>Nombre</th><th>Jugadores</th><th>Edad</th><th>Duración</th><th>Acciones</th></tr>
+            <tr><th>Número de serie</th><th>Nombre</th><th>Jugadores</th><th>Edad mínima</th><th>Duración</th><th>Disponibles</th><th class="cl-table__actions-head">Acciones</th></tr>
           </thead>
           <tbody>
             @for (j of juegos; track j.numSerie) {
@@ -76,9 +51,16 @@ import { JuegoMesaResponse } from '../../../../core/models/juego-mesa.model';
                 <td>{{ j.cantidadMinimaJugadores }} – {{ j.cantidadMaximaJugadores }}</td>
                 <td>{{ j.edadMinima }}+</td>
                 <td>{{ j.duracionPartida }} min</td>
-                <td class="actions">
-                  <button class="secondary" (click)="editar(j)">Editar</button>
-                  <button class="danger" (click)="eliminar(j)">Eliminar</button>
+                <td>
+                  <span class="badge" [ngClass]="(disponibles[j.numSerie] || 0) > 0 ? 'badge--success' : 'badge--danger'">
+                    {{ disponibles[j.numSerie] || 0 }}
+                  </span>
+                </td>
+                <td>
+                  <div class="cl-table__actions">
+                    <button class="btn btn--ghost btn--sm" type="button" (click)="editar(j)">Editar</button>
+                    <button class="btn btn--danger btn--sm" type="button" (click)="eliminar(j)">Eliminar</button>
+                  </div>
                 </td>
               </tr>
             }
@@ -86,28 +68,48 @@ import { JuegoMesaResponse } from '../../../../core/models/juego-mesa.model';
         </table>
       </div>
     </section>
-    <p class="message" *ngIf="mensaje">{{ mensaje }}</p>
-  </main>
+
+    <div class="cl-modal-overlay" *ngIf="formAbierto" (click)="cancelar()">
+      <section class="cl-card cl-modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+        <h2 class="cl-card__title">{{ editando ? 'Editar juego' : 'Nuevo juego' }}</h2>
+        <p class="cl-alert cl-alert--error" *ngIf="error">{{ error }}</p>
+        <form class="cl-form-grid" (ngSubmit)="guardar()">
+          <label class="cl-field">Número de serie *
+            <input class="form-control" name="serie" maxlength="30" [(ngModel)]="form.numSerie" required [disabled]="editando" placeholder="Ej: CATAN-CL-2024-112">
+          </label>
+          <label class="cl-field">Nombre *
+            <input class="form-control" name="nombre" [(ngModel)]="form.nombre" required>
+          </label>
+          <label class="cl-field cl-field--full">Reglamento *
+            <input class="form-control" name="reglamento" [(ngModel)]="form.reglamento" required placeholder="Enlace o descripción del reglamento">
+          </label>
+          <label class="cl-field">Jugadores mínimos *
+            <input class="form-control" type="number" name="min" [(ngModel)]="form.cantidadMinimaJugadores" min="1" required>
+          </label>
+          <label class="cl-field">Jugadores máximos *
+            <input class="form-control" type="number" name="max" [(ngModel)]="form.cantidadMaximaJugadores" min="1" required>
+          </label>
+          <label class="cl-field">Edad mínima *
+            <input class="form-control" type="number" name="edad" [(ngModel)]="form.edadMinima" min="1" required>
+          </label>
+          <label class="cl-field">Duración (minutos) *
+            <input class="form-control" type="number" name="duracion" [(ngModel)]="form.duracionPartida" min="1" required>
+          </label>
+          <label class="cl-field cl-field--full" *ngIf="!editando">Unidades físicas que llegan
+            <input class="form-control" type="number" name="unidades" [(ngModel)]="unidadesNuevas" min="0" max="20">
+            <span class="cl-field__hint">Se registran como Disponibles con código automático (UJ-…-001, 002…). Puedes poner 0 y agregarlas después.</span>
+          </label>
+          <div class="cl-form-actions">
+            <button class="btn btn--ghost" type="button" (click)="cancelar()">Cancelar</button>
+            <button class="btn btn--gold" type="submit" [disabled]="guardando">{{ guardando ? 'Guardando...' : 'Guardar juego' }}</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </section>
+
   `,
-  styles: [`
-    .page{padding:30px 24px;background:#0b1020;color:#f5f5fa;min-height:calc(100vh - 100px)}
-    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px}
-    .eyebrow{color:#22d3ee;font-size:12px;font-weight:800;letter-spacing:2px}
-    h1{font-size:32px;margin:10px 0}h2{font-size:19px;margin:0 0 20px}
-    p{color:#aeb5c5}.count{font-size:27px;color:#22d3ee}.count small{font-size:13px}
-    .panel{background:#1b2030;border:1px solid #465267;border-radius:14px;padding:24px;margin-bottom:22px}
-    form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}
-    label{display:grid;gap:8px;color:#c6ccd7;font-weight:700}
-    input{width:100%;box-sizing:border-box;background:#101827;color:white;border:1px solid #526078;border-radius:8px;padding:13px}
-    button{padding:11px 16px;border-radius:8px;border:1px solid #22d3ee;cursor:pointer;font-weight:700}
-    button:disabled{opacity:.5}.primary{background:#d3b354;color:#171827;border-color:#d3b354}
-    .secondary{background:transparent;color:#22d3ee}.danger{background:#a32154;color:white;border-color:#a32154}
-    .actions,.search{display:flex;gap:10px;align-items:center}.actions{flex-wrap:wrap}
-    form>.actions{grid-column:1/-1}.search{margin-bottom:20px}.search input{max-width:350px}
-    table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px;border-bottom:1px solid #465267}
-    th{color:#22d3ee}.table-wrap{overflow-x:auto}.error{color:#ff7892}.message{color:#22d3ee}
-    @media(max-width:650px){form{grid-template-columns:1fr}header{align-items:flex-start}.search{flex-wrap:wrap}}
-  `]
+  styles: [':host { display: block; }']
 })
 export class GamesPageComponent implements OnInit {
   juegos: JuegoMesaResponse[] = [];
@@ -115,12 +117,17 @@ export class GamesPageComponent implements OnInit {
   cargando = false;
   guardando = false;
   editando = false;
+  formAbierto = false;
   error = '';
   mensaje = '';
 
   form: JuegoMesaResponse = this.vacio();
+  /** Cuántas copias físicas registrar al crear el juego. */
+  unidadesNuevas = 1;
+  /** numSerie -> unidades disponibles. */
+  disponibles: Record<string, number> = {};
 
-  constructor(private service: JuegoMesaService) {}
+  constructor(private service: JuegoMesaService, private unidades: UnidadJuegoService) {}
 
   ngOnInit(): void { this.cargar(); }
 
@@ -129,7 +136,7 @@ export class GamesPageComponent implements OnInit {
       numSerie: '', nombre: '', reglamento: '',
       cantidadMinimaJugadores: 1,
       cantidadMaximaJugadores: 4,
-      edadMinima: 0, duracionPartida: 30
+      edadMinima: 8, duracionPartida: 30
     };
   }
 
@@ -138,43 +145,88 @@ export class GamesPageComponent implements OnInit {
     this.error = '';
     this.service.listar(this.busqueda).subscribe({
       next: data => { this.juegos = data; this.cargando = false; },
-      error: e => { this.error = e.error?.mensaje || 'Error al consultar juegos.'; this.cargando = false; }
+      error: e => { this.error = mensajeError(e, 'Error al consultar juegos.'); this.cargando = false; }
+    });
+    this.unidades.consultarDisponibilidad().subscribe({
+      next: lista => {
+        this.disponibles = {};
+        lista.forEach(d => this.disponibles[d.numSerie] = d.unidadesDisponibles);
+      },
+      error: () => this.disponibles = {}
     });
   }
 
   guardar(): void {
-    if (!this.form.numSerie.trim() || !this.form.nombre.trim() ||
-        this.form.cantidadMinimaJugadores < 1 ||
-        this.form.cantidadMaximaJugadores < this.form.cantidadMinimaJugadores ||
-        this.form.edadMinima < 0 || this.form.duracionPartida < 1) {
-      this.error = 'Revisa los datos ingresados.';
+    // Mismas reglas que valida el backend (JuegoMesaService)
+    if (!this.form.numSerie.trim() || !this.form.nombre.trim() || !this.form.reglamento?.trim()) {
+      this.error = 'Número de serie, nombre y reglamento son obligatorios.';
+      return;
+    }
+    if (this.form.cantidadMinimaJugadores < 1 ||
+        this.form.cantidadMaximaJugadores < this.form.cantidadMinimaJugadores) {
+      this.error = 'Revisa la cantidad de jugadores: mínimo 1 y el máximo no puede ser menor que el mínimo.';
+      return;
+    }
+    if (this.form.edadMinima < 1 || this.form.duracionPartida < 1) {
+      this.error = 'La edad mínima y la duración deben ser mayores que cero.';
       return;
     }
 
     this.guardando = true;
     this.error = '';
+    this.mensaje = '';
+    const editando = this.editando;
     const data = { ...this.form };
-    const request = this.editando
+    const request = editando
       ? this.service.actualizar(data.numSerie, data)
       : this.service.crear(data);
 
+    const copias = editando ? 0 : Math.max(0, Math.min(20, Math.floor(Number(this.unidadesNuevas) || 0)));
     request.subscribe({
       next: () => {
-        this.guardando = false;
-        this.mensaje = this.editando ? 'Juego actualizado.' : 'Juego registrado.';
-        this.cancelar();
-        this.cargar();
+        if (!copias) {
+          this.terminarGuardado(editando ? 'Juego actualizado.' : 'Juego registrado.');
+          return;
+        }
+        // Se crean una a una para que cada código sea consecutivo
+        from(Array.from({ length: copias })).pipe(
+          concatMap(() => this.unidades.crear({ codigo: '', numSerie: data.numSerie, estado: 'DISPONIBLE', observaciones: '' })),
+          toArray()
+        ).subscribe({
+          next: () => this.terminarGuardado(`Juego registrado con ${copias} ${copias === 1 ? 'unidad' : 'unidades'} disponible${copias === 1 ? '' : 's'}.`),
+          error: e => {
+            this.terminarGuardado('Juego registrado.');
+            this.error = 'No se pudieron crear todas las unidades: ' + mensajeError(e, 'error desconocido');
+          }
+        });
       },
       error: e => {
         this.guardando = false;
-        this.error = e.error?.mensaje || 'No fue posible guardar el juego.';
+        this.error = mensajeError(e, 'No fue posible guardar el juego.');
       }
     });
+  }
+
+  private terminarGuardado(mensaje: string): void {
+    this.guardando = false;
+    this.mensaje = mensaje;
+    this.cancelar();
+    this.cargar();
+  }
+
+  nuevo(): void {
+    this.unidadesNuevas = 1;
+    this.form = this.vacio();
+    this.editando = false;
+    this.formAbierto = true;
+    this.mensaje = '';
+    this.error = '';
   }
 
   editar(j: JuegoMesaResponse): void {
     this.form = { ...j };
     this.editando = true;
+    this.formAbierto = true;
     this.mensaje = '';
     this.error = '';
   }
@@ -182,13 +234,14 @@ export class GamesPageComponent implements OnInit {
   cancelar(): void {
     this.form = this.vacio();
     this.editando = false;
+    this.formAbierto = false;
   }
 
   eliminar(j: JuegoMesaResponse): void {
     if (!confirm(`¿Eliminar el juego ${j.nombre}?`)) return;
     this.service.eliminar(j.numSerie).subscribe({
       next: () => { this.mensaje = 'Juego eliminado.'; this.cargar(); },
-      error: e => { this.error = e.error?.mensaje || 'No fue posible eliminar el juego.'; }
+      error: e => { this.error = mensajeError(e, 'No fue posible eliminar el juego.'); }
     });
   }
 }

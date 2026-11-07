@@ -17,6 +17,7 @@ export interface ReservaResponse {
   horario: string;
   documento: string;
   idMesa: string;
+  juegos?: string[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -27,6 +28,13 @@ export class ReservaService {
 
   crear(data: ReservaRequest): Observable<ReservaResponse> {
     return this.http.post<ReservaResponse>(this.url, data);
+  }
+
+  /** Todas las reservas; si se indica fecha (yyyy-MM-dd) solo las de ese día. */
+  listarTodas(fecha = ''): Observable<ReservaResponse[]> {
+    let params = new HttpParams();
+    if (fecha) params = params.set('fecha', fecha);
+    return this.http.get<ReservaResponse[]>(this.url, { params });
   }
 
   listar(documento: string): Observable<ReservaResponse[]> {

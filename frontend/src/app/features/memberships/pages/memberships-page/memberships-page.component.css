@@ -3,99 +3,10 @@
     width: 100%;
 }
 
-.memberships-page {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    width: 100%;
-}
-
 .memberships-page__notification {
     position: fixed;
     top: 95px;
     right: 24px;
     z-index: 2500;
-
     width: min(420px, calc(100% - 48px));
-}
-
-.memberships-page__backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 2100;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    padding: 20px;
-
-    background: rgba(3, 5, 15, 0.8);
-    backdrop-filter: blur(5px);
-}
-
-.memberships-page__confirm {
-    width: min(100%, 420px);
-    padding: 25px;
-
-    background: var(--cl-surface);
-    border: 1px solid var(--cl-border-cyan);
-    border-radius: var(--cl-radius-lg);
-
-    box-shadow: var(--cl-glow-cyan);
-}
-
-.memberships-page__confirm h3 {
-    color: var(--cl-text);
-    font-size: var(--cl-text-lg);
-    margin-bottom: 14px;
-}
-
-.memberships-page__confirm p {
-    color: var(--cl-text-secondary);
-    font-size: var(--cl-text-sm);
-    line-height: 1.6;
-}
-
-.memberships-page__confirm strong {
-    color: var(--cl-cyan);
-}
-
-.memberships-page__confirm-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: 24px;
-}
-
-.memberships-page__cancel,
-.memberships-page__delete {
-    padding: 10px 18px;
-    border-radius: var(--cl-radius-sm);
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.memberships-page__cancel {
-    color: var(--cl-text);
-    background: var(--cl-surface-secondary);
-    border: 1px solid var(--cl-border);
-}
-
-.memberships-page__delete {
-    color: white;
-    background: var(--cl-danger);
-    border: 1px solid var(--cl-danger);
-}
-
-@media (max-width: 520px) {
-    .memberships-page__notification {
-        top: 85px;
-        right: 12px;
-        width: calc(100% - 24px);
-    }
-
-    .memberships-page__confirm {
-        padding: 18px;
-    }
 }

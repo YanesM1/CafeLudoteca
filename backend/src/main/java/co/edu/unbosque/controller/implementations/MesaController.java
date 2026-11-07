@@ -67,13 +67,8 @@ public class MesaController implements IMesaController {
 
     // MANEJAR ERRORES DE PERSISTENCIA
     private Response errorPersistencia(PersistenceException e) {
-
-        LOGGER.log(Level.SEVERE,
-                "Error de persistencia en el módulo de mesas", e);
-
-        return respuestaError(
-                Response.Status.INTERNAL_SERVER_ERROR,
-                "Ocurrió un error al acceder a la base de datos.");
+        // Delegar al manejador global: distingue duplicados (409) de fallos (500).
+        return new co.edu.unbosque.config.GlobalExceptionMapper().toResponse(e);
     }
 
     // REGISTRAR MESA

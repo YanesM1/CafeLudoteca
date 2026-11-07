@@ -1,37 +1,17 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Empleado } from '../../../../core/models/empleado.model';
 import { EmpleadoService } from '../../../../core/services/empleado.service';
+import { mensajeError } from '../../../../core/utils/http-error';
 
 @Component({
   selector: 'app-employees-page',
   standalone: true,
   imports: [FormsModule],
   templateUrl: './employees-page.component.html',
-  styles: [`
-    :host { display:block; color:#f4f4fa; }
-    main { padding:24px; }
-    header { display:flex; justify-content:space-between; align-items:center; gap:15px; }
-    h1 { font-size:28px; }
-    small { color:#22d3ee; font-weight:bold; }
-    section { background:#1b2030; padding:20px; margin-top:20px; border-radius:12px; }
-    input { padding:12px; background:#101827; color:white; border:1px solid #394256; border-radius:7px; }
-    button { padding:11px 15px; margin:4px; border-radius:7px; cursor:pointer; }
-    .gold { background:#d5b75d; border:0; color:#171322; }
-    .search { display:flex; flex-wrap:wrap; gap:15px; }
-    form { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
-    table { width:100%; border-collapse:collapse; margin-top:15px; }
-    th,td { padding:13px; text-align:left; border-bottom:1px solid #394256; }
-    th { color:#22d3ee; }
-    .overlay { position:fixed; inset:0; z-index:3000; background:#000b; display:grid; place-items:center; }
-    .modal { background:#1b2030; padding:25px; border:1px solid #22d3ee; border-radius:12px; width:min(480px,90%); }
-    .modal form { display:grid; }
-    .modal input { width:100%; box-sizing:border-box; }
-    .message { padding:12px; background:#17352d; }
-    .error { background:#49252a; }
-  `]
+  styles: [':host { display: block; }']
 })
-export class EmployeesPageComponent {
+export class EmployeesPageComponent implements OnInit {
   empleados: Empleado[] = [];
   nombre = '';
   documento = '';
@@ -45,6 +25,10 @@ export class EmployeesPageComponent {
 
   constructor(private service: EmpleadoService) {}
 
+  ngOnInit(): void {
+    this.buscar();
+  }
+
   vacio(): Empleado {
     return {
       documentoEmp: '',
@@ -55,15 +39,34 @@ export class EmployeesPageComponent {
     };
   }
 
-  buscar(): void {
-    if (!this.nombre.trim()) {
-      this.aviso('Escribe un nombre para buscar.', true);
-      return;
-    }
+  /** Busca por nombre; sin texto lista todos los empleados. */
+  /** Cargos ya usados, para elegirlos sin escribir de nuevo. */
+  get cargos(): string[] {
+    return [...new Set(this.empleados.map(e => e.cargo).filter(Boolean))].sort();
+  }
 
-    this.service.buscar(this.nombre.trim()).subscribe({
+  busqueda = '';
+  criterio: 'nombre' | 'documento' = 'nombre';
+
+  buscarSegunCriterio(): void {
+    const valor = this.busqueda.trim();
+    if (this.criterio === 'documento' && valor) {
+      this.documento = valor;
+      this.buscarDocumento();
+    } else {
+      this.nombre = valor;
+      this.buscar();
+    }
+  }
+
+  buscar(): void {
+    const peticion = this.nombre.trim()
+      ? this.service.buscar(this.nombre.trim())
+      : this.service.listar();
+
+    peticion.subscribe({
       next: data => this.empleados = data,
-      error: e => this.aviso(e.error?.mensaje || 'Error al consultar.', true)
+      error: e => this.aviso(mensajeError(e, 'Error al consultar.'), true)
     });
   }
 
@@ -74,7 +77,7 @@ export class EmployeesPageComponent {
       next: data => this.empleados = [data],
       error: e => {
         this.empleados = [];
-        this.aviso(e.error?.mensaje || 'Empleado no encontrado.', true);
+        this.aviso(mensajeError(e, 'Empleado no encontrado.'), true);
       }
     });
   }
@@ -92,30 +95,35 @@ export class EmployeesPageComponent {
   }
 
   guardar(): void {
-    if (Object.values(this.form).some(v => !v.trim())) {
+    if (Object.values(this.form).some(v => !String(v ?? '').trim())) {
       this.aviso('Todos los campos son obligatorios.', true);
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.correo.trim())) {
+      this.aviso('Escribe un correo válido.', true);
       return;
     }
 
     this.guardando = true;
+    const editando = !!this.documentoOriginal;
     const data = { ...this.form };
-    const peticion = this.documentoOriginal
-      ? this.service.actualizar(this.documentoOriginal, data)
+    const peticion = editando
+      ? this.service.actualizar(this.documentoOriginal!, data)
       : this.service.crear(data);
 
     peticion.subscribe({
       next: () => {
         this.guardando = false;
         this.modal = false;
-        this.nombre = data.nombre;
+        this.nombre = '';
         this.documento = '';
-        this.aviso(this.documentoOriginal ? 'Empleado actualizado.' : 'Empleado creado.');
+        this.aviso(editando ? 'Empleado actualizado.' : 'Empleado creado.');
         this.documentoOriginal = null;
         this.buscar();
       },
       error: e => {
         this.guardando = false;
-        this.aviso(e.error?.mensaje || 'No se pudo guardar.', true);
+        this.aviso(mensajeError(e, 'No se pudo guardar.'), true);
       }
     });
   }
@@ -126,17 +134,17 @@ export class EmployeesPageComponent {
     this.service.eliminar(e.documentoEmp).subscribe({
       next: () => {
         this.aviso('Empleado eliminado.');
-        this.nombre.trim() ? this.buscar() : this.empleados = [];
+        this.buscar();
       },
-      error: err => this.aviso(err.error?.mensaje || 'No se pudo eliminar.', true)
+      error: err => this.aviso(mensajeError(err, 'No se pudo eliminar.'), true)
     });
   }
 
   limpiar(): void {
     this.nombre = '';
     this.documento = '';
-    this.empleados = [];
     this.mensaje = '';
+    this.buscar();
   }
 
   aviso(texto: string, esError = false): void {

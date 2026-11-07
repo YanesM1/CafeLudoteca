@@ -1,5 +1,7 @@
 package co.edu.unbosque.controller.implementations;
 
+import co.edu.unbosque.config.ErrorResponses;
+
 import java.util.List;
 import co.edu.unbosque.controller.interfaces.IPrestamoController;
 import co.edu.unbosque.exceptions.PersistenceException;
@@ -21,10 +23,10 @@ public class PrestamoController implements IPrestamoController {
     public Response guardarPrestamo(PrestamoRequestDTO request) {
         try {
             PrestamoResponseDTO p=service.addPrestamo(request);
-            return p==null?Response.status(400).entity("{\"mensaje\":\"Datos inválidos o unidad no disponible\"}").build()
+            return p==null?ErrorResponses.of(400, "Datos inválidos o unidad no disponible")
                 :Response.status(201).entity(p).build();
         } catch(PersistenceException e) {
-            return Response.serverError().entity("{\"mensaje\":\"Error al registrar préstamo\"}").build();
+            throw e;
         }
     }
 
@@ -64,10 +66,10 @@ public class PrestamoController implements IPrestamoController {
             DevolucionPrestamoRequestDTO request) {
         try {
             var p=service.registrarDevolucion(id,request);
-            return p==null?Response.status(400).entity("{\"mensaje\":\"No se pudo registrar la devolución\"}").build()
+            return p==null?ErrorResponses.of(400, "No se pudo registrar la devolución")
                 :Response.ok(p).build();
         } catch(PersistenceException e) {
-            return Response.serverError().entity("{\"mensaje\":\"Error al registrar devolución\"}").build();
+            throw e;
         }
     }
 
@@ -84,7 +86,7 @@ public class PrestamoController implements IPrestamoController {
     @Override
     public Response borrarPrestamo(@PathParam("id_prestamo") Integer id) {
         var p=service.deletePrestamo(id);
-        return p==null?Response.status(409).entity("{\"mensaje\":\"No se puede eliminar un préstamo activo\"}").build()
+        return p==null?ErrorResponses.of(409, "No se puede eliminar un préstamo activo")
             :Response.ok(p).build();
     }
 }

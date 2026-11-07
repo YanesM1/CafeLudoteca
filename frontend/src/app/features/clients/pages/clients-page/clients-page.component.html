@@ -1,148 +1,138 @@
-<section class="clients-page">
+<section class="cl-page">
 
-    <header class="clients-header">
+    <header class="cl-page-header">
         <div>
-            <span class="eyebrow">ADMINISTRACIÓN</span>
-            <h1>Gestión de clientes</h1>
-            <p>Consulta y administra los clientes de Café & Ludoteca.</p>
+            <span class="cl-eyebrow">Administración · Clientes</span>
+            <h1 class="cl-title">Clientes</h1>
+            <p class="cl-subtitle">Consulta y administra los clientes de Café & Ludoteca.</p>
         </div>
-        <button class="primary" (click)="abrirCrear()">+ Nuevo cliente</button>
+        <div class="cl-page-header__aside">
+            <span class="cl-count"><strong>{{ clientes.length }}</strong>registros</span>
+            <button class="btn btn--gold" type="button" (click)="abrirCrear()">+ Nuevo cliente</button>
+        </div>
     </header>
 
     @if (notification) {
-        <div class="notice" [class.error]="notificationType === 'error'">
-            {{ notification }}
-            <button (click)="notification = ''">×</button>
-        </div>
+        <p class="cl-alert" [class.cl-alert--error]="notificationType === 'error'"
+           [class.cl-alert--success]="notificationType === 'success'">{{ notification }}</p>
     }
 
-    <div class="toolbar">
-        <form (ngSubmit)="buscar()">
-            <input name="search" [(ngModel)]="searchTerm"
-                placeholder="Buscar por primer nombre...">
-            <button class="search-button" type="submit">Buscar</button>
-            <button class="secondary" type="button" (click)="limpiar()">Limpiar</button>
+    <section class="cl-card">
+        <form class="cl-toolbar" (ngSubmit)="buscar()">
+            <input class="form-control" name="search" [(ngModel)]="searchTerm"
+                placeholder="Buscar por primer nombre (vacío = todos)">
+            <button class="btn btn--gold" type="submit">Buscar</button>
+            <button class="btn btn--ghost" type="button" (click)="limpiar()">Ver todos</button>
         </form>
-        <span>{{ clientes.length }} clientes encontrados</span>
-    </div>
 
-    <div class="table-container">
         @if (loading) {
-            <div class="empty">Cargando clientes...</div>
+            <p class="cl-empty">Consultando clientes...</p>
         } @else if (clientes.length === 0) {
-            <div class="empty">
-                <h2>No hay clientes registrados</h2>
-                <p>Comienza registrando el primer cliente.</p>
-                <button class="primary" (click)="abrirCrear()">Registrar cliente</button>
-            </div>
+            <p class="cl-empty">No hay clientes para mostrar.</p>
         } @else {
-            <table>
-                <thead>
-                    <tr>
-                        <th>Documento</th>
-                        <th>Nombre completo</th>
-                        <th>Dirección</th>
-                        <th>Fecha nacimiento</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (c of clientes; track c.documento) {
+            <div class="cl-table-wrap">
+                <table class="cl-table">
+                    <thead>
                         <tr>
-                            <td>{{ c.documento }}</td>
-                            <td>{{ nombreCompleto(c) }}</td>
-                            <td>{{ c.direccion || 'No registrada' }}</td>
-                            <td>{{ c.fechaNacimiento || 'No registrada' }}</td>
-                            <td class="actions">
-                                <button class="edit" (click)="abrirEditar(c)">Editar</button>
-                                <button class="delete" (click)="confirmarEliminacion(c)">Eliminar</button>
-                            </td>
+                            <th>Documento</th>
+                            <th>Nombre completo</th>
+                            <th>Dirección</th>
+                            <th>Fecha de nacimiento</th>
+                            <th class="cl-table__actions-head">Acciones</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @for (c of clientes; track c.documentoCliente) {
+                            <tr>
+                                <td>{{ c.documentoCliente }}</td>
+                                <td>{{ nombreCompleto(c) }}</td>
+                                <td>{{ c.direccion || '—' }}</td>
+                                <td>{{ fechaCorta(c.fechaNacimiento) || '—' }}</td>
+                                <td>
+                                    <div class="cl-table__actions">
+                                        <button class="btn btn--ghost btn--sm" type="button" (click)="abrirEditar(c)">Editar</button>
+                                        <button class="btn btn--danger btn--sm" type="button" (click)="confirmarEliminacion(c)">Eliminar</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         }
-    </div>
+    </section>
 
     @if (modalOpen) {
-        <div class="backdrop" (click)="cerrarModal()">
-            <section class="modal" role="dialog" aria-modal="true"
+        <div class="cl-modal-overlay" (click)="cerrarModal()">
+            <section class="cl-card cl-modal" role="dialog" aria-modal="true"
                 (click)="$event.stopPropagation()">
+                <div class="cl-card__header">
+                    <h2 class="cl-card__title">{{ editingDocument ? 'Editar cliente' : 'Nuevo cliente' }}</h2>
+                </div>
 
-                <header>
-                    <div>
-                        <span class="eyebrow">DATOS PERSONALES</span>
-                        <h2>{{ editingDocument ? 'Editar cliente' : 'Nuevo cliente' }}</h2>
-                    </div>
-                    <button class="close" type="button" (click)="cerrarModal()">×</button>
-                </header>
-
-                <form (ngSubmit)="guardar()">
-                    <div class="form-grid">
-                        <label>Documento *
-                            <input name="documento" [(ngModel)]="form.documento"
-                                required maxlength="50" [readonly]="!!editingDocument">
+                <form class="cl-form-grid" (ngSubmit)="guardar()">
+                    <label class="cl-field">Documento *
+                        <input class="form-control" name="documento" [(ngModel)]="form.documentoCliente"
+                            required maxlength="50" [readonly]="!!editingDocument">
+                    </label>
+                    <label class="cl-field">Fecha de nacimiento
+                        <input class="form-control" type="date" name="fechaNacimiento"
+                            [(ngModel)]="form.fechaNacimiento">
+                    </label>
+                    <label class="cl-field">Primer nombre *
+                        <input class="form-control" name="primerNombre" [(ngModel)]="form.primerNombre"
+                            required maxlength="50">
+                    </label>
+                    <label class="cl-field">Segundo nombre
+                        <input class="form-control" name="segundoNombre" [(ngModel)]="form.segundoNombre"
+                            maxlength="50">
+                    </label>
+                    <label class="cl-field">Primer apellido *
+                        <input class="form-control" name="primerApellido" [(ngModel)]="form.primerApellido"
+                            required maxlength="50">
+                    </label>
+                    <label class="cl-field">Segundo apellido
+                        <input class="form-control" name="segundoApellido" [(ngModel)]="form.segundoApellido"
+                            maxlength="50">
+                    </label>
+                    <label class="cl-field cl-field--full">Dirección
+                        <input class="form-control" name="direccion" [(ngModel)]="form.direccion"
+                            maxlength="100">
+                    </label>
+                    @if (!editingDocument) {
+                        <label class="cl-field cl-field--full">Teléfono (opcional)
+                            <input class="form-control" name="telefono" [(ngModel)]="telefono"
+                                inputmode="numeric" maxlength="15" placeholder="Solo números, entre 7 y 15 dígitos">
+                            <span class="cl-field__hint">Más teléfonos se agregan en Clientes → Teléfonos.</span>
                         </label>
-
-                        <label>Primer nombre *
-                            <input name="primerNombre" [(ngModel)]="form.primerNombre"
-                                required maxlength="50">
-                        </label>
-
-                        <label>Segundo nombre
-                            <input name="segundoNombre" [(ngModel)]="form.segundoNombre"
-                                maxlength="50">
-                        </label>
-
-                        <label>Primer apellido *
-                            <input name="primerApellido" [(ngModel)]="form.primerApellido"
-                                required maxlength="50">
-                        </label>
-
-                        <label>Segundo apellido
-                            <input name="segundoApellido" [(ngModel)]="form.segundoApellido"
-                                maxlength="50">
-                        </label>
-
-                        <label>Fecha de nacimiento
-                            <input type="date" name="fechaNacimiento"
-                                [(ngModel)]="form.fechaNacimiento">
-                        </label>
-
-                        <label class="full">Dirección
-                            <input name="direccion" [(ngModel)]="form.direccion"
-                                maxlength="100">
-                        </label>
-                    </div>
-
-                    <footer>
-                        <button type="button" class="secondary"
-                            (click)="cerrarModal()">Cancelar</button>
-                        <button type="submit" class="primary" [disabled]="saving">
+                    }
+                    <div class="cl-form-actions">
+                        <button type="button" class="btn btn--ghost" (click)="cerrarModal()">Cancelar</button>
+                        <button type="submit" class="btn btn--gold" [disabled]="saving">
                             {{ saving ? 'Guardando...' : 'Guardar cliente' }}
                         </button>
-                    </footer>
+                    </div>
                 </form>
             </section>
         </div>
     }
 
     @if (selectedClient) {
-        <div class="backdrop" (click)="cancelarEliminacion()">
-            <section class="modal confirmation" role="alertdialog"
+        <div class="cl-modal-overlay" (click)="cancelarEliminacion()">
+            <section class="cl-card cl-modal" role="alertdialog"
                 (click)="$event.stopPropagation()">
-                <h2>Eliminar cliente</h2>
+                <h2 class="cl-card__title">Eliminar cliente</h2>
                 <p>¿Deseas eliminar a <strong>{{ nombreCompleto(selectedClient) }}</strong>?</p>
-                <p class="warning">
-                    Si tiene reservas, préstamos u otras relaciones,
-                    la base de datos podría impedir su eliminación.
+                <p class="cl-card__hint">
+                    Si tiene reservas, préstamos u otros registros relacionados,
+                    la base de datos no permitirá eliminarlo.
                 </p>
-                <footer>
-                    <button class="secondary" (click)="cancelarEliminacion()">Cancelar</button>
-                    <button class="delete" [disabled]="deleting" (click)="eliminar()">
+                <div class="cl-form-actions">
+                    <button class="btn btn--ghost" type="button" (click)="cancelarEliminacion()">Cancelar</button>
+                    <button class="btn btn--danger" type="button" [disabled]="deleting" (click)="eliminar()">
                         {{ deleting ? 'Eliminando...' : 'Confirmar eliminación' }}
                     </button>
-                </footer>
+                </div>
             </section>
         </div>
     }

@@ -11,6 +11,8 @@ public interface ICategoriaRepository {
     List<Categoria>findByCategoria(String categoria);
     Optional<Categoria> findByNumCategoria(Integer numCategoria, String numSerie);
     boolean updateCategoria(Integer numCategoria, String numSerie, Categoria categoria);
+    /** Siguiente número de categoría dentro de un juego. */
+    int siguienteNumero(String numSerie);
     boolean deleteCategoria(Integer numCategoria, String numSerie);
 
 }

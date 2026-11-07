@@ -23,19 +23,19 @@ public class ExpansionService implements IExpansionService {
         }
 
         if (request.getNombre() == null || request.getNombre().isBlank()) {
-            return false;
+            throw co.edu.unbosque.exceptions.BusinessException.badRequest("Escribe el nombre de la expansión.");
         }
 
         if (request.getDescripcion() == null || request.getDescripcion().isBlank()) {
-            return false;
+            throw co.edu.unbosque.exceptions.BusinessException.badRequest("Escribe la descripción de la expansión.");
         }
 
         if (request.getContenidoAdicional() == null || request.getContenidoAdicional().isBlank()) {
-            return false;
+            throw co.edu.unbosque.exceptions.BusinessException.badRequest("Escribe el contenido adicional de la expansión.");
         }
 
         if (request.getNumSerie() == null || request.getNumSerie().isBlank()) {
-            return false;
+            throw co.edu.unbosque.exceptions.BusinessException.badRequest("Selecciona el juego al que pertenece la expansión.");
         }
 
         return true;

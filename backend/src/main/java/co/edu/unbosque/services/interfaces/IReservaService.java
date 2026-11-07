@@ -12,6 +12,8 @@ public interface IReservaService {
 
     List<ReservaResponseDTO> getReserva(String documento);
 
+    List<ReservaResponseDTO> getTodas(java.time.LocalDate fecha);
+
     ReservaResponseDTO getReservasPorIdReserva(String idReserva);
 
     ReservaResponseDTO updateReserva(

@@ -2,6 +2,7 @@ package co.edu.unbosque.model.entity;
 
 import java.time.LocalDate;
 import java.util.Objects;
+import co.edu.unbosque.model.dto.UnidadPrestadaDTO;
 import lombok.*;
 
 @Getter
@@ -18,6 +19,8 @@ public class Prestamo {
     private String documentoEmp;
     private String codigoUnidad;
     private String numSerieUnidad;
+    /** Todas las unidades del préstamo (supuesto 3: uno o varios juegos físicos). */
+    private java.util.List<UnidadPrestadaDTO> unidades = new java.util.ArrayList<>();
 
     @Override
     public boolean equals(Object o) {

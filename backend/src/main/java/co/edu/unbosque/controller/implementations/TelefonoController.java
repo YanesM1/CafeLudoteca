@@ -1,5 +1,7 @@
 package co.edu.unbosque.controller.implementations;
 
+import co.edu.unbosque.config.ErrorResponses;
+
 import java.util.List;
 
 import co.edu.unbosque.controller.interfaces.ITelefonoController;
@@ -31,9 +33,7 @@ public class TelefonoController implements ITelefonoController {
     public Response guardarTelefono(TelefonoRequestDTO request) {
         TelefonoResponseDTO telefono = telefonoService.addTelefono(request);
         if (telefono == null) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("No se pudo registrar el telefono")
-                    .build();
+            return ErrorResponses.of(Response.Status.BAD_REQUEST, "No se pudo registrar el telefono");
         }
         return Response.status(Response.Status.CREATED)
                 .entity(telefono)
@@ -57,9 +57,7 @@ public class TelefonoController implements ITelefonoController {
         TelefonoResponseDTO telefono =
                 telefonoService.getTelefonoPorNumero(documento, numero);
         if (telefono == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("No se ha encontrado el telefono")
-                    .build();
+            return ErrorResponses.of(Response.Status.NOT_FOUND, "No se ha encontrado el telefono");
         }
         return Response.ok(telefono).build();
     }
@@ -73,9 +71,7 @@ public class TelefonoController implements ITelefonoController {
         TelefonoResponseDTO telefono =
                 telefonoService.updateTelefono(documento, numeroActual, request);
         if (telefono == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("No se ha encontrado el telefono que desea actualizar")
-                    .build();
+            return ErrorResponses.of(Response.Status.NOT_FOUND, "No se ha encontrado el telefono que desea actualizar");
         }
         return Response.ok(telefono).build();
     }
@@ -87,9 +83,7 @@ public class TelefonoController implements ITelefonoController {
             @PathParam("numero") String numero) {
         TelefonoResponseDTO telefono = telefonoService.deleteTelefono(documento, numero);
         if (telefono == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("No se ha encontrado el telefono")
-                    .build();
+            return ErrorResponses.of(Response.Status.NOT_FOUND, "No se ha encontrado el telefono");
         }
         return Response.ok(telefono).build();
     }

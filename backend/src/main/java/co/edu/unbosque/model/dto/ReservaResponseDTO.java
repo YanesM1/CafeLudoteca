@@ -1,6 +1,8 @@
 
 package co.edu.unbosque.model.dto;
 
+import java.util.List;
+
 import java.time.LocalDate;
 
 import lombok.AllArgsConstructor;
@@ -19,5 +21,6 @@ public class ReservaResponseDTO {
     private String horario;
     private String documento;
     private String idMesa;
+    private List<String> juegos;
 
 }

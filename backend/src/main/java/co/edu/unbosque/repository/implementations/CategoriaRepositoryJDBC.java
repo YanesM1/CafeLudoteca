@@ -41,18 +41,19 @@ public class CategoriaRepositoryJDBC implements  ICategoriaRepository{
     public List<Categoria> findByCategoria(String categoria) {
          List<Categoria> categorias = new ArrayList<>();
 
-        String sql = """
-                SELECT *
-                FROM CATEGORIA
-                WHERE categoria=?
-                """;
+        // Búsqueda parcial sin distinguir mayúsculas; sin texto lista todas.
+        boolean filtrar = categoria != null && !categoria.isBlank();
+        String sql = "SELECT * FROM CATEGORIA"
+                + (filtrar ? " WHERE LOWER(categoria) LIKE LOWER(?)" : "")
+                + " ORDER BY num_serie, num_categoria";
 
         try (Connection conexion = ConnectionBD.obtenerConexion();
                 PreparedStatement ps = conexion.prepareStatement(sql);) {
 
-            ps.setString(1, categoria);
-            ResultSet rs = ps.executeQuery();
-
+            if (filtrar) {
+                ps.setString(1, "%" + categoria.trim() + "%");
+            }
+            try (ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 Categoria categoriaJ = new Categoria();
 
@@ -62,6 +63,7 @@ public class CategoriaRepositoryJDBC implements  ICategoriaRepository{
                 
 
                 categorias.add(categoriaJ);
+            }
             }
 
         } catch (SQLException e) {
@@ -146,4 +148,19 @@ public boolean deleteCategoria(Integer numCategoria, String numSerie) {
                 }
     }
 
+
+    @Override
+    public int siguienteNumero(String numSerie) {
+        String sql = "SELECT COALESCE(MAX(num_categoria), 0) + 1 FROM CATEGORIA WHERE num_serie = ?";
+        try (Connection c = ConnectionBD.obtenerConexion();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, numSerie);
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw new PersistenceException("Error al calcular el número de categoría", e);
+        }
+    }
 }

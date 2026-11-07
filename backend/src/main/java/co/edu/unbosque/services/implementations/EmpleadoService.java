@@ -48,6 +48,11 @@ public class EmpleadoService implements IEmpleadoService {
             return false;
         }
 
+        if (!request.getCorreo().trim().matches("[^@\\s]+@[^@\\s]+\\.[^@\\s]+")) {
+            throw co.edu.unbosque.exceptions.BusinessException.badRequest(
+                    "El correo del empleado no tiene un formato válido.");
+        }
+
         if (request.getCargo() == null ||
                 request.getCargo().isBlank()) {
             return false;

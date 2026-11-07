@@ -10,6 +10,10 @@ export class EmpleadoService {
 
   constructor(private http: HttpClient) {}
 
+  listar(): Observable<Empleado[]> {
+    return this.http.get<Empleado[]>(`${this.endpoint}/listar`);
+  }
+
   buscar(nombre: string): Observable<Empleado[]> {
     const params = new HttpParams().set('nombre', nombre);
     return this.http.get<Empleado[]>(`${this.endpoint}/buscar`, { params });

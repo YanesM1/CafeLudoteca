@@ -5,7 +5,6 @@ import {
     SelectOption
 } from '../../atoms/select/select.component';
 
-import { InputComponent } from '../../atoms/input/input.component';
 import { LabelComponent } from '../../atoms/label/label.component';
 import { BadgeComponent } from '../../atoms/badge/badge.component';
 import { IconComponent } from '../../atoms/icon/icon.component';
@@ -50,7 +49,6 @@ export interface ReservationPayload {
     standalone: true,
     imports: [
         SelectComponent,
-        InputComponent,
         LabelComponent,
         BadgeComponent,
         IconComponent,
@@ -62,6 +60,10 @@ export interface ReservationPayload {
     styleUrl: './reservation-form.component.css'
 })
 export class ReservationFormComponent {
+    /** Paso 1: datos del cliente (el campo llega por proyección de contenido). */
+    @Input() clientStepTitle = 'Tus datos';
+    @Input() clientStepHint = 'Escribe tu número de documento.';
+
 
     @Input() date = '';
     @Input() time = '';
@@ -75,6 +77,7 @@ export class ReservationFormComponent {
     @Input() submitting = false;
     @Input() loading = false;
     @Input() errorMessage = '';
+    @Input() submitError = '';
 
     @Output() dateChange = new EventEmitter<string>();
     @Output() timeChange = new EventEmitter<string>();
@@ -89,7 +92,9 @@ export class ReservationFormComponent {
     @Output() cancel = new EventEmitter<void>();
     @Output() retry = new EventEmitter<void>();
 
-    private quantities: Record<string, number> = {};
+    get selectedCount(): number {
+        return this.games.filter(game => this.isSelected(game)).length;
+    }
 
     get tableOptions(): SelectOption[] {
         return this.tables.map(table => ({
@@ -112,15 +117,7 @@ export class ReservationFormComponent {
             && this.selectedTable.disponible !== false
             && !this.submitting
             && !this.loading
-            && !this.errorMessage
-            && this.games.some(game => game.unidadesDisponibles > 0);
-    }
-
-    get totalUnits(): number {
-        return this.games.reduce(
-            (total, game) => total + this.quantityFor(game),
-            0
-        );
+            && this.selectedCount > 0;
     }
 
     get actions(): ActionButton[] {
@@ -128,8 +125,7 @@ export class ReservationFormComponent {
             {
                 id: 'cancel',
                 label: 'Cancelar',
-                variant: 'danger',
-                icon: 'close'
+                variant: 'ghost'
             },
             {
                 id: 'confirm',
@@ -137,7 +133,6 @@ export class ReservationFormComponent {
                     ? 'Procesando...'
                     : 'Confirmar reserva',
                 variant: 'gold',
-                icon: 'check',
                 disabled: !this.canSubmit
             }
         ];
@@ -158,59 +153,33 @@ export class ReservationFormComponent {
         this.tableChange.emit(value);
     }
 
-    quantityFor(game: ReservationGameItem): number {
-
-        if (game.unidadesDisponibles <= 0) {
-            return 0;
-        }
-
-        const quantity = this.quantities[game.numSerie] ?? game.cantidad;
-
-        return Math.max(
-            1,
-            Math.min(quantity, game.unidadesDisponibles)
-        );
+    /** Juegos elegidos (llegan del catálogo o se agregan aquí). */
+    get selectedGames(): ReservationGameItem[] {
+        return this.games.filter(game => this.isSelected(game));
     }
 
-    quantityValue(game: ReservationGameItem): string {
-        return String(this.quantityFor(game));
+    /** Juegos que se pueden agregar: con unidades disponibles y aún no elegidos. */
+    get availableGames(): ReservationGameItem[] {
+        return this.games
+            .filter(game => !this.isSelected(game) && game.unidadesDisponibles > 0)
+            .sort((a, b) => a.nombre.localeCompare(b.nombre));
     }
 
-    maxQuantity(game: ReservationGameItem): string {
-        return String(game.unidadesDisponibles);
+    agregarJuego(numSerie: string): void {
+        const game = this.games.find(g => g.numSerie === numSerie);
+        if (game && !this.isSelected(game)) this.toggleGame(game);
     }
 
-    onQuantityChange(
-        game: ReservationGameItem,
-        value: string
-    ): void {
+    isSelected(game: ReservationGameItem): boolean {
+        return game.cantidad > 0;
+    }
 
-        if (value.trim() === '') {
-            return;
-        }
-
-        const quantity = Number(value);
-
-        if (
-            !Number.isInteger(quantity) ||
-            game.unidadesDisponibles <= 0
-        ) {
-            return;
-        }
-
-        const validQuantity = Math.max(
-            1,
-            Math.min(quantity, game.unidadesDisponibles)
-        );
-
-        this.quantities = {
-            ...this.quantities,
-            [game.numSerie]: validQuantity
-        };
-
+    // Un juego se incluye (1) o no (0) en la reserva: el backend guarda
+    // la lista de juegos preseleccionados, no cantidades.
+    toggleGame(game: ReservationGameItem): void {
         this.gameQuantityChange.emit({
             numSerie: game.numSerie,
-            cantidad: validQuantity
+            cantidad: this.isSelected(game) ? 0 : 1
         });
     }
 
@@ -230,10 +199,9 @@ export class ReservationFormComponent {
                 fecha: this.date,
                 horario: this.time,
                 idMesa: this.selectedTableId,
-                juegos: this.games.map(game => ({
-                    numSerie: game.numSerie,
-                    cantidad: this.quantityFor(game)
-                }))
+                juegos: this.games
+                    .filter(game => this.isSelected(game))
+                    .map(game => ({ numSerie: game.numSerie, cantidad: 1 }))
             });
         }
     }

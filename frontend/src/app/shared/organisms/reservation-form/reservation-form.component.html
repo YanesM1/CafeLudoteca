@@ -1,10 +1,15 @@
 <section class="reservation-form">
 
-    <header class="reservation-form__header">
-        <span class="reservation-form__eyebrow">CAFÉ & LUDECA</span>
-        <h2>RESERVAS DE MESAS Y JUEGOS</h2>
-        <p>Organiza tu visita y selecciona los juegos que deseas disfrutar.</p>
-    </header>
+    <section class="reservation-form__section">
+        <div class="reservation-form__section-heading">
+            <span class="reservation-form__number">1.</span>
+            <div>
+                <h3>{{ clientStepTitle }}</h3>
+                <p>{{ clientStepHint }}</p>
+            </div>
+        </div>
+        <ng-content />
+    </section>
 
     @if (loading) {
 
@@ -29,7 +34,7 @@
         <section class="reservation-form__section">
 
             <div class="reservation-form__section-heading">
-                <span class="reservation-form__number">1.</span>
+                <span class="reservation-form__number">2.</span>
                 <div>
                     <h3>Fecha y horario</h3>
                     <p>Selecciona el día y la hora de tu reserva.</p>
@@ -54,7 +59,7 @@
         <section class="reservation-form__section">
 
             <div class="reservation-form__section-heading">
-                <span class="reservation-form__number">2.</span>
+                <span class="reservation-form__number">3.</span>
                 <div>
                     <h3>Selecciona la mesa</h3>
                     <p>Elige una mesa disponible para tu visita.</p>
@@ -164,90 +169,53 @@
         <section class="reservation-form__section">
 
             <div class="reservation-form__section-heading">
-                <span class="reservation-form__number">3.</span>
+                <span class="reservation-form__number">4.</span>
                 <div>
                     <h3>Juegos preseleccionados</h3>
-                    <p>Revisa los juegos que deseas incluir en tu reserva.</p>
+                    <p>Los juegos que quieres tener listos al llegar.</p>
                 </div>
                 <app-badge variant="info">
-                    {{ games.length }} juegos
+                    {{ selectedCount }} {{ selectedCount === 1 ? 'juego' : 'juegos' }}
                 </app-badge>
             </div>
 
-            @if (games.length > 0) {
-
-                <div class="reservation-form__games">
-
-                    @for (game of games; track game.numSerie) {
-
-                        <article class="reservation-game">
-
-                            <div class="reservation-game__info">
-                                <span class="reservation-game__code">
-                                    {{ game.numSerie }}
-                                </span>
-
+            @if (selectedGames.length) {
+                <ul class="reservation-picked">
+                    @for (game of selectedGames; track game.numSerie) {
+                        <li class="reservation-picked__item">
+                            <div>
                                 <strong>{{ game.nombre }}</strong>
-
-                                <app-badge
-                                    [variant]="game.unidadesDisponibles > 0 ? 'success' : 'danger'"
-                                >
-                                    {{ game.unidadesDisponibles > 0 ? 'Disponible' : 'Agotado' }}
-                                </app-badge>
+                                <span>{{ game.numSerie }} · {{ game.unidadesDisponibles }} disponibles</span>
                             </div>
-
-                            <div class="reservation-game__quantity">
-                                <app-label
-                                    text="Unidades"
-                                    [forId]="'quantity-' + game.numSerie"
-                                />
-
-                                <app-input
-                                    [inputId]="'quantity-' + game.numSerie"
-                                    [name]="'quantity-' + game.numSerie"
-                                    type="number"
-                                    [value]="quantityValue(game)"
-                                    [min]="'1'"
-                                    [max]="maxQuantity(game)"
-                                    [disabled]="game.unidadesDisponibles <= 0"
-                                    ariaLabel="Cantidad de unidades"
-                                    (valueChange)="onQuantityChange(game, $event)"
-                                />
-
-                                <small>
-                                    {{ game.unidadesDisponibles }} disponibles
-                                </small>
-                            </div>
-
-                        </article>
-
+                            <button class="btn btn--ghost btn--sm" type="button" (click)="toggleGame(game)">Quitar</button>
+                        </li>
                     }
-
-                </div>
-
+                </ul>
             } @else {
-
-                <app-loading-state
-                    state="empty"
-                    title="No hay juegos preseleccionados"
-                    message="Puedes regresar al catálogo para elegir tus juegos."
-                />
-
+                <p class="reservation-picked__empty">
+                    Aún no has elegido juegos. Agrégalos con la lista de abajo o desde el catálogo.
+                </p>
             }
 
-            <div class="reservation-form__summary">
-                <div>
-                    <span>Juegos seleccionados</span>
-                    <strong>{{ games.length }}</strong>
-                </div>
-
-                <div>
-                    <span>Unidades solicitadas</span>
-                    <strong>{{ totalUnits }}</strong>
-                </div>
-            </div>
+            <label class="reservation-form__table-field" for="reservation-add-game">
+                <span class="reservation-picked__label">Agregar otro juego</span>
+                <!-- Solo juegos con unidades disponibles que aún no están en la reserva -->
+                <select class="form-control" id="reservation-add-game" #selectorJuego
+                    (change)="agregarJuego(selectorJuego.value); selectorJuego.value = ''">
+                    <option value="" selected disabled>
+                        {{ availableGames.length ? 'Selecciona un juego disponible' : 'No hay más juegos disponibles' }}
+                    </option>
+                    @for (game of availableGames; track game.numSerie) {
+                        <option [value]="game.numSerie">{{ game.nombre }} ({{ game.unidadesDisponibles }} disponibles)</option>
+                    }
+                </select>
+            </label>
 
         </section>
+
+        @if (submitError) {
+            <p class="reservation-form__error" role="alert">{{ submitError }}</p>
+        }
 
         <footer class="reservation-form__footer">
             <app-action-buttons

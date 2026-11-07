@@ -6,210 +6,160 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 
 type Kind = 'beneficios' | 'frecuentes' | 'telefonos';
 
+import { ClienteResponse } from '../../../../core/models/cliente.model';
+import { mensajeError } from '../../../../core/utils/http-error';
 @Component({
   selector: 'app-relationship-admin-page',
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-  <main class="page">
-    <header>
+  <section class="cl-page">
+    <header class="cl-page-header">
       <div>
-        <span>ADMINISTRACIÓN · GESTIÓN</span>
-        <h1>{{title}}</h1>
-        <p>Consulta, registra, actualiza y administra la información.</p>
+        <span class="cl-eyebrow">{{ eyebrow }}</span>
+        <h1 class="cl-title">{{ title }}</h1>
+        <p class="cl-subtitle">{{ subtitle }}</p>
       </div>
-      <strong>{{rows.length}} registros</strong>
+      <div class="cl-page-header__aside">
+        <span class="cl-count"><strong>{{ visibles.length }}</strong>registros</span>
+        <button class="btn btn--gold" type="button" (click)="nuevo()">+ Nuevo {{ nuevoLabel.toLowerCase() }}</button>
+      </div>
     </header>
 
-    @if(kind === 'beneficios') {
-      <section class="panel">
-        <h2>{{editing ? 'Editar beneficio' : 'Registrar beneficio'}}</h2>
-        <form (ngSubmit)="save()">
-          <label>ID beneficio
-            <input type="number" name="idBeneficio" [(ngModel)]="form.idBeneficio" required>
-          </label>
-          <label>ID membresía
-            <input type="number" name="idMembresia" [(ngModel)]="form.idMembresia" required>
-          </label>
-          <label>Documento del socio
-            <input name="documentoSocio" [(ngModel)]="form.documentoSocio" required>
-          </label>
-          <label>Descripción del beneficio
-            <input name="beneficio" [(ngModel)]="form.beneficio" required>
-          </label>
-          <div class="actions">
-            <button class="primary" [disabled]="saving">{{saving?'Guardando...':editing?'Actualizar':'Registrar'}}</button>
-            <button type="button" (click)="reset()">Limpiar</button>
-          </div>
-        </form>
-      </section>
-      <section class="panel">
-        <div class="heading">
-          <h2>Beneficios registrados</h2>
-          <button (click)="load()">Actualizar</button>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>ID</th><th>Membresía</th><th>Socio</th><th>Beneficio</th><th>Acciones</th></tr></thead>
-            <tbody>
-              @for(r of rows; track r.idBeneficio + '-' + r.idMembresia + '-' + r.documentoSocio) {
-                <tr>
-                  <td>{{r.idBeneficio}}</td>
-                  <td>{{r.idMembresia}}</td>
-                  <td>{{r.documentoSocio}}</td>
-                  <td>{{r.beneficio}}</td>
-                  <td class="actions">
-                    <button (click)="edit(r)">Editar</button>
-                    <button class="danger" (click)="remove(r)">Eliminar</button>
-                  </td>
-                </tr>
-              }
-            </tbody>
+    @if (message) { <p class="cl-alert cl-alert--success">{{ message }}</p> }
+    @if (error && !formAbierto) { <p class="cl-alert cl-alert--error">{{ error }}</p> }
+
+    <section class="cl-card">
+      <form class="cl-toolbar" (ngSubmit)="buscar()">
+        <input class="form-control" name="busqueda" [(ngModel)]="searchValue" [placeholder]="placeholder">
+        <button class="btn btn--gold" type="submit">Buscar</button>
+        <button class="btn btn--ghost" type="button" (click)="searchValue='';buscar()">Ver todos</button>
+      </form>
+
+      @if (loading) {
+        <p class="cl-empty">Consultando información...</p>
+      } @else if (!visibles.length) {
+        <p class="cl-empty">No hay registros para mostrar.</p>
+      } @else {
+        <div class="cl-table-wrap">
+          <table class="cl-table">
+            @if (kind === 'beneficios') {
+              <thead><tr><th>ID</th><th>Beneficio</th><th>Membresía</th><th>Socio</th><th class="cl-table__actions-head">Acciones</th></tr></thead>
+              <tbody>
+                @for (r of visibles; track r.idBeneficio + '-' + r.idMembresia + '-' + r.documentoSocio) {
+                  <tr>
+                    <td>{{ r.idBeneficio }}</td><td>{{ r.beneficio }}</td><td>#{{ r.idMembresia }}</td>
+                    <td>{{ nombres[r.documentoSocio] || r.documentoSocio }} <span class="cl-muted">· {{ r.documentoSocio }}</span></td>
+                    <td><div class="cl-table__actions">
+                      <button class="btn btn--ghost btn--sm" type="button" (click)="edit(r)">Editar</button>
+                      <button class="btn btn--danger btn--sm" type="button" (click)="remove(r)">Eliminar</button>
+                    </div></td>
+                  </tr>
+                }
+              </tbody>
+            }
+            @if (kind === 'frecuentes') {
+              <thead><tr><th>Documento</th><th>Cliente</th><th>Puntos</th><th>Nivel</th><th class="cl-table__actions-head">Acciones</th></tr></thead>
+              <tbody>
+                @for (r of visibles; track r.documentoCliente || r.documento) {
+                  <tr>
+                    <td>{{ r.documentoCliente || r.documento }}</td>
+                    <td>{{ nombres[r.documentoCliente || r.documento] || '—' }}</td>
+                    <td>{{ r.puntosAcumulados }}</td><td>{{ r.nivelFidelidad }}</td>
+                    <td><div class="cl-table__actions">
+                      <button class="btn btn--ghost btn--sm" type="button" (click)="edit(r)">Editar</button>
+                      <button class="btn btn--danger btn--sm" type="button" (click)="remove(r)">Eliminar</button>
+                    </div></td>
+                  </tr>
+                }
+              </tbody>
+            }
+            @if (kind === 'telefonos') {
+              <thead><tr><th>Documento</th><th>Cliente</th><th>Teléfono</th><th class="cl-table__actions-head">Acciones</th></tr></thead>
+              <tbody>
+                @for (r of visibles; track r.documento + '-' + r.telefono) {
+                  <tr>
+                    <td>{{ r.documento }}</td><td>{{ nombres[r.documento] || '—' }}</td><td>{{ r.telefono }}</td>
+                    <td><div class="cl-table__actions">
+                      <button class="btn btn--ghost btn--sm" type="button" (click)="edit(r)">Editar</button>
+                      <button class="btn btn--danger btn--sm" type="button" (click)="remove(r)">Eliminar</button>
+                    </div></td>
+                  </tr>
+                }
+              </tbody>
+            }
           </table>
         </div>
-      </section>
-    }
+      }
+    </section>
 
-    @if(kind === 'frecuentes') {
-      <section class="panel">
-        <h2>Buscar clientes frecuentes</h2>
-        <div class="search">
-          <input [(ngModel)]="searchValue" placeholder="Nivel de fidelidad">
-          <button class="primary" (click)="search()">Buscar</button>
-        </div>
-      </section>
-      <section class="panel">
-        <h2>{{editing ? 'Actualizar cliente frecuente' : 'Registrar cliente frecuente'}}</h2>
-        <form (ngSubmit)="save()">
-          <label>Documento
-            <input name="documentoCliente" [(ngModel)]="form.documentoCliente" required [disabled]="editing">
-          </label>
-          <label>Primer nombre
-            <input name="primerNombre" [(ngModel)]="form.primerNombre" required>
-          </label>
-          <label>Segundo nombre
-            <input name="segundoNombre" [(ngModel)]="form.segundoNombre">
-          </label>
-          <label>Primer apellido
-            <input name="primerApellido" [(ngModel)]="form.primerApellido" required>
-          </label>
-          <label>Segundo apellido
-            <input name="segundoApellido" [(ngModel)]="form.segundoApellido">
-          </label>
-          <label>Dirección
-            <input name="direccion" [(ngModel)]="form.direccion">
-          </label>
-          <label>Fecha nacimiento
-            <input type="date" name="fechaNacimiento" [(ngModel)]="form.fechaNacimiento">
-          </label>
-          <label>Puntos acumulados
-            <input type="number" name="puntosAcumulados" [(ngModel)]="form.puntosAcumulados" min="0">
-          </label>
-          <label>Nivel de fidelidad
-            <input name="nivelFidelidad" [(ngModel)]="form.nivelFidelidad" required>
-          </label>
-          <div class="actions">
-            <button class="primary" [disabled]="saving">{{saving?'Guardando...':editing?'Actualizar':'Registrar'}}</button>
-            <button type="button" (click)="reset()">Limpiar</button>
-          </div>
-        </form>
-      </section>
-      <section class="panel">
-        <h2>Resultados</h2>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Documento</th><th>Cliente</th><th>Puntos</th><th>Nivel</th><th>Acciones</th></tr></thead>
-            <tbody>
-              @for(r of rows; track r.documentoCliente || r.documento) {
-                <tr>
-                  <td>{{r.documentoCliente || r.documento}}</td>
-                  <td>{{r.primerNombre}} {{r.primerApellido}}</td>
-                  <td>{{r.puntosAcumulados}}</td>
-                  <td>{{r.nivelFidelidad}}</td>
-                  <td class="actions">
-                    <button (click)="edit(r)">Editar</button>
-                    <button class="danger" (click)="remove(r)">Eliminar</button>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      </section>
+    @if (formAbierto) {
+      <div class="cl-modal-overlay" (click)="reset()">
+        <section class="cl-card cl-modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+          <h2 class="cl-card__title">{{ editing ? 'Editar' : 'Nuevo' }} {{ nuevoLabel.toLowerCase() }}</h2>
+          @if (error) { <p class="cl-alert cl-alert--error">{{ error }}</p> }
+          <form class="cl-form-grid" (ngSubmit)="save()">
+            @if (kind === 'beneficios') {
+              <label class="cl-field cl-field--full">Membresía *
+                <select class="form-control" name="membresia" [(ngModel)]="form.membresiaClave" required [disabled]="editing">
+                  <option value="" disabled>Selecciona una membresía</option>
+                  @for (m of opcionesMembresia; track m.value) {
+                    <option [value]="m.value">{{ m.label }}</option>
+                  }
+                </select>
+              </label>
+              <label class="cl-field cl-field--full">Beneficio *
+                <input class="form-control" name="beneficio" maxlength="100" [(ngModel)]="form.beneficio" required
+                  list="beneficios-sugeridos" placeholder="Elige una sugerencia o escribe otro">
+                <datalist id="beneficios-sugeridos">
+                  @for (b of beneficiosSugeridos; track b) { <option [value]="b"></option> }
+                </datalist>
+              </label>
+            }
+            @if (kind === 'frecuentes') {
+              <label class="cl-field cl-field--full">Cliente *
+                <select class="form-control" name="documentoCliente" [(ngModel)]="form.documentoCliente" required [disabled]="editing">
+                  <option value="" disabled>Selecciona un cliente</option>
+                  @for (c of opcionesCliente(form.documentoCliente); track c.value) {
+                    <option [value]="c.value">{{ c.label }}</option>
+                  }
+                </select>
+              </label>
+              <label class="cl-field">Puntos acumulados
+                <input class="form-control" type="number" name="puntosAcumulados" [(ngModel)]="form.puntosAcumulados" min="0">
+              </label>
+              <label class="cl-field">Nivel de fidelidad *
+                <select class="form-control" name="nivelFidelidad" [(ngModel)]="form.nivelFidelidad" required>
+                  @for (n of nivelesFidelidad; track n) { <option [value]="n">{{ n }}</option> }
+                </select>
+              </label>
+            }
+            @if (kind === 'telefonos') {
+              <label class="cl-field cl-field--full">Cliente *
+                <select class="form-control" name="documento" [(ngModel)]="form.documento" required [disabled]="editing">
+                  <option value="" disabled>Selecciona un cliente</option>
+                  @for (c of opcionesCliente(form.documento); track c.value) {
+                    <option [value]="c.value">{{ c.label }}</option>
+                  }
+                </select>
+              </label>
+              <label class="cl-field cl-field--full">Número de teléfono *
+                <input class="form-control" name="telefono" [(ngModel)]="form.telefono" required
+                  inputmode="numeric" maxlength="15" placeholder="Solo números, entre 7 y 15 dígitos">
+              </label>
+            }
+            <div class="cl-form-actions">
+              <button class="btn btn--ghost" type="button" (click)="reset()">Cancelar</button>
+              <button class="btn btn--gold" type="submit" [disabled]="saving">{{ saving ? 'Guardando...' : 'Guardar ' + nuevoLabel.toLowerCase() }}</button>
+            </div>
+          </form>
+        </section>
+      </div>
     }
+  </section>
 
-    @if(kind === 'telefonos') {
-      <section class="panel">
-        <h2>Consultar teléfonos por cliente</h2>
-        <div class="search">
-          <input [(ngModel)]="searchValue" placeholder="Documento del cliente">
-          <button class="primary" (click)="search()">Buscar</button>
-        </div>
-      </section>
-      <section class="panel">
-        <h2>{{editing ? 'Actualizar teléfono' : 'Registrar teléfono'}}</h2>
-        <form (ngSubmit)="save()">
-          <label>Documento cliente
-            <input name="documento" [(ngModel)]="form.documento" required [disabled]="editing">
-          </label>
-          <label>Número de teléfono
-            <input name="telefono" [(ngModel)]="form.telefono" required>
-          </label>
-          <div class="actions">
-            <button class="primary" [disabled]="saving">{{saving?'Guardando...':editing?'Actualizar':'Registrar'}}</button>
-            <button type="button" (click)="reset()">Limpiar</button>
-          </div>
-        </form>
-      </section>
-      <section class="panel">
-        <h2>Teléfonos encontrados</h2>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Documento</th><th>Teléfono</th><th>Acciones</th></tr></thead>
-            <tbody>
-              @for(r of rows; track r.documento + '-' + r.telefono) {
-                <tr>
-                  <td>{{r.documento}}</td>
-                  <td>{{r.telefono}}</td>
-                  <td class="actions">
-                    <button (click)="edit(r)">Editar</button>
-                    <button class="danger" (click)="remove(r)">Eliminar</button>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      </section>
-    }
-
-    @if(error) { <p class="error">{{error}}</p> }
-    @if(message) { <p class="message">{{message}}</p> }
-    @if(loading) { <p>Consultando información...</p> }
-  </main>
   `,
-  styles: [`
-    .page{padding:28px;background:#0b1020;color:#fff;min-height:80vh}
-    header,.heading,.search{display:flex;justify-content:space-between;align-items:center;gap:15px}
-    header span{color:#22d3ee;font-size:12px;font-weight:800;letter-spacing:2px}
-    h1{font-size:30px;margin:9px 0}
-    p{color:#aeb5c5}
-    .panel{background:#1b2030;border:1px solid #465267;border-radius:14px;padding:22px;margin:20px 0}
-    form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
-    label{display:grid;gap:8px;color:#c6ccd7}
-    input{box-sizing:border-box;width:100%;padding:12px;background:#101827;color:white;border:1px solid #526078;border-radius:8px}
-    button{padding:10px 14px;border-radius:8px;cursor:pointer;background:transparent;color:#22d3ee;border:1px solid #22d3ee}
-    button:disabled{opacity:.5;cursor:wait}
-    .primary{background:#d3b354;color:#171827;border-color:#d3b354}
-    .danger{background:#a32154;color:white;border-color:#a32154}
-    .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    table{width:100%;border-collapse:collapse}
-    td,th{text-align:left;padding:12px;border-bottom:1px solid #465267}
-    th{color:#22d3ee}
-    .table-wrap{overflow-x:auto}
-    .error{color:#ff7892}.message{color:#22d3ee}
-    @media(max-width:650px){form{grid-template-columns:1fr}.search{align-items:stretch;flex-direction:column}}
-  `]
+  styles: [':host { display: block; }']
 })
 export class RelationshipAdminPageComponent implements OnInit {
   kind: Kind;
@@ -218,6 +168,7 @@ export class RelationshipAdminPageComponent implements OnInit {
   searchValue='';
   originalPhone='';
   editing=false;
+  formAbierto=false;
   loading=false;
   saving=false;
   error='';
@@ -232,18 +183,111 @@ export class RelationshipAdminPageComponent implements OnInit {
       this.kind==='frecuentes'?'Clientes frecuentes':'Teléfonos';
   }
 
+  /** Documento -> nombre del cliente (para mostrar a quién pertenece cada registro). */
+  nombres:Record<string,string>={};
+
   ngOnInit():void {
     this.reset();
-    if(this.kind==='beneficios')this.load();
+    this.buscar();
+    // Nombres de clientes (para mostrar a quién pertenece cada registro) y listas del formulario
+    this.http.get<ClienteResponse[]>('/api/cliente/buscar').subscribe({
+      next:lista=>{
+        lista.forEach(c=>this.nombres[c.documentoCliente]=
+          [c.primerNombre,c.primerApellido].filter(Boolean).join(' '));
+        this.clientes=lista
+          .map(c=>({value:c.documentoCliente,label:`${this.nombres[c.documentoCliente]} · ${c.documentoCliente}`}))
+          .sort((a,b)=>a.label.localeCompare(b.label));
+      },
+      error:()=>{}
+    });
+    if(this.kind==='beneficios') this.cargarMembresias();
+  }
+
+  /** Clientes para los desplegables (incluye el actual al editar). */
+  clientes:{value:string;label:string}[]=[];
+  opcionesCliente(actual:string){
+    return actual && !this.clientes.some(c=>c.value===actual)
+      ? [{value:actual,label:actual},...this.clientes] : this.clientes;
+  }
+
+  /** Niveles de fidelidad para clientes frecuentes. */
+  get nivelesFidelidad():string[]{
+    const base=['Bronce','Plata','Oro'];
+    const actual=this.form?.nivelFidelidad;
+    return actual && !base.includes(actual) ? [...base,actual] : base;
+  }
+
+  /** Beneficios que menciona la propuesta para los socios. */
+  readonly beneficiosSugeridos=[
+    'Descuento en consumo',
+    'Mayor cantidad de préstamos simultáneos',
+    'Prioridad en reservas'
+  ];
+
+  opcionesMembresia:{value:string;label:string}[]=[];
+  private cargarMembresias():void{
+    this.http.get<any[]>('/api/membresia/buscar').subscribe({
+      next:lista=>this.opcionesMembresia=lista.map(m=>({
+        value:`${m.idMembresia}::${m.documento}`,
+        label:`#${m.idMembresia} · ${m.plan} · ${this.nombres[m.documento]||m.documento} (${m.estado})`
+      })),
+      error:()=>{}
+    });
+  }
+
+  /** Beneficios se filtran en pantalla; frecuentes y teléfonos consultan al backend. */
+  get visibles():any[] {
+    if(this.kind!=='beneficios'||!this.filtroAplicado) return this.rows;
+    const t=this.filtroAplicado.toLowerCase();
+    return this.rows.filter(r=>
+      [r.beneficio,r.documentoSocio,this.nombres[r.documentoSocio],String(r.idMembresia)]
+        .some(v=>(v||'').toString().toLowerCase().includes(t)));
+  }
+
+  filtroAplicado='';
+
+  get placeholder():string {
+    return this.kind==='beneficios' ? 'Buscar por beneficio, socio o membresía'
+      : this.kind==='frecuentes' ? 'Nivel de fidelidad (vacío = todos)'
+      : 'Documento del cliente (vacío = todos)';
+  }
+
+  buscar():void {
+    if(this.kind==='beneficios'){ this.filtroAplicado=this.searchValue.trim(); this.load(); }
+    else this.search();
+  }
+
+  get eyebrow():string {
+    return this.kind==='beneficios'?'Administración · Membresías':'Administración · Clientes';
+  }
+
+  get subtitle():string {
+    return this.kind==='beneficios'
+      ? 'Beneficios incluidos en cada membresía (descuentos, prioridad en reservas...).'
+      : this.kind==='frecuentes'
+        ? 'Clientes registrados que acumulan puntos por fidelidad.'
+        : 'Números de contacto de cada cliente.';
+  }
+
+  get nuevoLabel():string {
+    return this.kind==='beneficios'?'Beneficio':this.kind==='frecuentes'?'Cliente frecuente':'Teléfono';
+  }
+
+  nuevo():void {
+    this.reset();
+    this.error='';this.message='';
+    this.formAbierto=true;
   }
 
   reset():void {
     this.editing=false;
+    this.formAbierto=false;
     this.originalPhone='';
     if(this.kind==='beneficios')
-      this.form={idBeneficio:null,idMembresia:null,documentoSocio:'',beneficio:''};
+      this.form={idBeneficio:null,membresiaClave:'',beneficio:''};
     else if(this.kind==='frecuentes')
-      this.form={documentoCliente:'',primerNombre:'',segundoNombre:'',primerApellido:'',segundoApellido:'',direccion:'',fechaNacimiento:'',puntosAcumulados:0,nivelFidelidad:''};
+      // El cliente ya debe existir: aquí solo se registran puntos y nivel.
+      this.form={documentoCliente:'',puntosAcumulados:0,nivelFidelidad:'Bronce'};
     else
       this.form={documento:'',telefono:''};
   }
@@ -259,14 +303,15 @@ export class RelationshipAdminPageComponent implements OnInit {
   search():void {
     this.loading=true;this.error='';this.message='';
     if(this.kind==='frecuentes') {
-      if(!this.searchValue.trim()){this.loading=false;this.error='Escribe el nivel de fidelidad.';return;}
-      const params=new HttpParams().set('nivelFidelidad',this.searchValue.trim());
-      this.http.get<any[]>('/api/clienteFrecuente/buscar',{params}).subscribe({
+      const nivel=this.searchValue.trim();
+      const peticion=nivel
+        ? this.http.get<any[]>('/api/clienteFrecuente/buscar',{params:new HttpParams().set('nivelFidelidad',nivel)})
+        : this.http.get<any[]>('/api/clienteFrecuente');
+      peticion.subscribe({
         next:r=>{this.rows=r;this.loading=false;},
         error:e=>this.fail(e,'No fue posible consultar clientes frecuentes.')
       });
     } else if(this.kind==='telefonos') {
-      if(!this.searchValue.trim()){this.loading=false;this.error='Escribe el documento del cliente.';return;}
       const params=new HttpParams().set('documento',this.searchValue.trim());
       this.http.get<any[]>('/api/telefono/buscar',{params}).subscribe({
         next:r=>{this.rows=r;this.loading=false;},
@@ -282,7 +327,11 @@ export class RelationshipAdminPageComponent implements OnInit {
     let method:any;
 
     if(this.kind==='beneficios') {
-      request={...this.form};
+      const [idMembresia,documentoSocio]=String(this.form.membresiaClave||'').split('::');
+      if(!idMembresia||!documentoSocio){this.error='Selecciona la membresía.';return;}
+      // Al crear, el backend asigna el número de beneficio
+      request={idBeneficio:this.form.idBeneficio||0,idMembresia:Number(idMembresia),
+        documentoSocio,beneficio:this.form.beneficio};
       url='/api/beneficio';
       method=this.editing?'put':'post';
       if(this.editing)
@@ -307,24 +356,20 @@ export class RelationshipAdminPageComponent implements OnInit {
       next:()=>{
         this.saving=false;
         this.message=this.editing?'Registro actualizado.':'Registro creado.';
-        const filtro = this.kind==='frecuentes'
-          ? this.form.nivelFidelidad
-          : this.form.documento;
-        if(filtro) this.searchValue=filtro;
         this.reset();
-        if(this.kind==='beneficios')this.load();
-        else this.search();
+        this.buscar();
       },
       error:e=>this.fail(e,'No fue posible guardar el registro.')
     });
   }
 
   edit(r:any):void {
-    this.error='';this.message='';this.editing=true;
+    this.error='';this.message='';this.editing=true;this.formAbierto=true;
     this.form={...r};
+    if(this.kind==='beneficios') this.form.membresiaClave=`${r.idMembresia}::${r.documentoSocio}`;
     if(this.kind==='frecuentes') {
-      this.form.documentoCliente=r.documentoCliente||r.documento;
-      this.form.fechaNacimiento=this.dateInput(r.fechaNacimiento);
+      this.form={documentoCliente:r.documentoCliente||r.documento,
+        puntosAcumulados:r.puntosAcumulados,nivelFidelidad:r.nivelFidelidad};
     }
     if(this.kind==='telefonos')this.originalPhone=r.telefono;
   }
@@ -349,15 +394,9 @@ export class RelationshipAdminPageComponent implements OnInit {
     });
   }
 
-  private dateInput(value:any):string {
-    if(!value)return '';
-    if(Array.isArray(value))
-      return `${value[0]}-${String(value[1]).padStart(2,'0')}-${String(value[2]).padStart(2,'0')}`;
-    return String(value).substring(0,10);
-  }
 
   private fail(e:any,fallback:string):void {
     this.loading=false;this.saving=false;
-    this.error=typeof e.error==='string'?e.error:e.error?.mensaje||fallback;
+    this.error=mensajeError(e,fallback);
   }
 }

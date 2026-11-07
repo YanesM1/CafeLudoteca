@@ -1,7 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { ClienteService } from '../../../../core/services/cliente.service';
 import { ClienteRequest, ClienteResponse } from '../../../../core/models/cliente.model';
+
+import { fechaCorta, fechaISO } from '../../../../core/utils/fecha';
+import { mensajeError } from '../../../../core/utils/http-error';
 
 @Component({
     selector: 'app-clients-page',
@@ -27,7 +31,10 @@ export class ClientsPageComponent implements OnInit {
 
     form: ClienteRequest = this.emptyForm();
 
-    constructor(private clienteService: ClienteService) {}
+    /** Teléfono opcional al crear el cliente (se guarda en TELEFONO). */
+    telefono = '';
+
+    constructor(private clienteService: ClienteService, private http: HttpClient) {}
 
     ngOnInit(): void {
         this.cargarClientes();
@@ -35,7 +42,7 @@ export class ClientsPageComponent implements OnInit {
 
     private emptyForm(): ClienteRequest {
         return {
-            documento: '',
+            documentoCliente: '',
             primerNombre: '',
             segundoNombre: null,
             primerApellido: '',
@@ -71,13 +78,14 @@ export class ClientsPageComponent implements OnInit {
 
     abrirCrear(): void {
         this.form = this.emptyForm();
+        this.telefono = '';
         this.editingDocument = null;
         this.modalOpen = true;
     }
 
     abrirEditar(cliente: ClienteResponse): void {
-        this.form = { ...cliente };
-        this.editingDocument = cliente.documento;
+        this.form = { ...cliente, fechaNacimiento: fechaISO(cliente.fechaNacimiento) || null };
+        this.editingDocument = cliente.documentoCliente;
         this.modalOpen = true;
     }
 
@@ -91,7 +99,7 @@ export class ClientsPageComponent implements OnInit {
 
         const data: ClienteRequest = {
             ...this.form,
-            documento: this.form.documento.trim(),
+            documentoCliente: this.form.documentoCliente.trim(),
             primerNombre: this.form.primerNombre.trim(),
             primerApellido: this.form.primerApellido.trim(),
             segundoNombre: this.form.segundoNombre?.trim() || null,
@@ -100,9 +108,14 @@ export class ClientsPageComponent implements OnInit {
             fechaNacimiento: this.form.fechaNacimiento || null
         };
 
-        if (!data.documento || !data.primerNombre || !data.primerApellido) {
+        if (!data.documentoCliente || !data.primerNombre || !data.primerApellido) {
             this.notify('error',
                 'Documento, primer nombre y primer apellido son obligatorios.');
+            return;
+        }
+        const telefono = this.editingDocument ? '' : this.telefono.replace(/[\s-]/g, '');
+        if (telefono && !/^\d{7,15}$/.test(telefono)) {
+            this.notify('error', 'El teléfono debe tener entre 7 y 15 dígitos.');
             return;
         }
 
@@ -121,6 +134,14 @@ export class ClientsPageComponent implements OnInit {
                 this.notify('success',
                     editing ? 'Cliente actualizado.' : 'Cliente registrado.');
                 this.cargarClientes();
+                if (telefono) {
+                    this.http.post('/api/telefono', { documento: data.documentoCliente, telefono }).subscribe({
+                        next: () => this.notify('success', 'Cliente registrado con su teléfono.'),
+                        error: e => this.notify('error',
+                            'Cliente registrado, pero el teléfono no se guardó: ' + this.errorMessage(e))
+                    });
+                }
+                this.telefono = '';
             },
             error: error => {
                 this.saving = false;
@@ -141,7 +162,7 @@ export class ClientsPageComponent implements OnInit {
         if (!this.selectedClient || this.deleting) return;
 
         this.deleting = true;
-        const documento = this.selectedClient.documento;
+        const documento = this.selectedClient.documentoCliente;
 
         this.clienteService.eliminar(documento).subscribe({
             next: () => {
@@ -169,9 +190,11 @@ export class ClientsPageComponent implements OnInit {
         this.notification = message;
     }
 
-    private errorMessage(error: any): string {
-        const body = error?.error;
-        if (typeof body === 'string') return body;
-        return body?.mensaje || 'No fue posible completar la operación.';
+    fechaCorta(valor: unknown): string {
+        return fechaCorta(valor);
+    }
+
+    private errorMessage(error: unknown): string {
+        return mensajeError(error, 'No fue posible completar la operación.');
     }
 }

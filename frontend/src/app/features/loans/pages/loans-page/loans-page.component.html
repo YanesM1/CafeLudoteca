@@ -1,4 +1,4 @@
-<section class="loans-page">
+<section class="cl-page">
 
     <div class="loans-page__notification">
 
@@ -12,9 +12,19 @@
 
     </div>
 
+    <header class="cl-page-header">
+        <div>
+            <span class="cl-eyebrow">Empleado · Préstamos</span>
+            <h1 class="cl-title">Préstamos y devoluciones</h1>
+            <p class="cl-subtitle">Registra préstamos internos y externos, registra devoluciones con el estado de los componentes y consulta el historial.</p>
+        </div>
+    </header>
+
     <app-loan-form
         [clienteOptions]="clienteOptions"
-        [membershipOptions]="membershipOptions"
+        [clienteInfo]="clienteInfo"
+        [clienteAviso]="clienteAviso"
+        [activeLoanDetail]="activeLoanDetail"
         [unitOptions]="unitOptions"
         [employeeOptions]="employeeOptions"
         [componentStatusOptions]="componentStatusOptions"
@@ -25,9 +35,51 @@
         [errorMessage]="errorMessage"
         (registerLoan)="onRegisterLoan($event)"
         (activeLoanChange)="onActiveLoanChange($event)"
+        (clienteChange)="onClienteChange($event)"
         (updateAudit)="onUpdateAudit($event)"
         (cancel)="onCancel()"
         (retry)="onRetry()"
     />
+
+    <section class="cl-card">
+        <div class="cl-card__header">
+            <h2 class="cl-card__title">Historial de préstamos</h2>
+            <div class="cl-card__header-aside">
+                <span class="cl-count"><strong>{{ historial.length }}</strong>préstamos</span>
+                <button class="btn btn--ghost btn--sm" type="button" (click)="cargarHistorial()">Actualizar</button>
+            </div>
+        </div>
+
+        @if (cargandoHistorial) {
+            <p class="cl-empty">Consultando historial...</p>
+        } @else if (!historial.length) {
+            <p class="cl-empty">No hay préstamos registrados.</p>
+        } @else {
+            <div class="cl-table-wrap">
+                <table class="cl-table">
+                    <thead>
+                        <tr>
+                            <th>#</th><th>Salida</th><th>Devolución</th><th>Tipo</th>
+                            <th>Cliente</th><th>Empleado</th><th>Juegos</th><th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (p of historial; track p.idPrestamo) {
+                            <tr>
+                                <td>{{ p.idPrestamo }}</td>
+                                <td>{{ fechaCorta(p.fechaSalida) }}</td>
+                                <td>{{ fechaCorta(p.fechaDevolucion) }}</td>
+                                <td>{{ etiquetaTipo(p.tipoPrestamo) }}</td>
+                                <td>{{ nombreCliente(p.documentoCliente) }}</td>
+                                <td>{{ p.documentoEmp }}</td>
+                                <td>{{ unidad(p) }}</td>
+                                <td><span class="badge" [ngClass]="claseEstado(p.estadoComponentes)">{{ etiquetaEstado(p.estadoComponentes) }}</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
 
 </section>

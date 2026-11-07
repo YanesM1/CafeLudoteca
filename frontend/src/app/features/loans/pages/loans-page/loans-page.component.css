@@ -3,13 +3,6 @@
     width: 100%;
 }
 
-.loans-page {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    width: 100%;
-}
-
 .loans-page__notification {
     position: fixed;
     top: 95px;
@@ -25,3 +18,4 @@
         width: calc(100% - 24px);
     }
 }
+

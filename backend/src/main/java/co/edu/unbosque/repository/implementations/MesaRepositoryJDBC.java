@@ -68,9 +68,9 @@ public class MesaRepositoryJDBC implements IMesaRepository {
             FROM MESA m
             WHERE NOT EXISTS (
                 SELECT 1 FROM RESERVA r
-                WHERE r.MESA_id_mesa = m.id_mesa
+                WHERE r.id_mesa = m.id_mesa
                   AND r.fecha = ?
-                  AND r.horario = ?
+                  AND TIME(r.horario) = TIME(?)
             )
             """;
         try (Connection c = ConnectionBD.obtenerConexion();

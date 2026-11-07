@@ -12,6 +12,12 @@ export interface Categoria {
 export class CategoriaService {
   private url='/api/categoria';
   constructor(private http:HttpClient){}
+  /** Todas las categorías, o las que contienen el texto indicado. */
+  listar(texto=''):Observable<Categoria[]>{
+    const params = texto.trim() ? { categoria: texto.trim() } : undefined;
+    return this.http.get<Categoria[]>(this.url, { params });
+  }
+
   buscar(nombre:string):Observable<Categoria[]>{
     return this.http.get<Categoria[]>(`${this.url}/${encodeURIComponent(nombre)}`);
   }

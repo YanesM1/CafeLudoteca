@@ -24,6 +24,9 @@ public class ReservaMapper {
         reserva.setHorario(request.getHorario());
         reserva.setDocumento(request.getDocumento());
         reserva.setIdMesa(request.getIdMesa());
+        if (request.getJuegos() != null) {
+            reserva.setJuegos(new java.util.ArrayList<>(request.getJuegos()));
+        }
 
         return reserva;
     }
@@ -39,7 +42,8 @@ public class ReservaMapper {
                 reserva.getFecha(),
                 reserva.getHorario(),
                 reserva.getDocumento(),
-                reserva.getIdMesa()
+                reserva.getIdMesa(),
+                reserva.getJuegos()
         );
     }
 

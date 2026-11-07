@@ -25,11 +25,11 @@ public class ElementoJuegoService implements IElementoJuegoService {
      
 
         if (request.getElementoJuego() == null || request.getElementoJuego().isBlank()) {
-            return false;
+            throw co.edu.unbosque.exceptions.BusinessException.badRequest("Escribe la descripción del elemento.");
         }
 
         if (request.getNumSerie() == null || request.getNumSerie().isBlank()) {
-            return false;
+            throw co.edu.unbosque.exceptions.BusinessException.badRequest("Selecciona el juego al que pertenece el elemento.");
         }
 
         return true;
@@ -118,5 +118,12 @@ public class ElementoJuegoService implements IElementoJuegoService {
         }
 
         return elementoJuegoMapper.elementoJuegoToElementoJuegoResponseDTO(elementoJuego.get());
+    }
+
+    @Override
+    public java.util.List<ElementoJuegoResponseDTO> listar(String numSerie) {
+        return elementoJuegoRepository.findAll(numSerie).stream()
+                .map(elementoJuegoMapper::elementoJuegoToElementoJuegoResponseDTO)
+                .toList();
     }
 }

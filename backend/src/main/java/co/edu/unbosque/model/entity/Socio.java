@@ -21,7 +21,8 @@ public class Socio extends  Cliente{
         if (o == null || getClass() != o.getClass())
              return false;
 
-        return Objects.equals(this.getDocumentoCliente(), getDocumentoCliente());
+        Socio that = (Socio) o;
+        return Objects.equals(getDocumentoCliente(), that.getDocumentoCliente());
     }
 
     @Override
